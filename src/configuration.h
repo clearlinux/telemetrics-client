@@ -46,6 +46,7 @@ enum config_int_keys {
 enum config_bool_keys {
         CONF_BOOL_MIN = 0,
         CONF_RATE_LIMIT_ENABLED,
+	CONF_DAEMON_RECYCLING_ENABLED,
         CONF_BOOL_MAX
 };
 
@@ -112,5 +113,8 @@ const char *get_cainfo_config(void);
 
 /* Gets tidheader */
 const char *get_tidheader_config(void);
+
+/* Gets whether recycling is enabled */
+bool daemon_recycling_enabled_config(void);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

@@ -44,7 +44,8 @@ const char *config_key_int[] = { NULL, "record_expiry", "spool_max_size",
                                  "byte_window_length", "record_burst_limit",
                                  "byte_burst_limit", NULL };
 
-const char *config_key_bool[] = { NULL, "rate_limit_enabled", NULL };
+const char *config_key_bool[] = { NULL, "rate_limit_enabled",
+				  "daemon_recycling_enabled", NULL };
 
 static struct configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
 
@@ -333,5 +334,11 @@ const char *rate_limit_strategy_config()
         }
 
         return val;
+}
+
+bool daemon_recycling_enabled_config(void)
+{
+	initialize_config();
+	return config.boolValues[CONF_DAEMON_RECYCLING_ENABLED];
 }
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

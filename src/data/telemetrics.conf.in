@@ -51,3 +51,7 @@ byte_window_length=20
 # Valid stategies: spool, drop
 rate_limit_strategy=spool
 
+# daemon recycling enabled - if daemon has been running for a while (2 hours),
+# has not any client nor spool data, then it exits.
+# this is to ensure that latest code runs.
+daemon_recycling_enabled=true
