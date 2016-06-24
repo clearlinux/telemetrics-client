@@ -20,6 +20,7 @@
 
 #include "config.h"
 
+#ifdef TM_LOG_SYSTEMD
 #ifdef HAVE_SYSTEMD_SD_JOURNAL_H
 
 /* Certain static analysis tools do not understand GCC's __INCLUDE_LEVEL__
@@ -32,6 +33,7 @@
 #endif
 
 #include <systemd/sd-journal.h>
+#endif
 #else
 #include <errno.h>
 #include <string.h>
@@ -88,10 +90,10 @@
 #define telem_perror(msg) sd_journal_perror(msg)
 #endif
 #ifdef TM_LOG_SYSLOG
-#define telem_perror(msg) syslog(LOG_ERR, msg ": %s", strerror(errno))
+#define telem_perror(msg) syslog(LOG_ERR, msg ": %s\n", strerror(errno))
 #endif
 #ifdef TM_LOG_STDERR
-#define telem_perror(msg) fprintf(stderr, ": %s", msg)
+#define telem_perror(msg) fprintf(stderr, "ERROR: " msg ": %s\n", strerror(errno))
 #endif
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
