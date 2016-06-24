@@ -380,6 +380,14 @@ int main(int argc, char **argv)
         GError *error = NULL;
         GOptionContext *context;
 
+        if (fcntl(STDERR_FILENO, F_GETFL) < 0) {
+                // redirect stderr to avoid bad things to happen with
+                // fd 2 when launched from kernel core pattern
+                if (freopen("/dev/null", "w", stderr) == NULL) {
+                        exit(EXIT_FAILURE);
+                }
+        }
+
         // Since this program handles core files, make sure it does not produce
         // core files itself, or else it will be invoked endlessly...
         prctl(PR_SET_DUMPABLE, 0);
