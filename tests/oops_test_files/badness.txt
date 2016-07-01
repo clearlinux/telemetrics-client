@@ -1,0 +1,40 @@
+<5>[    0.000000] BIOS-e820: [mem 0x00000000ba555000-0x00000000ba768fff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000ba769000-0x00000000ba854fff] ACPI NVS
+<5>[    0.000000] BIOS-e820: [mem 0x00000000ba855000-0x00000000baffefff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000bafff000-0x00000000baffffff] usable
+<5>[    0.000000] BIOS-e820: [mem 0x00000000bb800000-0x00000000bf9fffff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000f8000000-0x00000000fbffffff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fec00000-0x00000000fec00fff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fed00000-0x00000000fed03fff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1ffff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fee00000-0x00000000fee00fff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000ff000000-0x00000000ffffffff] reserved
+<5>[    68764.975944] ------------[ cut here ]------------
+<4>[    68764.975944] Badness at drivers/char/tty_ldisc.c:738
+<4>[    68764.975944] NIP: c025003c LR: c0250024 CTR: c003e4cc
+<4>[    68764.975944] REGS: c98ddda0 TRAP: 0700   Tainted: G        W
+<4>[    68764.975944] MSR: 00029032 <EE,ME,CE,IR,DR>  CR: 24002448  XER: 20000000
+<4>[    68764.975944] TASK = c7ec69a0[2282] 'login' THREAD: c98dc000
+<4>[    68764.975944] GPR00: 00000001 c98dde50 c7ec69a0 fffffff0 c98dde18 00000000 00009300 000002d1 
+<4>[    68764.975944] GPR08: c98dde24 c0580000 00009032 c04fa4c4 ffd9da60 10021af8 10019b1c 10008828 
+<4>[    68764.975944] GPR16: bf847b4c 10019b34 10452eb0 10020000 10444218 10019910 bf847d4c c0249718 
+<4>[    68764.975944] GPR24: c02494b8 c8fff0a0 00000000 00000000 00000002 00000000 c8b661f8 c2257c00 
+<4>[    68764.975944] NIP [c025003c] tty_ldisc_reinit+0x54/0xa8
+<4>[    68764.975944] LR [c0250024] tty_ldisc_reinit+0x3c/0xa8
+<4>[    68764.975944] Call Trace:
+<4>[    68764.975944] [c98dde50] [c0250024] tty_ldisc_reinit+0x3c/0xa8
+<4>[    68764.975944] [c98dde70] [c02501d4] tty_ldisc_hangup+0x144/0x1d4
+<4>[    68764.975944] [c98dde90] [c0248a30] do_tty_hangup+0xe4/0x300
+<4>[    68764.975944] [c98ddec0] [c0249040] disassociate_ctty+0x5c/0x19c
+<4>[    68764.975944] [c98ddee0] [c0048e20] do_exit+0x240/0x63c
+<4>[    68764.975944] [c98ddf20] [c0049298] do_group_exit+0x7c/0xa8
+<4>[    68764.975944] [c98ddf30] [c00492d8] sys_exit_group+0x14/0x28
+<4>[    68764.975944] [c98ddf40] [c0014d6c] ret_from_syscall+0x0/0x40
+<4>[    68764.975944] --- Exception: c01 at 0xfed26d8
+<4>[    68764.975944]     LR = 0xfed26a4
+<5>[    0.000000] BIOS-e820: [mem 0x00000000ba855000-0x00000000baffefff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000bafff000-0x00000000baffffff] usable
+<5>[    0.000000] BIOS-e820: [mem 0x00000000bb800000-0x00000000bf9fffff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000f8000000-0x00000000fbffffff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fec00000-0x00000000fec00fff] reserved
+<5>[    0.000000] BIOS-e820: [mem 0x00000000fed00000-0x00000000fed03fff] reserved

@@ -1,0 +1,64 @@
+<6>[    2.362527] WARNING: at net/sched/sch_generic.c:255 dev_watchdog+0x238/0x250
+<3>[    3.014975] NETDEV WATCHDOG: wwan0 (cdc_ether): transmit queue 0 timed out
+<3>[    3.014975] Modules linked in: ebtable_nat fuse ipt_MASQUERADE bnep bluetooth nf_conntrack_netbios_ns nf_conntrack_broadcast ip6table_mangle ip6t_REJECT nf_conntrack_ipv6 nf_defrag_ipv6 iptable_nat nf_nat_ipv4 nf_nat iptable_mangle nf_conntrack_ipv4 nf_defrag_ipv4 xt_conntrack nf_conntrack ebtable_filter ebtables ip6table_filter ip6_tables be2iscsi iscsi_boot_sysfs bnx2i cnic uio cxgb4i cxgb4 cxgb3i cxgb3 mdio libcxgbi ib_iser rdma_cm ib_addr iw_cm ib_cm ib_sa ib_mad ib_core iscsi_tcp libiscsi_tcp libiscsi scsi_transport_iscsi cdc_ether usbnet cdc_acm usb_storage joydev arc4 brcmsmac cordic brcmutil mac80211 cfg80211 snd_hda_codec_hdmi snd_hda_codec_idt snd_hda_intel snd_hda_codec snd_hwdep snd_seq snd_seq_device snd_pcm snd_page_alloc snd_timer snd dell_laptop acpi_cpufreq mperf coretemp microcode i2c_i801 rfkill iTCO_wdt iTCO_vendor_support intel_ips soundcore uvcvideo dell_wmi videobuf2_vmalloc videobuf2_memops videobuf2_core videodev dcdbas bcma vhost_net sparse_keymap media lpc_ich mfd_core tun macvtap macvlan kvm_intel kvm uinput crc32c_intel wmi video radeon i2c_algo_bit drm_kms_helper ttm drm r8169 firewire_ohci sdhci_pci mii sdhci firewire_core mmc_core crc_itu_t i2c_core sunrpc
+<3>[    3.014975] CPU: 2 PID: 0 Comm: swapper/2 Not tainted  3.10.4-100.fc18.x86_64 #1
+<3>[    3.014975] Hardware name: Dell Inc. Studio 1558/0NJWJR, BIOS A02 12/23/2009
+<3>[    3.014975] 0000000000000009 ffff880137d03d78 ffffffff816606a8 ffff880137d03db8
+<3>[    3.014975] ffffffff8105d660 ffff880137d03d98 0000000000000000 ffff88012adbe000
+<3>[    3.014975] 0000000000000001 0000000000000002 ffff88012adbe000 ffff880137d03e18
+<3>[    3.014975] Call Trace:
+<3>[    3.014975]  <IRQ>  [<ffffffff816606a8>] dump_stack+0x19/0x1b
+<3>[    3.014975]  [<ffffffff8105d660>] warn_slowpath_common+0x70/0xa0
+<3>[    3.014975]  [<ffffffff8105d746>] warn_slowpath_fmt+0x46/0x50
+<3>[    3.014975]  [<ffffffff8107ad9b>] ? __queue_work+0x12b/0x300
+<3>[    3.014975]  [<ffffffff81576ab8>] dev_watchdog+0x238/0x250
+<3>[    3.014975]  [<ffffffff81576880>] ? dev_deactivate_queue.constprop.30+0x80/0x80
+<3>[    3.014975]  [<ffffffff8106beea>] call_timer_fn+0x3a/0x110
+<3>[    3.014975]  [<ffffffff81576880>] ? dev_deactivate_queue.constprop.30+0x80/0x80
+<3>[    3.014975]  [<ffffffff8106d996>] run_timer_softirq+0x1f6/0x2a0
+<3>[    3.014975]  [<ffffffff81065aa8>] __do_softirq+0xe8/0x230
+<3>[    3.014975]  [<ffffffff81065d85>] irq_exit+0xb5/0xc0
+<3>[    3.014975]  [<ffffffff81670ace>] smp_apic_timer_interrupt+0x6e/0x99
+<3>[    3.014975]  [<ffffffff8166f91d>] apic_timer_interrupt+0x6d/0x80
+<3>[    3.014975]  <EOI>  [<ffffffff8108653e>] ? __hrtimer_start_range_ns+0x1be/0x400
+<3>[    3.014975]  [<ffffffff8150b0ae>] ? cpuidle_enter_state+0x5e/0xe0
+<3>[    3.014975]  [<ffffffff8150b0a7>] ? cpuidle_enter_state+0x57/0xe0
+<3>[    3.014975]  [<ffffffff8150b1ed>] cpuidle_idle_call+0xbd/0x200
+<3>[    3.014975]  [<ffffffff8101aeee>] arch_cpu_idle+0xe/0x30
+<3>[    3.014975]  [<ffffffff810ac430>] cpu_startup_entry+0xd0/0x260
+<3>[    3.014975]  [<ffffffff810b4015>] ? clockevents_register_device+0xb5/0x120
+<3>[    3.014975]  [<ffffffff8165581e>] start_secondary+0x254/0x256
+<30>[    1.007110] systemd[1]: Started Load/Save Random Seed.
+<30>[    1.019959] systemd[1]: Started Create Static Device Nodes in /dev.
+<30>[    1.021015] systemd[1]: Starting udev Kernel Device Manager...
+<30>[    1.021334] systemd[1]: Reached target Local File Systems (Pre).
+<30>[    1.024271] systemd[1]: Started udev Coldplug all Devices.
+<30>[    1.040022] systemd[1]: Started udev Kernel Device Manager.
+<30>[    1.045300] systemd[1]: Started Journal Service.
+<6>[    1.049309] input: Power Button as /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0C:00/input/input2
+<6>[    1.049313] ACPI: Power Button [PWRB]
+<6>[    1.049365] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input3
+<6>[    1.049367] ACPI: Power Button [PWRF]
+<46>[    1.050153] systemd-journald[204]: Received request to flush runtime journal from PID 1
+<4>[    1.062979] usb 3-7: ep 0x81 - rounding interval to 64 microframes, ep desc says 80 microframes
+<6>[    1.063051] parport_pc 00:07: reported by Plug and Play ACPI
+<6>[    1.063101] parport0: PC-style at 0x378, irq 5 [PCSPP,TRISTATE]
+<6>[    1.064570] thermal LNXTHERM:00: registered as thermal_zone0
+<6>[    1.064571] ACPI: Thermal Zone [TZ00] (28 C)
+<6>[    1.064764] thermal LNXTHERM:01: registered as thermal_zone1
+<6>[    1.064765] ACPI: Thermal Zone [TZ01] (30 C)
+<6>[    1.119178] shpchp: Standard Hot Plug PCI Controller Driver version: 0.4
+<6>[    1.121711] i801_smbus 0000:00:1f.3: enabling device (0001 -> 0003)
+<6>[    1.121932] input: PC Speaker as /devices/platform/pcspkr/input/input4
+<4>[    1.121948] ACPI Warning: SystemIO range 0x000000000000F040-0x000000000000F05F conflicts with OpRegion 0x000000000000F040-0x000000000000F04F (\_SB_.PCI0.SBUS.SMBI) (20150410/utaddress-254)
+<6>[    1.121952] ACPI: If an ACPI driver is available for this device, you should use it instead of the native driver
+<6>[    1.127240] [drm] Initialized drm 1.1.0 20060810
+<6>[    1.127620] pps_core: LinuxPPS API ver. 1 registered
+<6>[    1.127622] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+<6>[    1.128858] EXT4-fs (sda3): mounted filesystem with ordered data mode. Opts: data=ordered
+<4>[    1.129162] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+<6>[    1.129541] AVX2 version of gcm_enc/dec engaged.
+<6>[    1.129542] AES CTR mode by8 optimization enabled
+<6>[    1.129661] PTP clock support registered
+<6>[    1.132018] snd_hda_intel 0000:00:03.0: enabling device (0000 -> 0002)
+<6>[    1.132110] snd_hda_intel 0000:00:1b.0: enabling device (0000 -> 0002)

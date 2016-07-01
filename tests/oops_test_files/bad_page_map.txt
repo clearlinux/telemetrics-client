@@ -1,0 +1,49 @@
+<30>[    1.024271] systemd[1]: Started udev Coldplug all Devices.
+<30>[    1.040022] systemd[1]: Started udev Kernel Device Manager.
+<30>[    1.045300] systemd[1]: Started Journal Service.
+<6>[    1.049309] input: Power Button as /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0C:00/input/input2
+<6>[    1.049313] ACPI: Power Button [PWRB]
+<6>[    1.049365] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input3
+<6>[    1.049367] ACPI: Power Button [PWRF]
+<46>[    1.050153] systemd-journald[204]: Received request to flush runtime journal from PID 1
+<4>[    1.062979] usb 3-7: ep 0x81 - rounding interval to 64 microframes, ep desc says 80 microframes
+<6>[    1.063051] parport_pc 00:07: reported by Plug and Play ACPI
+<6>[    1.063101] parport0: PC-style at 0x378, irq 5 [PCSPP,TRISTATE]
+<6>[    1.064570] thermal LNXTHERM:00: registered as thermal_zone0
+<6>[    1.064571] ACPI: Thermal Zone [TZ00] (28 C)
+<6>[    1.064764] thermal LNXTHERM:01: registered as thermal_zone1
+<6>[    1.064765] ACPI: Thermal Zone [TZ01] (30 C)
+<6>[    1.119178] shpchp: Standard Hot Plug PCI Controller Driver version: 0.4
+<6>[    1.121711] i801_smbus 0000:00:1f.3: enabling device (0001 -> 0003)
+<6>[    1.121932] input: PC Speaker as /devices/platform/pcspkr/input/input4
+<4>[    1.121948] ACPI Warning: SystemIO range 0x000000000000F040-0x000000000000F05F conflicts with OpRegion 0x000000000000F040-0x000000000000F04F (\_SB_.PCI0.SBUS.SMBI) (20150410/utaddress-254)
+<6>[    1.121952] ACPI: If an ACPI driver is available for this device, you should use it instead of the native driver
+<6>[    1.127240] [drm] Initialized drm 1.1.0 20060810
+<6>[    1.127620] pps_core: LinuxPPS API ver. 1 registered
+<6>[    1.127622] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+<6>[    1.128858] EXT4-fs (sda3): mounted filesystem with ordered data mode. Opts: data=ordered
+<4>[    1.129162] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+<6>[    1.129541] AVX2 version of gcm_enc/dec engaged.
+<6>[    1.129542] AES CTR mode by8 optimization enabled
+<6>[    1.129661] PTP clock support registered
+<4>[500065.593462] BUG: Bad page map in process nemo  pte:00010000 pmd:6ade7067
+<4>[500065.593467] addr:00007f383a681000 vm_flags:00000071 anon_vma:          (null) mapping:ffff8801b74f8dd8 index:154f
+<4>[500065.593485] vma->vm_ops->fault: filemap_fault+0x0/0x3e0
+<4>[500065.593545] vma->vm_file->f_op->mmap: ext4_file_mmap+0x0/0x50 [ext4]
+<4>[500065.593550] CPU: 3 PID: 7951 Comm: nemo Not tainted 3.12-1-amd64 #1 Debian 3.12.9-1
+<4>[500065.593552] Hardware name: Gigabyte Technology Co., Ltd. Z68X-UD3H-B3/Z68X-UD3H-B3, BIOS F9 09/01/2011
+<4>[500065.593555]  ffff8800b0a5a540 ffffffff8148be76 00007f383a681000 ffffffff81135ce9
+<4>[500065.593560]  0000000000010000 ffff88006ade7408 0000000000010000 ffff8801b8aede48
+<4>[500065.593563]  00007f383a800000 00007f383a681000 ffffc00000000fff ffffffff81137525
+<4>[500065.593567] Call Trace:
+<6>[    1.132018] snd_hda_intel 0000:00:03.0: enabling device (0000 -> 0002)
+<6>[    1.132110] snd_hda_intel 0000:00:1b.0: enabling device (0000 -> 0002)
+<6>[    1.132560] e1000e: Intel(R) PRO/1000 Network Driver - 2.3.2-k
+<6>[    1.132561] e1000e: Copyright(c) 1999 - 2014 Intel Corporation.
+<6>[    1.132656] e1000e 0000:00:19.0: Interrupt Throttling Rate (ints/sec) set to dynamic conservative mode
+<6>[    1.157784] ppdev: user-space parallel port driver
+<6>[    1.160160] snd_hda_codec_realtek hdaudioC1D2: autoconfig for ALC887-VD: line_outs=4 (0x14/0x15/0x16/0x17/0x0) type:line
+<6>[    1.160162] snd_hda_codec_realtek hdaudioC1D2:    speaker_outs=0 (0x0/0x0/0x0/0x0/0x0)
+<6>[    1.160164] snd_hda_codec_realtek hdaudioC1D2:    hp_outs=1 (0x1b/0x0/0x0/0x0/0x0)
+<6>[    1.160166] snd_hda_codec_realtek hdaudioC1D2:    mono: mono_out=0x0
+<6>[    1.160167] snd_hda_codec_realtek hdaudioC1D2:    dig-out=0x11/0x1e

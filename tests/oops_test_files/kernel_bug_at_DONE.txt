@@ -1,0 +1,42 @@
+<6>[    4.668231] ------------[ cut here ]------------
+<6>[    4.668231] kernel BUG at mm/mmap.c:2156!
+<6>[    4.668231] invalid opcode: 0000 [1] SMP 
+<6>[    4.668231] last sysfs file: /sys/module/snd_ac97_codec/parameters/power_save
+<6>[    4.668231] CPU 0 
+<6>[    4.668231] Modules linked in: ip6t_LOG xt_tcpudp xt_pkttype ipt_LOG xt_limit adi joydev snd_pcm_oss snd_mixer_oss snd_seq snd_seq_device af_packet ip6t_REJECT nf_conntrack_ipv6 ip6table_raw xt_NOTRACK ipt_REJECT xt_state iptable_raw iptable_filter ip6table_mangle nf_conntrack_netbios_ns nf_conntrack_ipv4 nf_conntrack ip_tables ip6table_filter ip6_tables x_tables ipv6 binfmt_misc cpufreq_conservative cpufreq_userspace cpufreq_powersave powernow_k8 fuse loop dm_mod snd_intel8x0 snd_ac97_codec ac97_bus ppdev snd_pcm snd_timer snd rtc_cmos 8139too soundcore rtc_core sr_mod ns558 sis190 parport_pc 8139cp button pcspkr gameport rtc_lib cdrom parport tulip snd_page_alloc mii serio_raw k8temp(N) sg floppy usbhid hid ff_memless ohci_hcd sd_mod crc_t10dif ehci_hcd usbcore edd ext3 mbcache jbd fan ide_pci_generic sis5513 ide_core ata_generic sata_sis pata_sis libata scsi_mod dock thermal processor thermal_sys hwmon
+<6>[    4.668231] Supported: No, Unsupported modules are loaded
+<6>[    4.668231] Pid: 6909, comm: vlc Tainted: G          2.6.27.56-0.1-default #1
+<6>[    4.668231] RIP: 0010:[<ffffffff8029737f>]  [<ffffffff8029737f>] exit_mmap+0x145/0x152
+<6>[    4.668231] RSP: 0018:ffff880094cd7d58  EFLAGS: 00010202
+<6>[    4.668231] RAX: 0000000000000000 RBX: ffff8800010365f0 RCX: 0000000000000d26
+<6>[    4.668231] RDX: ffff880099f9fc20 RSI: ffff880099f958c8 RDI: ffff8800bf894c00
+<6>[    4.668231] RBP: ffff880099f9fbc0 R08: 0000000000000000 R09: 0000000000000292
+<6>[    4.668231] R10: 0000000000000002 R11: ffffffff803329f9 R12: 0000000000000000
+<6>[    4.668231] R13: ffff880099f9fc20 R14: ffff8800a35ea480 R15: ffff880094cd7f58
+<6>[    4.668231] FS:  00007fe88a69d710(0000) GS:ffffffff80a45080(0000) knlGS:0000000000000000
+<6>[    4.668231] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+<6>[    4.668231] CR2: 00000000006275e0 CR3: 00000000bd5cb000 CR4: 00000000000006e0
+<6>[    4.668231] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<6>[    4.668231] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<6>[    4.668231] Process vlc
+<6>[    4.668231] Stack:  ffff8800a35ea480 ffffffff8049e2c3 000000000000436b ffff8800010365f0
+<6>[    4.668231]  ffff880099f9fbc0 ffff880094c9c6c0 ffff880099f9fbc0 ffffffff8023ba80
+<6>[    4.668231]  0000000000000002 ffffffff8023f413 0000000000000000 ffff880094cd9da8
+<6>[    4.668231] Call Trace:
+<6>[    4.668231]  [<ffffffff8023ba80>] mmput+0x20/0x9f
+<6>[    4.668231]  [<ffffffff8023f413>] exit_mm+0x106/0x111
+<6>[    4.668231]  [<ffffffff8024102c>] do_exit+0x20d/0x325
+<6>[    4.668231]  [<ffffffff802411ab>] do_group_exit+0x67/0x94
+<6>[    4.668231]  [<ffffffff80249d85>] get_signal_to_deliver+0x2f4/0x313
+<6>[    4.668231]  [<ffffffff8020b993>] do_signal+0x62/0x171
+<6>[    4.668231]  [<ffffffff8020bad1>] do_notify_resume+0x2f/0x50
+<6>[    4.668231]  [<ffffffff8020c377>] ptregscall_common+0x67/0xb0
+<6>[    4.668231]  [<ffffffff8020c092>] sysret_signal+0x1a/0x25
+<6>[    4.668231]  [<00007fe8ccf1339c>] 0x7fe8ccf1339c
+<6>[    4.668231] 
+<6>[    4.668231] 
+<6>[    4.668231] Code: 8d 7b 18 e8 f4 67 00 00 c7 43 08 00 00 00 00 eb 0b 4c 89 e7 e8 63 fe ff ff 49 89 c4 4d 85 e4 75 f0 48 83 bd e8 00 00 00 00 74 04 <0f> 0b eb fe 48 83 c4 20 5b 5d 41 5c c3 41 56 41 be f4 ff ff ff 
+<6>[    4.668231] RIP  [<ffffffff8029737f>] exit_mmap+0x145/0x152
+<6>[    4.668231]  RSP <ffff880094cd7d58>
+<6>[    4.668231] ---[ end trace 8362ecae7f672b41 ]---
+<6>[    4.668231] 

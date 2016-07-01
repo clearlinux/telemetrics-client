@@ -1,0 +1,59 @@
+<4>[    68764.975944] irq 11: nobody cared
+<4>[    68764.975944] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 3.10.7-100.fc18.i686.PAE #1
+<4>[    68764.975944] Hardware name: IBM 2653RNG/2653RNG, BIOS 1NET10WW (1.04 ) 05/15/2003
+<4>[    68764.975944]  f5005840 f5005840 f5007f54 c099a83c f5007f74 c04cd159 c0b2e7fc 0000000b
+<4>[    68764.975944]  00000000 00000000 f5005840 0000000b f5007f9c c04cd576 f4ffe550 bf4e8add
+<4>[    68764.975944]  0000000b c0453ac5 00000000 f5005840 f5005840 00000000 f5007fd8 c04cb34f
+<4>[    68764.975944] Call Trace:
+<4>[    68764.975944]  [<c099a83c>] dump_stack+0x16/0x18
+<4>[    68764.975944]  [<c04cd159>] __report_bad_irq+0x29/0xd0
+<4>[    68764.975944]  [<c04cd576>] note_interrupt+0x166/0x1b0
+<4>[    68764.975944]  [<c0453ac5>] ? __do_softirq+0x75/0x1f0
+<4>[    68764.975944]  [<c04cb34f>] handle_irq_event_percpu+0x9f/0x1d0
+<4>[    68764.975944]  [<c04cb4b3>] handle_irq_event+0x33/0x60
+<4>[    68764.975944]  [<c04cda90>] ? handle_nested_irq+0xc0/0xc0
+<4>[    68764.975944]  [<c04cdaee>] handle_level_irq+0x5e/0xa0
+<4>[    68764.975944]  <IRQ>  [<c0410f72>] ? do_IRQ+0x42/0xc0
+<4>[    68764.975944]  [<c09a7573>] ? common_interrupt+0x33/0x38
+<4>[    68764.975944]  [<c0453ac5>] ? __do_softirq+0x75/0x1f0
+<4>[    68764.975944]  [<c04113e5>] ? handle_irq+0x35/0xf0
+<4>[    68764.975944]  [<c0453da5>] ? irq_exit+0x95/0xa0
+<4>[    68764.975944]  [<c0410f7b>] ? do_IRQ+0x4b/0xc0
+<4>[    68764.975944]  [<c0897264>] ? pci_write+0x34/0x40
+<4>[    68764.975944]  [<c09a7573>] ? common_interrupt+0x33/0x38
+<4>[    68764.975944]  [<c04c007b>] ? audit_make_tree+0x5b/0x100
+<4>[    68764.975944]  [<c07f00d8>] ? usbdev_ioctl+0xa98/0x13d0
+<4>[    68764.975944]  [<c099fa3f>] ? _raw_spin_unlock_irqrestore+0xf/0x20
+<4>[    68764.975944]  [<c04cc993>] ? __setup_irq+0x1f3/0x460
+<4>[    68764.975944]  [<c05471c9>] ? kmem_cache_alloc_trace+0x189/0x1c0
+<4>[    68764.975944]  [<c0691099>] ? vsnprintf+0xb9/0x3d0
+<4>[    68764.975944]  [<c04ccc68>] ? request_threaded_irq+0x68/0x120
+<4>[    68764.975944]  [<c07e1ec0>] ? usb_hcd_platform_shutdown+0x30/0x30
+<4>[    68764.975944]  [<c04ccca2>] ? request_threaded_irq+0xa2/0x120
+<4>[    68764.975944]  [<c07e34dc>] ? usb_add_hcd+0x47c/0x740
+<4>[    68764.975944]  [<c07f24eb>] ? usb_hcd_pci_probe+0x23b/0x610
+<4>[    68764.975944]  [<c077e7e2>] ? rpm_resume+0xe2/0x580
+<4>[    68764.975944]  [<c06b3c59>] ? pci_device_probe+0x79/0xb0
+<4>[    68764.975944]  [<c07743b9>] ? driver_probe_device+0x79/0x360
+<4>[    68764.975944]  [<c06b3b9e>] ? pci_match_device+0x9e/0xb0
+<4>[    68764.975944]  [<c0774731>] ? __driver_attach+0x91/0xa0
+<4>[    68764.975944]  [<c07746a0>] ? driver_probe_device+0x360/0x360
+<4>[    68764.975944]  [<c0772882>] ? bus_for_each_dev+0x42/0x80
+<4>[    68764.975944]  [<c0773dce>] ? driver_attach+0x1e/0x20
+<4>[    68764.975944]  [<c07746a0>] ? driver_probe_device+0x360/0x360
+<4>[    68764.975944]  [<c07739fc>] ? bus_add_driver+0xec/0x270
+<4>[    68764.975944]  [<c06b39f0>] ? pci_match_id+0x90/0x90
+<4>[    68764.975944]  [<c0774d2a>] ? driver_register+0x6a/0x160
+<4>[    68764.975944]  [<c0cbd210>] ? ohci_hcd_mod_init+0x88/0x88
+<4>[    68764.975944]  [<c0cbd210>] ? ohci_hcd_mod_init+0x88/0x88
+<4>[    68764.975944]  [<c06b2e33>] ? __pci_register_driver+0x33/0x40
+<4>[    68764.975944]  [<c0cbd28f>] ? uhci_hcd_init+0x7f/0xbd
+<4>[    68764.975944]  [<c04020da>] ? do_one_initcall+0xba/0x170
+<4>[    68764.975944]  [<c0c79bde>] ? kernel_init_freeable+0x117/0x1b6
+<4>[    68764.975944]  [<c0c7950e>] ? do_early_param+0x7a/0x7a
+<4>[    68764.975944]  [<c09872b0>] ? kernel_init+0x10/0xd0
+<4>[    68764.975944]  [<c09a6ff7>] ? ret_from_kernel_thread+0x1b/0x28
+<4>[    68764.975944]  [<c09872a0>] ? rest_init+0x70/0x70
+<4>[    68764.975944]  ---[ end trace 8362ecae7f672b41 ]---
+
+

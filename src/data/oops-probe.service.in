@@ -1,0 +1,11 @@
+[Unit]
+Description=Telemetrics Kernel Oops Probe
+Requires=telemd.socket
+After=telemd.socket
+
+[Service]
+ExecStart=@bindir@/oopsprobe
+User=telemetry
+
+[Install]
+WantedBy=multi-user.target

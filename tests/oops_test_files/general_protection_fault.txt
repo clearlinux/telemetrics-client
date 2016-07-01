@@ -1,0 +1,35 @@
+<6>[    2.362527] Version: 3.10.0-210.el7.x86_64
+<6>[    2.362527] general protection fault: 0000 [#1] SMP 
+<6>[    2.362527] Modules linked in: tun 8021q garp mrp bridge stp llc bonding ipt_REJECT xt_comment xt_multiport xt_conntrack iptable_filter xt_CHECKSUM iptable_mangle ipt_MASQUERADE iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack ip_tables raid0 xprtrdma ib_isert iscsi_target_mod ib_iser libiscsi scsi_transport_iscsi intel_powerclamp ib_srpt coretemp target_core_mod intel_rapl ib_srp scsi_transport_srp kvm_intel scsi_tgt kvm crct10dif_pclmul crc32_pclmul crc32c_intel ib_ipoib ghash_clmulni_intel rdma_ucm iTCO_wdt iTCO_vendor_support aesni_intel ib_ucm lrw gf128mul glue_helper ib_uverbs ablk_helper cdc_ether cryptd ib_umad ntb shpchp pcspkr sb_edac usbnet rdma_cm edac_core mii ib_cm i2c_i801 ioatdma lpc_ich iw_cm mfd_core nfsd auth_rpcgss wmi nfs_acl lockd ipmi_si ipmi_devintf
+<6>[    2.362527]  sunrpc ipmi_msghandler ext4 mbcache jbd2 raid1 sd_mod crc_t10dif crct10dif_common mlx4_ib ib_sa ib_mad ib_core ib_addr mlx4_en vxlan ip_tunnel mgag200 syscopyarea sysfillrect sysimgblt drm_kms_helper ttm mpt2sas igb drm raid_class ptp scsi_transport_sas mlx4_core pps_core dca i2c_algo_bit i2c_core dm_mirror dm_region_hash dm_log dm_mod
+<6>[    2.362527] CPU: 13 PID: 23672 Comm: qemu Not tainted 3.10.0-210.el7.x86_64 #1
+<6>[    2.362527] Hardware name: IBM IBM System X iDataPlex dx360 M4 Server -[7912Z16]-/00D4158, BIOS -[TDE142AUS-1.51]- 08/06/2014
+<6>[    2.362527] task: ffff880c1219e660 ti: ffff880c18754000 task.ti: ffff880c18754000
+<6>[    2.362527] RIP: 0010:[<ffffffff811ab4b0>]  [<ffffffff811ab4b0>] kmem_cache_alloc_trace+0x80/0x1f0
+<6>[    2.362527] RSP: 0018:ffff880c18757e60  EFLAGS: 00010286
+<6>[    2.362527] RAX: 0000000000000000 RBX: ffff880c3d27ce40 RCX: 000000000002f61d
+<6>[    2.362527] RDX: 000000000002f61c RSI: 00000000000080d0 RDI: ffff880c4f803500
+<6>[    2.362527] RBP: ffff880c18757e98 R08: 00000000000174a0 R09: ffff880c4f803500
+<6>[    2.362527] R10: ffffffff811cf4ce R11: 0000000000000246 R12: 52554f535f545249
+<6>[    2.362527] R13: 00000000000080d0 R14: 0000000000000280 R15: ffff880c4f803500
+<6>[    2.362527] FS:  00007f58b7d7b740(0000) GS:ffff880c4fce0000(0000) knlGS:0000000000000000
+<6>[    2.362527] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+<6>[    2.362527] CR2: 00000000019ed63c CR3: 0000000c2ef88000 CR4: 00000000000427e0
+<6>[    2.362527] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<6>[    2.362527] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<6>[    2.362527] Stack:
+<6>[    2.362527]  ffff880c4f803500 ffffffff811cf4ce ffff880c3d27ce40 ffff880c18757f48
+<6>[    2.362527]  0000000000000000 ffff880c18757f40 0000000000000001 ffff880c18757eb0
+<6>[    2.362527]  ffffffff811cf4ce ffff880bcd8ae2b0 ffff880c18757ef8 ffffffff811cf9f6
+<6>[    2.362527] Call Trace:
+<6>[    2.362527]  [<ffffffff811cf4ce>] ? alloc_pipe_info+0x3e/0xb0
+<6>[    2.362527]  [<ffffffff811cf4ce>] alloc_pipe_info+0x3e/0xb0
+<6>[    2.362527]  [<ffffffff811cf9f6>] create_pipe_files+0x56/0x220
+<6>[    2.362527]  [<ffffffff811cfbf4>] __do_pipe_flags+0x34/0xf0
+<6>[    2.362527]  [<ffffffff811cfd4f>] SyS_pipe2+0x2f/0xc0
+<6>[    2.362527]  [<ffffffff810faca6>] ? __audit_syscall_exit+0x1f6/0x2a0
+<6>[    2.362527]  [<ffffffff811cfdf0>] SyS_pipe+0x10/0x20
+<6>[    2.362527]  [<ffffffff81613929>] system_call_fastpath+0x16/0x1b
+<6>[    2.362527] Code: dc 00 00 49 8b 50 08 4d 8b 20 49 8b 40 10 4d 85 e4 0f 84 1c 01 00 00 48 85 c0 0f 84 13 01 00 00 49 63 47 20 48 8d 4a 01 4d 8b 07 <49> 8b 1c 04 4c 89 e0 65 49 0f c7 08 0f 94 c0 84 c0 74 b9 49 63 
+<6>[    2.362527] RIP  [<ffffffff811ab4b0>] kmem_cache_alloc_trace+0x80/0x1f0
+<6>[    2.362527]  RSP <ffff880c18757e60>

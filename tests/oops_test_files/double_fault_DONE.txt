@@ -1,0 +1,27 @@
+<6>[    7.813765] double fault: 0000 [1] SMP 
+<6>[    7.813765] CPU 1 
+<6>[    7.813765] Modules linked in: aes_x86_64 aes_generic fuse i915 drm sco bridge stp bnep l2cap bluetooth sunrpc ipv6 cpufreq_ondemand acpi_cpufreq freq_table dm_multipath uinput snd_hda_intel arc4 ecb snd_seq_dummy crypto_blkcipher snd_seq_oss snd_seq_midi_event snd_seq snd_seq_device rtl8187 snd_pcm_oss uvcvideo snd_mixer_oss i2c_i801 mac80211 compat_ioctl32 snd_pcm i2c_core videodev snd_timer v4l1_compat joydev pcspkr snd_page_alloc eeprom_93cx6 r8169 snd_hwdep serio_raw snd video cfg80211 mii output soundcore ac battery [last unloaded: microcode]
+<6>[    7.813765] Pid: 5823, comm: npviewer.bin Not tainted 2.6.27.37-170.2.104.fc10.x86_64 #1 AMILO Pi 3525
+<6>[    7.813765] RIP: 0010:[<ffffffff813349ca>]  [<ffffffff813349ca>] _spin_unlock_irqrestore+0x3d/0x3e
+<6>[    7.813765] RSP: 0000:ffff88000000000a  EFLAGS: 00010013
+<6>[    7.813765] RAX: ffff88008176b2c0 RBX: ffffffff8116bacb RCX: 00000000ffffffff
+<6>[    7.813765] RDX: ffff88005c4fe0a1 RSI: 0000000000000000 RDI: ffff8800814301f8
+<6>[    7.813765] RBP: e2c3f000ff53f000 R08: 0000000000000000 R09: ffff880071431958
+<6>[    7.813765] R10: 000001657e4acbd3 R11: 0000000000000217 R12: ffff880077062e20
+<6>[    7.813765] R13: 00007f56973149f0 R14: ffff88005c525e00 R15: ffff880077062e20
+<6>[    7.813765] FS:  00007f5697314950(0000) GS:ffff88007d004880(0000) knlGS:0000000000000000
+<6>[    7.813765] CS:  0010 DS: 0018 ES: 0018 CR0: 000000008005003b
+<6>[    7.813765] CR2: ffff87fffffffff8 CR3: 0000000000201000 CR4: 00000000000006e0
+<6>[    7.813765] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<6>[    7.813765] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<6>[    7.813765] Process npviewer.bin
+<6>[    7.813765] Stack:  ff53f000ff53f000 a14af000ff54f000 fea5f000ff53f000 2117f000e987f000
+<6>[    7.813765]  2117f0002117f000 ef57f0002117f000 0014f000f549f000 f841f000f84dc000
+<6>[    7.813765]  e739e6188d40f000 511cf000f859f000 ff57f000efd2e618 fe6ef000e6f2f000
+<6>[    7.813765] Call Trace:
+<6>[    7.813765] 
+<6>[    7.813765] 
+<6>[    7.813765] Code: f6 c7 02 75 12 48 89 df 57 9d 66 0f 1f 44 00 00 e8 ec 8b d5 ff eb 10 e8 89 8e d5 ff 48 89 df 57 9d 66 0f 1f 44 00 00 41 59 5b c9 <c3> 55 48 89 e5 53 48 89 fb 48 83 ec 08 fa 0f 1f 80 00 00 00 00 
+<6>[    7.813765] RIP  [<ffffffff813349ca>] _spin_unlock_irqrestore+0x3d/0x3e
+<6>[    7.813765]  RSP <ffff88000000000a>
+<6>[    7.813765] ---[ end trace 797b42614545b5e1 ]---

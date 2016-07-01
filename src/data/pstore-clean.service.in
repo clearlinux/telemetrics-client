@@ -1,0 +1,8 @@
+[Unit]
+Description=Telemetrics Pstore Clean Service
+
+[Service]
+ExecStart=@bindir@/pstoreclean
+
+[Install]
+WantedBy=multi-user.target

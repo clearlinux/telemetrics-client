@@ -1,0 +1,78 @@
+Indentation
+-----------
+telemetrics-client uses spaces for indentation (no tabs). To help enforce this
+rule, all source files provide modelines; if your editor does not support
+modelines, configure your editor accordingly.
+
+Line length
+-----------
+Wherever possible, try to limit line length to 80 characters.
+
+Coding Style
+------------
+- Function declarations and invocations should include no space between the
+  function name and the open parenthesis:
+
+        spool_max_size_config();
+
+- All other usages of parentheses in code should have one intervening space:
+
+        if (spool_size == -1) {
+                ...
+        }
+
+- To distinguish function definitions from other top-level constructs, add the
+  opening curly bracket on its own line:
+
+        void spool_record(char *headers[], char *body)
+        {
+                ...
+        }
+
+- All other usages of curly brackets in code should include the opening curly
+  bracket at the end of the line which opens the block:
+
+        for (i = 0; i < NUM_HEADERS; i++) {
+                ...
+        }
+
+- if statements should *always* use curly brackets, even when each clause only
+  contains a single statement. This is a safeguard to ensure future changes to
+  an if statement are not buggy due to forgetting to add the curly brackets
+  when needed.
+
+        if (ret == -1) {
+                ...
+        }
+
+- Comments that span more than one line should use the following style:
+
+        /* This comment
+         * spans more
+         * than one
+         * line.
+         */
+
+- For single-line comments, use either of the following forms:
+
+        /* single line comment 1 */
+
+        // single line comment 2
+
+- To make type casts stand out more, include no space between the cast and the
+  variable, etc. to cast:
+
+        GString **foo = (GString **)bar;
+
+- Whenever arithmetic operators are used, always include one space before and
+  after each operator:
+
+        size = size - offset + 1;
+
+- For pointer variable declarations, pointer dereferences, functions that return
+  a pointer, typecasts to a pointer variable, and other related constructs;
+  include a single space between the type and '*', and no space between the '*'
+  and the following variable, function name, etc. The purpose here is to
+  distinguish pointer usage versus arithmetic usage:
+
+        char *payload;

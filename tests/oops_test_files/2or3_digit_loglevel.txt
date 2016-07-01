@@ -1,0 +1,47 @@
+<30>[    0.058707] ... max period:             0000ffffffffffff
+<30>[    0.058708] ... fixed-purpose events:   3
+<30>[    0.058708] ... event mask:             000000070000000f
+<30>[    0.082105] x86: Booting SMP configuration:
+<30>[    0.082106] .... node  #0, CPUs:      #1
+<30>[    0.095970] NMI watchdog: enabled on all CPUs, permanently consumes one hw-PMU counter.
+<30>[    0.102633]  #2 #3 #4 #5 #6 #7
+<30>[    0.215769] x86: Booted up 1 node, 8 CPUs
+<30>[1834786.435534] ------------[ cut here ]------------
+<30>[1834786.435549] WARNING: CPU: 4 PID: 0 at net/sched/sch_generic.c:303 dev_watchdog+0xe8/0x158
+<30>[1834786.435554] NETDEV WATCHDOG: eth0 (r8169): transmit queue 0 timed out
+<30>[1834786.435557] Modules linked in: isofs btrfs ufs qnx4 hfsplus hfs minix ntfs msdos jfs xfs crc32c_generic libcrc32c reiserfs nls_cp437 vfat fat uas usb_storage nls_utf8 udf fuse pcspkr ip6table_filter ip6_tables ebtable_nat ebtables ipt_MASQUERADE nf_nat_masquerade_ipv4 iptable_nat nf_nat_ipv4 nf_nat nf_conntrack_ipv4 nf_defrag_ipv4 xt_state nf_conntrack ipt_REJECT nf_reject_ipv4 xt_CHECKSUM iptable_mangle xt_tcpudp iptable_filter ip_tables x_tables bridge stp llc kvm_amd kvm bnep rfcomm bluetooth rfkill parport_pc ppdev rpcsec_gss_krb5 nfsv4 nfsd auth_rpcgss oid_registry nfs_acl nfs lockd binfmt_misc grace sunrpc fscache ext3 jbd sha256_generic cbc sp5100_tco joydev dm_crypt dm_multipath scsi_dh dm_mod serio_raw k10temp edac_mce_amd edac_core i2c_piix4 snd_hda_codec_realtek xhci_pci xhci_hcd snd_hda_codec_generic ehci_pci snd_hda_codec_hdmi ehci_hcd 8250_fintek snd_hda_intel snd_hda_controller evdev snd_hda_codec snd_hwdep snd_pcm_oss snd_mixer_oss snd_pcm snd_seq_midi snd_seq_midi_event snd_rawmidi snd_seq snd_seq_device snd_timer snd soundcore acpi_cpufreq processor thermal_sys lp parport ext2 loop ext4 jbd2 mbcache crc16 raid10 raid456 async_raid6_recov async_pq raid6_pq async_xor xor async_memcpy async_tx raid1 raid0 multipath linear md_mod ata_generic sr_mod cdrom sd_mod hid_generic usbhid hid radeon ttm drm_kms_helper drm i2c_algo_bit firewire_ohci i2c_core firewire_core crc_itu_t ohci_pci ohci_hcd pata_atiixp sata_sil24 pata_jmicron r8169 mii ahci libahci wmi usbcore libata usb_common scsi_mod button
+<30>[1834786.435703] CPU: 4 PID: 0 Comm: swapper/4 Not tainted 3.18.2 #12
+<30>[1834786.435707] Hardware name: Gigabyte Technology Co., Ltd. GA-MA790XT-UD4P/GA-MA790XT-UD4P, BIOS F8 09/08/2011
+<30>[1834786.435710]  0000000000000000 0000000000000009 ffffffff813e9957 ffff88042fd03e38
+<30>[1834786.435715]  ffffffff8104c11f ffff88042fd03f60 ffffffff81347c3f ffff88042fd03e20
+<30>[1834786.435720]  ffff8804160c8000 0000000000000100 ffffffff81347b57 ffff8804160c83c8
+<30>[1834786.435725] Call Trace:
+<30>[1834786.435728]  <IRQ>  [<ffffffff813e9957>] ? dump_stack+0x41/0x51
+<30>[1834786.435739]  [<ffffffff8104c11f>] ? warn_slowpath_common+0x78/0x90
+<30>[1834786.435744]  [<ffffffff81347c3f>] ? dev_watchdog+0xe8/0x158
+<30>[1834786.435749]  [<ffffffff81347b57>] ? netif_tx_lock+0x7a/0x7a
+<30>[1834786.435754]  [<ffffffff8104c1cf>] ? warn_slowpath_fmt+0x45/0x4a
+<30>[1834786.435759]  [<ffffffff81347b44>] ? netif_tx_lock+0x67/0x7a
+<30>[1834786.435771]  [<ffffffff81347c3f>] ? dev_watchdog+0xe8/0x158
+<340>[1834786.435776]  [<ffffffff8108ff71>] ? call_timer_fn+0x3f/0xd8
+<340>[1834786.435781]  [<ffffffff81347b57>] ? netif_tx_lock+0x7a/0x7a
+<340>[1834786.435785]  [<ffffffff810904e6>] ? run_timer_softirq+0x1b1/0x1ff
+<340>[1834786.435792]  [<ffffffff81014731>] ? paravirt_sched_clock+0x5/0x8
+<340>[1834786.435797]  [<ffffffff8104efa5>] ? __do_softirq+0xed/0x25a
+<340>[1834786.435802]  [<ffffffff81014731>] ? paravirt_sched_clock+0x5/0x8
+<340>[1834786.435807]  [<ffffffff8106d1f3>] ? account_system_time+0xf8/0x111
+<340>[1834786.435812]  [<ffffffff8104f2af>] ? irq_exit+0x55/0x9b
+<340>[1834786.435817]  [<ffffffff810335fb>] ? smp_apic_timer_interrupt+0x2c/0x37
+<340>[1834786.435822]  [<ffffffff813eedfd>] ? apic_timer_interrupt+0x6d/0x80
+<340>[1834786.435825]  <EOI>  [<ffffffff8103ca0b>] ? native_safe_halt+0x2/0x3
+<340>[1834786.435833]  [<ffffffff810158a7>] ? default_idle+0x18/0x29
+<340>[1834786.435837]  [<ffffffff8101596e>] ? amd_e400_idle+0xb6/0xdd
+<340>[1834786.435842]  [<ffffffff81076fab>] ? cpu_startup_entry+0x16a/0x2af
+<340>[1834786.435847]  [<ffffffff810320a7>] ? start_secondary+0x152/0x174
+<340>[1834786.435851] ---[ end trace 896408cb0ffe005c ]---
+<340>[    0.274345] ACPI Exception: AE_NOT_FOUND, While evaluating Sleep State [\_S1_] (20150410/hwxface-580)
+<340>[    0.274348] ACPI Exception: AE_NOT_FOUND, While evaluating Sleep State [\_S2_] (20150410/hwxface-580)
+<340>[    0.274358] ACPI: (supports S0 S3 S4 S5)
+<340>[    0.274358] ACPI: Using IOAPIC for interrupt routing
+<340>[    0.274373] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+<340>[    0.279245] ACPI: Power Resource [FN00] (off)

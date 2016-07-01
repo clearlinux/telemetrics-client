@@ -1,0 +1,9 @@
+[Unit]
+Description=Telemetry Daemon Spool
+ConditionPathExists=!/etc/telemetrics/opt-out
+
+[Path]
+DirectoryNotEmpty=@localstatedir@/spool/telemetry
+
+[Install]
+WantedBy=multi-user.target

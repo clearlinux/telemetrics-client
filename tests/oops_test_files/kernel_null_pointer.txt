@@ -1,0 +1,36 @@
+<6>[    1.127622]BUG: unable to handle kernel NULL pointer dereference at 0000000000000118
+<6>[    1.127622]IP: [<ffffffff816356ee>] _raw_spin_lock+0xe/0x30
+<6>[    1.127622]PGD 1c482d067 PUD 1c4bac067 PMD 0 
+<6>[    1.127622]Oops: 0002 [#1] SMP 
+<6>[    1.127622]Modules linked in: vfat fat usb_storage ipt_MASQUERADE nf_conntrack_netbios_ns nf_conntrack_broadcast ip6table_mangle ip6t_REJECT nf_conntrack_ipv6 nf_defrag_ipv6 iptable_nat nf_nat_ipv4 nf_nat iptable_mangle lockd sunrpc nf_conntrack_ipv4 nf_defrag_ipv4 xt_conntrack nf_conntrack ebtable_filter ebtables ip6table_filter ip6_tables rfcomm bnep iTCO_wdt iTCO_vendor_support snd_hda_codec_conexant coretemp microcode arc4 iwldvm mac80211 r592 lpc_ich memstick i2c_i801 mfd_core uvcvideo videobuf2_vmalloc videobuf2_memops videobuf2_core iwlwifi videodev media snd_hda_intel cfg80211 snd_hda_codec snd_hwdep snd_seq btusb snd_seq_device bluetooth snd_pcm snd_page_alloc snd_timer e1000e mei thinkpad_acpi snd soundcore rfkill binfmt_misc vhost_net tun macvtap macvlan kvm_intel kvm uinput dm_crypt firewire_ohci sdhci_pci sdhci i915 mmc_core firewire_core crc_itu_t yenta_socket i2c_algo_bit drm_kms_helper drm i2c_core wmi video
+<6>[    1.127622]CPU 0 
+<6>[    1.127622]Pid: 1949, comm: nepomukservices Not tainted 3.7.4-204.fc18.x86_64 #1 LENOVO 27672LG/27672LG
+<6>[    1.127622]RIP: 0010:[<ffffffff816356ee>]  [<ffffffff816356ee>] _raw_spin_lock+0xe/0x30
+<6>[    1.127622]RSP: 0018:ffff8801c4b49e68  EFLAGS: 00010292
+<6>[    1.127622]RAX: 0000000000000100 RBX: ffff8801558eada8 RCX: 0000000000000034
+<6>[    1.127622]RDX: 0000000000000002 RSI: 0000000000000000 RDI: 0000000000000118
+<6>[    1.127622]RBP: ffff8801c4b49e68 R08: 8038000000000000 R09: 01558eae401c0000
+<6>[    1.127622]R10: fe8c71a7238f9007 R11: 0000000000000000 R12: 0000000000000000
+<6>[    1.127622]R13: ffffffffa0648640 R14: ffffffffa0648640 R15: 0000000000b37610
+<6>[    1.127622]FS:  00007f9ea9074880(0000) GS:ffff88023bc00000(0000) knlGS:0000000000000000
+<6>[    1.127622]CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+<6>[    1.127622]CR2: 0000000000000118 CR3: 00000001c482a000 CR4: 00000000000007f0
+<6>[    1.127622]DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<6>[    1.127622]DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<6>[    1.127622]Process nepomukservices
+<6>[    1.127622]Stack:
+<6>[    1.127622] ffff8801c4b49e88 ffffffffa0646487 ffff8801558eada8 ffff8801558eaea0
+<6>[    1.127622] ffff8801c4b49ea8 ffffffffa0646588 ffff8801c4b49eb8 ffff8801558eada8
+<6>[    1.127622] ffff8801c4b49ed8 ffffffff811ae072 7fffffffffffffff ffff8801558eada8
+<6>[    1.127622]Call Trace:
+<6>[    1.127622]  [<ffffffffa0646487>] fat_detach+0x27/0xd0 [fat]
+<6>[    1.127622]  [<ffffffffa0646588>] fat_evict_inode+0x58/0x60 [fat]
+<6>[    1.127622]  [<ffffffff811ae072>] evict+0xa2/0x1a0
+<6>[    1.127622]  [<ffffffff811ae833>] iput+0x103/0x190
+<6>[    1.127622]  [<ffffffff811d4930>] fsnotify_destroy_mark+0x140/0x150
+<6>[    1.127622]  [<ffffffff811d68a6>] sys_inotify_rm_watch+0x76/0xc0
+<6>[    1.127622]  [<ffffffff8163e059>] system_call_fastpath+0x16/0x1b
+<6>[    1.127622]Code: c2 ff ff ff ff be 01 00 00 00 48 89 e5 e8 8b fe ff ff 5d c3 90 90 90 90 90 90 90 90 90 66 66 66 66 90 55 b8 00 01 00 00 48 89 e5 <f0> 66 0f c1 07 0f b6 d4 38 c2 74 0f 66 0f 1f 44 00 00 f3 90 0f 
+<6>[    1.127622]RIP  [<ffffffff816356ee>] _raw_spin_lock+0xe/0x30
+<6>[    1.127622] RSP <ffff8801c4b49e68>
+<6>[    1.127622]CR2: 0000000000000118

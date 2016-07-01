@@ -1,0 +1,38 @@
+telemetrics-client
+==================
+
+This package provides the front end component of a complete telemetrics
+solution for Linux-based operating systems. Specifically, the front end
+component includes:
+
+- telemetrics probes that collect specific types of data from the operating
+  system.
+
+- a library, libtelemetry, that telemetrics probes use to create telemetrics
+  records and send them to the daemon for further processing.
+
+- a daemon, telemd, that prepares the records to send to a telemetrics server
+  (not included in this source tree), or spools the records on disk in case
+  it's unable to successfully deliver them.
+
+
+Build dependencies
+==================
+
+- libcheck
+
+- libcurl
+
+- glib
+
+- elfutils, which provides libelf and libdwfl libraries..
+
+- (optional) libsystemd, for syslog-style logging to the systemd journal, and
+  socket/path activation of telemd by systemd.
+
+
+Generating HTML documentation
+=============================
+
+At toplevel, run 'doxygen docs/Doxyfile'. The documentation is generated in
+the docs/html/ directory.

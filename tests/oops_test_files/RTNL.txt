@@ -1,0 +1,22 @@
+<6>[    7.813765] RTNL: assertion failed at drivers/net/bonding/bond_main.c
+<6>[    7.813765] CPU: 2 PID: 2834 Comm: avahi-daemon Not tainted 3.12-trunk-amd64 #1 Debian 3.12.3-1~exp1
+<6>[    7.813765] Hardware name: Gigabyte Technology Co., Ltd. Z68X-UD3H-B3/Z68X-UD3H-B3, BIOS F9 09/01/2011
+<6>[    7.813765] ffff880214db7000 ffffffff8148a996 ffff880214db7000 ffffffffa06c6273
+<6>[    7.813765] ffff880214db7000 ffff880214db7204 0000000000000000 ffffffff813ae9be
+<6>[    7.813765] ffff880216b07d40 ffff880214db7000 ffff880216b07de4 ffff8802162dfd50
+<6>[    7.813765] Call Trace:
+<6>[    7.813765]  [<ffffffff8148a996>] ? dump_stack+0x41/0x51
+<6>[    7.813765]  [<ffffffffa06c6273>] ? bond_set_rx_mode+0xb3/0xc0 [bonding]
+<6>[    7.813765]  [<ffffffff813ae9be>] ? __dev_mc_add+0x4e/0x60
+<6>[    7.813765]  [<ffffffff8145a7e4>] ? igmp6_group_added+0x174/0x1c0
+<6>[    7.813765]  [<ffffffff81393e91>] ? sock_def_readable+0x31/0x60
+<6>[    7.813765]  [<ffffffff8145bc1f>] ? ipv6_dev_mc_inc+0x25f/0x300
+<6>[    7.813765]  [<ffffffff8145bdcf>] ? ipv6_sock_mc_join+0x10f/0x1d0
+<6>[    7.813765]  [<ffffffff8144ece8>] ? do_ipv6_setsockopt.isra.6+0xab8/0xf20
+<6>[    7.813765]  [<ffffffff8117959d>] ? pipe_write+0x3fd/0x560
+<6>[    7.813765]  [<ffffffff81391e81>] ? SYSC_sendto+0xf1/0x180
+<6>[    7.813765]  [<ffffffff8144f1b2>] ? ipv6_setsockopt+0x62/0xc0
+<6>[    7.813765]  [<ffffffff81392997>] ? SyS_setsockopt+0x67/0xd0
+<6>[    7.813765]  [<ffffffff81497af9>] ? system_call_fastpath+0x16/0x1b
+<4>[    68764.975942]---[ end trace 259b43274eeaaa27 ]---
+

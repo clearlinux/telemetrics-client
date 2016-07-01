@@ -1,0 +1,11 @@
+[Unit]
+Description=Telemetrics Pstore Probe
+Requires=telemd.socket
+After=telemd.socket
+
+[Service]
+ExecStart=@bindir@/pstoreprobe
+User=telemetry
+
+[Install]
+WantedBy=multi-user.target

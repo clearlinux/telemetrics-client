@@ -1,0 +1,29 @@
+<4>[1034074.173653] WARNING: CPU: 3 PID: 0 at net/sched/sch_generic.c:303 dev_watchdog+0x254/0x260
+<4>[1034074.173653] NETDEV WATCHDOG: enp0s16f1u1 (ax88179_178a): transmit queue 0 timed out
+<4>[1034074.173653] Modules linked in: rfcomm xt_multiport xt_CHECKSUM tun ipt_MASQUERADE nf_nat_masquerade_ipv4 nf_conntrack_netbios_ns nf_conntrack_broadcast ip6t_rpfilter ip6t_REJECT nf_reject_ipv6 xt_conntrack ebtable_nat ebtable_broute bridge ebtable_filter ebtables ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6 ip6table_mangle ip6table_security ip6table_raw ip6table_filter ip6_tables iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack iptable_mangle iptable_security iptable_raw bnep arc4 ath9k kvm_amd kvm ath9k_common ath9k_hw ath3k crct10dif_pclmul ath crc32_pclmul btusb crc32c_intel mac80211 bluetooth ghash_clmulni_intel fuse snd_hda_codec_hdmi snd_hda_codec_realtek cfg80211 snd_hda_codec_generic snd_hda_intel snd_hda_controller snd_hda_codec k10temp snd_hwdep
+<4>[1034074.173653] snd_seq i2c_piix4 snd_seq_device snd_pcm rfkill tpm_tis tpm video snd_timer snd shpchp soundcore acpi_cpufreq nfsd auth_rpcgss nfs_acl lockd grace sunrpc amdkfd amd_iommu_v2 radeon 8021q garp stp llc mrp serio_raw i2c_algo_bit drm_kms_helper alx mdio ttm usb_storage drm ax88179_178a usbnet mii
+<4>[1034074.173653] CPU: 3 PID: 0 Comm: swapper/3 Not tainted 4.0.5-300.fc22.x86_64 #1
+<4>[1034074.173653] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.M./FM2A88X-ITX+, BIOS P2.40 08/01/2014
+<4>[1034074.173653] 0000000000000000 cb92479d4acc27fc ffff88042ed83d48 ffffffff817834f4
+<4>[1034074.173653] 0000000000000000 ffff88042ed83da0 ffff88042ed83d88 ffffffff8109c66a
+<4>[1034074.173653] ffff88042ed83d78 0000000000000000 ffff8802b91e3000 0000000000000003
+<4>[1034074.173653] Call Trace:
+<4>[1034074.173653]  <IRQ>  [<ffffffff817834f4>] dump_stack+0x45/0x57
+<4>[1034074.173653]  [<ffffffff8109c66a>] warn_slowpath_common+0x8a/0xc0
+<4>[1034074.173653]  [<ffffffff8109c6f5>] warn_slowpath_fmt+0x55/0x70
+<4>[1034074.173653]  [<ffffffff81691204>] dev_watchdog+0x254/0x260
+<4>[1034074.173653]  [<ffffffff81690fb0>] ? qdisc_rcu_free+0x40/0x40
+<4>[1034074.173653]  [<ffffffff81102ec9>] call_timer_fn+0x39/0x110
+<4>[1034074.173653]  [<ffffffff81690fb0>] ? qdisc_rcu_free+0x40/0x40
+<4>[1034074.173653]  [<ffffffff8110372a>] run_timer_softirq+0x24a/0x300
+<4>[1034074.173653]  [<ffffffff810a0cbb>] __do_softirq+0x10b/0x2d0
+<4>[1034074.173653]  [<ffffffff810a10c5>] irq_exit+0x145/0x150
+<4>[1034074.173653]  [<ffffffff8178c986>] smp_apic_timer_interrupt+0x46/0x60
+<4>[1034074.173653]  [<ffffffff8178a9ed>] apic_timer_interrupt+0x6d/0x80
+<4>[1034074.173653]  <EOI>  [<ffffffff81619a0a>] ? cpuidle_enter_state+0x5a/0x170
+<4>[1034074.173653]  [<ffffffff816199fd>] ? cpuidle_enter_state+0x4d/0x170
+<4>[1034074.173653]  [<ffffffff81619b57>] cpuidle_enter+0x17/0x20
+<4>[1034074.173653]  [<ffffffff810df3f4>] cpu_startup_entry+0x314/0x430
+<4>[1034074.173653]  [<ffffffff8104aa15>] start_secondary+0x1a5/0x1f0
+<4>[    68764.975942]---[ end trace 259b43274eeaaa27 ]---
+

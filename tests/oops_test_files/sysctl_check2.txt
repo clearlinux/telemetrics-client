@@ -1,0 +1,18 @@
+<4>[    68764.975944] sysctl table check failed: net/netfilter/nf_conntrack_max .3.19.1 Missing strategy
+<4>[    68764.975944] Pid: 3221, comm: vzctl veid: 0 Tainted: P           ----------------   2.6.32.53-bigmem-5-openvz #28
+<4>[    68764.975944] Call Trace:
+<4>[    68764.975944]  [<c0476e49>] ? set_fail+0x49/0x50
+<4>[    68764.975944]  [<c0477175>] ? sysctl_check_table+0x325/0x5b0
+<4>[    68764.975944]  [<c0476df6>] ? sysctl_check_lookup+0x116/0x120
+<4>[    68764.975944]  [<c047718d>] ? sysctl_check_table+0x33d/0x5b0
+<4>[    68764.975944]  [<c0476df6>] ? sysctl_check_lookup+0x116/0x120
+<4>[    68764.975944]  [<c047718d>] ? sysctl_check_table+0x33d/0x5b0
+<4>[    68764.975944]  [<c05238c1>] ? __kmalloc+0x181/0x1b0
+<4>[    68764.975944]  [<c045ac87>] ? __register_sysctl_paths+0xc7/0x2c0
+<4>[    68764.975944]  [<c05796f2>] ? proc_register+0xc2/0x1c0
+<4>[    68764.975944]  [<c07ef9ed>] ? register_net_sysctl_table+0x4d/0x60
+<4>[    68764.975944]  [<fc299bf5>] ? nf_conntrack_net_init+0x105/0x190 [nf_conntrack]
+<4>[    68764.975944]  [<c073538b>] ? setup_net+0x3b/0x90
+<4>[    68764.975944]  [<c07358a4>] ? copy_net_ns+0x64/0xe0
+<4>[    68764.975944]  [<c04733a1>] ? create_new_namespaces+0xc1/0x160
+<4>[    68764.975942]---[ end trace 259b43274eeaaa27 ]---

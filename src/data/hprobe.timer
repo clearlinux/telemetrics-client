@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Heartbeat for Telemetrics
+ConditionPathExists=!/etc/telemetrics/opt-out
+
+[Timer]
+OnCalendar=daily
+AccuracySec=12h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

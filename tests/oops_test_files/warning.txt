@@ -1,0 +1,104 @@
+<6>[    2.362527] Switched to clocksource tsc
+<3>[    3.014975] [drm:intel_set_cpu_fifo_underrun_reporting [i915]] *ERROR* uncleared fifo underrun on pipe B
+<3>[    3.014984] [drm:intel_cpu_fifo_underrun_irq_handler [i915]] *ERROR* CPU pipe B FIFO underrun
+<6>[    3.047225] e1000e: eno1 NIC Link is Up 100 Mbps Full Duplex, Flow Control: None
+<6>[    3.047228] e1000e 0000:00:19.0 eno1: 10/100 speed: disabling TSO
+<6>[    3.047254] IPv6: ADDRCONF(NETDEV_CHANGE): eno1: link becomes ready
+<6>[    4.668231] cfg80211: Calling CRDA to update world regulatory domain
+<6>[    7.813765] cfg80211: Calling CRDA to update world regulatory domain
+<4>[	68764.975944]------------[ cut here ]------------
+<4>[	68764.975944]WARNING: CPU: 1 PID: 796 at kernel/sched/core.c:2342 preempt_notifier_register+0x30/0x70
+registering preempt_notifier while notifiers disabled
+Modules linked in: vboxpci(OE) vboxnetadp(OE) vboxnetflt(OE) vboxdrv(OE) joydev pci_stub pppoe pppox iscsi_target_mod target_core_mod configfs cmac rmd160 xfrm_user ah6 ah4 esp6 esp4 xfrm4_mode_beet xfrm4_tunnel tunnel4 xfrm4_mode_tunnel xfrm4_mode_transport xfrm6_mode_transport xfrm6_mode_ro xfrm6_mode_beet xfrm6_mode_tunnel ipcomp ipcomp6 xfrm6_tunnel tunnel6 xfrm_ipcomp af_key ip6table_filter ip6_tables xfrm_algo ebtable_nat ebtables camellia_generic camellia_aesni_avx2 camellia_aesni_avx_x86_64 camellia_x86_64 cast6_avx_x86_64 cast6_generic cast5_avx_x86_64 cast5_generic cast_common deflate cts ctr gcm crypto_null ccm serpent_avx2 serpent_avx_x86_64 serpent_sse2_x86_64 serpent_generic blowfish_generic blowfish_x86_64 blowfish_common twofish_generic twofish_avx_x86_64 twofish_x86_64_3way xts twofish_x86_64 twofish_common xcbc sha256_ssse3 sha512_ssse3 des_generic xt_nat xt_REDIRECT nf_nat_redirect xt_tcpudp bridge stp llc ipt_MASQUERADE nf_nat_masquerade_ipv4 ts_bm xt_string iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack iptable_filter ip_tables x_tables ib_iser rdma_cm iw_cm ib_cm ib_sa ib_mad ib_core ib_addr iscsi_tcp libiscsi_tcp libiscsi scsi_transport_iscsi rfcomm bnep bluetooth nfsd auth_rpcgss nfs_acl nfs binfmt_misc lockd grace sunrpc fscache intel_rapl iosf_mbi x86_pkg_temp_thermal intel_powerclamp dm_multipath scsi_dh serio_raw kvm_intel kvm i2c_i801 snd_hda_codec_realtek snd_hda_codec_generic snd_hda_codec_hdmi snd_hda_intel snd_hda_codec snd_hda_core snd_hwdep snd_pcm snd_seq_midi snd_seq_midi_event snd_rawmidi snd_seq snd_seq_device snd_timer snd soundcore eeprom lpc_ich mei_me mei shpchp mac_hid parport_pc ppdev coretemp hwmon_vid lp parport xfs libcrc32c btrfs drbg ansi_cprng dm_crypt raid10 raid456 async_memcpy async_raid6_recov async_pq async_xor async_tx xor raid6_pq raid1 raid0 multipath linear nbd dm_mirror dm_region_hash dm_log hid_generic usbhid pata_acpi hid usb_storage crct10dif_pclmul crc32_pclmul ghash_clmulni_intel aesni_intel pata_jmicron i915 aes_x86_64 lrw gf128mul glue_helper ablk_helper cryptd i2c_algo_bit psmouse ahci libahci drm_kms_helper e1000e 8139too drm r8169 8139cp ptp mii pps_core wmi video
+<4>[	68764.975944]CPU: 1 PID: 796 Comm: EMT Tainted: G        W  OE   4.2.0-rc2-satori #1
+<4>[	68764.975944]Hardware name: LENOVO ThinkServer TS240/ThinkServer TS140, BIOS FBKT82AUS 04/02/2014
+<4>[	68764.975944] ffffffff81ab3f62 ffff880003247cc8 ffffffff8176ff14 0000000000000000
+<4>[	68764.975944] ffff880003247d18 ffff880003247d08 ffffffff81074a8a 00000000fffffffe
+<4>[	68764.975944] ffff8800aee23d20 ffffc9000cbb6000 0000000000000000 0000000000000000
+<4>[	68764.975944]Call Trace:
+<4>[	68764.975944]  [<ffffffff8176ff14>] dump_stack+0x45/0x57
+<4>[	68764.975944]  [<ffffffff81074a8a>] warn_slowpath_common+0x8a/0xc0
+<4>[	68764.975944]  [<ffffffff81074b06>] warn_slowpath_fmt+0x46/0x50
+<4>[	68764.975944]  [<ffffffff81097530>] preempt_notifier_register+0x30/0x70
+<4>[	68764.975944]  [<ffffffffc0d5e3fc>] VBoxHost_RTThreadCtxHooksRegister+0x3c/0x50 [vboxdrv]
+<4>[	68764.975944]  [<ffffffff810a5740>] ? update_curr+0x80/0x110
+<4>[	68764.975944]  [<ffffffffc0d4fe41>] ? supdrvIOCtlFast+0x71/0x90 [vboxdrv]
+<4>[	68764.975944]  [<ffffffffc0d4c43c>] ? VBoxDrvLinuxIOCtl_4_3_28+0x4c/0x230 [vboxdrv]
+<4>[	68764.975964]  [<ffffffff810a5b19>] ? put_prev_entity+0x89/0x450
+<4>[	68764.975953]  [<ffffffff811ed0ad>] ? do_vfs_ioctl+0x2cd/0x4b0
+<4>[	68764.975944]  [<ffffffff810ac915>] ? pick_next_task_rt+0xb5/0x190
+<4>[	68764.975944]  [<ffffffff811ed309>] ? SyS_ioctl+0x79/0x90
+<4>[	68764.975947]  [<ffffffff81777372>] ? entry_SYSCALL_64_fastpath+0x16/0x75
+<4>[	68764.975942]---[ end trace 259b43274eeaaa27 ]---
+<30>[    0.982349] systemd[1]: Created slice System Slice.
+<30>[    0.982390] systemd[1]: Reached target Slices.
+<30>[    0.982612] systemd[1]: Mounting Huge Pages File System...
+<30>[    0.982867] systemd[1]: Starting Remount Root and Kernel File Systems...
+<30>[    0.982993] systemd[1]: Created slice system-dhcpcd.slice.
+<30>[    0.983652] systemd[1]: Mounting Temporary Directory...
+<30>[    0.983977] systemd[1]: Starting Create list of required static device nodes for the current kernel...
+<30>[    0.984303] systemd[1]: Starting Setup Virtual Console...
+<30>[    0.984872] systemd[1]: Created slice system-systemd\x2dfsck.slice.
+<30>[    0.986238] systemd[1]: Starting Apply Kernel Variables...
+<30>[    0.986838] systemd[1]: Mounting Configuration File System...
+<30>[    0.987213] systemd[1]: Created slice system-getty.slice.
+<30>[    0.987812] systemd[1]: Starting Journal Service...
+<30>[    0.988503] systemd[1]: Mounting Debug File System...
+<30>[    0.989102] systemd[1]: Mounting POSIX Message Queue File System...
+<6>[    0.990614] EXT4-fs (sda2): re-mounted. Opts: data=ordered
+<30>[    0.991280] systemd[1]: Mounted Configuration File System.
+<30>[    0.991660] systemd[1]: Mounted Debug File System.
+<30>[    0.991978] systemd[1]: Mounted POSIX Message Queue File System.
+<30>[    0.992280] systemd[1]: Mounted Huge Pages File System.
+<30>[    0.992582] systemd[1]: Mounted Temporary Directory.
+<30>[    0.993030] systemd[1]: Started Remount Root and Kernel File Systems.
+<30>[    0.993472] systemd[1]: Started Create list of required static device nodes for the current kernel.
+<30>[    0.993996] systemd[1]: Started Setup Virtual Console.
+<30>[    0.994383] systemd[1]: Started Apply Kernel Variables.
+<30>[    1.003241] systemd[1]: Starting udev Coldplug all Devices...
+<30>[    1.003767] systemd[1]: Starting Load/Save Random Seed...
+<30>[    1.004301] systemd[1]: Starting Create Static Device Nodes in /dev...
+<30>[    1.007110] systemd[1]: Started Load/Save Random Seed.
+<30>[    1.019959] systemd[1]: Started Create Static Device Nodes in /dev.
+<30>[    1.021015] systemd[1]: Starting udev Kernel Device Manager...
+<30>[    1.021334] systemd[1]: Reached target Local File Systems (Pre).
+<30>[    1.024271] systemd[1]: Started udev Coldplug all Devices.
+<30>[    1.040022] systemd[1]: Started udev Kernel Device Manager.
+<30>[    1.045300] systemd[1]: Started Journal Service.
+<6>[    1.049309] input: Power Button as /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0C:00/input/input2
+<6>[    1.049313] ACPI: Power Button [PWRB]
+<6>[    1.049365] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input3
+<6>[    1.049367] ACPI: Power Button [PWRF]
+<46>[    1.050153] systemd-journald[204]: Received request to flush runtime journal from PID 1
+<4>[    1.062979] usb 3-7: ep 0x81 - rounding interval to 64 microframes, ep desc says 80 microframes
+<6>[    1.063051] parport_pc 00:07: reported by Plug and Play ACPI
+<6>[    1.063101] parport0: PC-style at 0x378, irq 5 [PCSPP,TRISTATE]
+<6>[    1.064570] thermal LNXTHERM:00: registered as thermal_zone0
+<6>[    1.064571] ACPI: Thermal Zone [TZ00] (28 C)
+<6>[    1.064764] thermal LNXTHERM:01: registered as thermal_zone1
+<6>[    1.064765] ACPI: Thermal Zone [TZ01] (30 C)
+<6>[    1.119178] shpchp: Standard Hot Plug PCI Controller Driver version: 0.4
+<6>[    1.121711] i801_smbus 0000:00:1f.3: enabling device (0001 -> 0003)
+<6>[    1.121932] input: PC Speaker as /devices/platform/pcspkr/input/input4
+<4>[    1.121948] ACPI Warning: SystemIO range 0x000000000000F040-0x000000000000F05F conflicts with OpRegion 0x000000000000F040-0x000000000000F04F (\_SB_.PCI0.SBUS.SMBI) (20150410/utaddress-254)
+<6>[    1.121952] ACPI: If an ACPI driver is available for this device, you should use it instead of the native driver
+<6>[    1.127240] [drm] Initialized drm 1.1.0 20060810
+<6>[    1.127620] pps_core: LinuxPPS API ver. 1 registered
+<6>[    1.127622] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+<6>[    1.128858] EXT4-fs (sda3): mounted filesystem with ordered data mode. Opts: data=ordered
+<4>[    1.129162] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+<6>[    1.129541] AVX2 version of gcm_enc/dec engaged.
+<6>[    1.129542] AES CTR mode by8 optimization enabled
+<6>[    1.129661] PTP clock support registered
+<6>[    1.132018] snd_hda_intel 0000:00:03.0: enabling device (0000 -> 0002)
+<6>[    1.132110] snd_hda_intel 0000:00:1b.0: enabling device (0000 -> 0002)
+<6>[    1.132560] e1000e: Intel(R) PRO/1000 Network Driver - 2.3.2-k
+<6>[    1.132561] e1000e: Copyright(c) 1999 - 2014 Intel Corporation.
+<6>[    1.132656] e1000e 0000:00:19.0: Interrupt Throttling Rate (ints/sec) set to dynamic conservative mode
+<6>[    1.157784] ppdev: user-space parallel port driver
+<6>[    1.160160] snd_hda_codec_realtek hdaudioC1D2: autoconfig for ALC887-VD: line_outs=4 (0x14/0x15/0x16/0x17/0x0) type:line
+<6>[    1.160162] snd_hda_codec_realtek hdaudioC1D2:    speaker_outs=0 (0x0/0x0/0x0/0x0/0x0)
+<6>[    1.160164] snd_hda_codec_realtek hdaudioC1D2:    hp_outs=1 (0x1b/0x0/0x0/0x0/0x0)
+<6>[    1.160166] snd_hda_codec_realtek hdaudioC1D2:    mono: mono_out=0x0
+<6>[    1.160167] snd_hda_codec_realtek hdaudioC1D2:    dig-out=0x11/0x1e
+<6>[    1.160168] snd_hda_codec_realtek hdaudioC1D2:    inputs:

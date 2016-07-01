@@ -1,0 +1,40 @@
+<3>[    0.000000] Initializing cgroup subsys cpuset
+<3>[    0.000000] Initializing cgroup subsys cpu
+<3>[    0.000000] Initializing cgroup subsys cpuacct
+<3>[    0.000000] Linux version 4.1.6-1-ARCH (builduser@tobias) (gcc version 5.2.0 (GCC) ) #1 SMP PREEMPT Mon Aug 17 08:52:28 CEST 2015
+<3>[    0.000000] Command line: initrd=\initramfs-linux.img root=/dev/sda2 rw
+<3>[    0.000000] e820: BIOS-provided physical RAM map:
+<3>[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x0000000000057fff] usable
+<3>[    0.000000] BIOS-e820: [mem 0x0000000000058000-0x0000000000058fff] reserved
+<3>[    0.000000] BIOS-e820: [mem 0x0000000000059000-0x000000000009efff] usable
+<3>[    0.000000] BIOS-e820: [mem 0x000000000009f000-0x000000000009ffff] reserved
+<6>[   3432.3432] WARNING: CPU: 1 PID: 796 at kernel/sched/core.c:2342 preempt_notifier_register+0x30/0x70
+<6>[   3432.3432] registering preempt_notifier while notifiers disabled
+<6>[   3432.3432] Modules linked in: vboxpci(OE) vboxnetadp(OE) vboxnetflt(OE) vboxdrv(OE) joydev pci_stub pppoe pppox iscsi_target_mod target_core_mod configfs cmac rmd160 xfrm_user ah6 ah4 esp6 esp4 xfrm4_mode_beet xfrm4_tunnel tunnel4 xfrm4_mode_tunnel xfrm4_mode_transport xfrm6_mode_transport xfrm6_mode_ro xfrm6_mode_beet xfrm6_mode_tunnel ipcomp ipcomp6 xfrm6_tunnel tunnel6 xfrm_ipcomp af_key ip6table_filter ip6_tables xfrm_algo ebtable_nat ebtables camellia_generic camellia_aesni_avx2 camellia_aesni_avx_x86_64 camellia_x86_64 cast6_avx_x86_64 cast6_generic cast5_avx_x86_64 cast5_generic cast_common deflate cts ctr gcm crypto_null ccm serpent_avx2 serpent_avx_x86_64 serpent_sse2_x86_64 serpent_generic blowfish_generic blowfish_x86_64 blowfish_common twofish_generic twofish_avx_x86_64 twofish_x86_64_3way xts twofish_x86_64 twofish_common xcbc sha256_ssse3 sha512_ssse3 des_generic xt_nat xt_REDIRECT nf_nat_redirect xt_tcpudp bridge stp llc ipt_MASQUERADE nf_nat_masquerade_ipv4 ts_bm xt_string iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack iptable_filter ip_tables x_tables ib_iser rdma_cm iw_cm ib_cm ib_sa ib_mad ib_core ib_addr iscsi_tcp libiscsi_tcp libiscsi scsi_transport_iscsi rfcomm bnep bluetooth nfsd auth_rpcgss nfs_acl nfs binfmt_misc lockd grace sunrpc fscache intel_rapl iosf_mbi x86_pkg_temp_thermal intel_powerclamp dm_multipath scsi_dh serio_raw kvm_intel kvm i2c_i801 snd_hda_codec_realtek snd_hda_codec_generic snd_hda_codec_hdmi snd_hda_intel snd_hda_codec snd_hda_core snd_hwdep snd_pcm snd_seq_midi snd_seq_midi_event snd_rawmidi snd_seq snd_seq_device snd_timer snd soundcore eeprom lpc_ich mei_me mei shpchp mac_hid parport_pc ppdev coretemp hwmon_vid lp parport xfs libcrc32c btrfs drbg ansi_cprng dm_crypt raid10 raid456 async_memcpy async_raid6_recov async_pq async_xor async_tx xor raid6_pq raid1 raid0 multipath linear nbd dm_mirror dm_region_hash dm_log hid_generic usbhid pata_acpi hid usb_storage crct10dif_pclmul crc32_pclmul ghash_clmulni_intel aesni_intel pata_jmicron i915 aes_x86_64 lrw gf128mul glue_helper ablk_helper cryptd i2c_algo_bit psmouse ahci libahci drm_kms_helper e1000e 8139too drm r8169 8139cp ptp mii pps_core wmi video
+<6>[   3432.3432] CPU: 1 PID: 796 Comm: EMT Tainted: G        W  OE   4.2.0-rc2-satori #1
+<6>[   3432.3432] Hardware name: LENOVO ThinkServer TS240/ThinkServer TS140, BIOS FBKT82AUS 04/02/2014
+<6>[   3432.3432]  ffffffff81ab3f62 ffff880003247cc8 ffffffff8176ff14 0000000000000000
+<6>[   3432.3432]  ffff880003247d18 ffff880003247d08 ffffffff81074a8a 00000000fffffffe
+<6>[   3432.3432]  ffff8800aee23d20 ffffc9000cbb6000 0000000000000000 0000000000000000
+<6>[   3432.3432] Call Trace:
+<6>[   3432.3432]  [<ffffffff8176ff14>] dump_stack+0x45/0x57
+<6>[   3432.3432]  [<ffffffff81074a8a>] warn_slowpath_common+0x8a/0xc0
+<6>[   3432.3432]  [<ffffffff81074b06>] warn_slowpath_fmt+0x46/0x50
+<6>[   3432.3432]  [<ffffffff81097530>] preempt_notifier_register+0x30/0x70
+<6>[   3432.3432]  [<ffffffffc0d5e3fc>] VBoxHost_RTThreadCtxHooksRegister+0x3c/0x50 [vboxdrv]
+<6>[   3432.3432]  [<ffffffff810a5740>] ? update_curr+0x80/0x110
+<6>[   3432.3432]  [<ffffffffc0d4fe41>] ? supdrvIOCtlFast+0x71/0x90 [vboxdrv]
+<6>[   3432.3432]  [<ffffffffc0d4c43c>] ? VBoxDrvLinuxIOCtl_4_3_28+0x4c/0x230 [vboxdrv]
+<6>[   3432.3432]  [<ffffffff810a5b19>] ? put_prev_entity+0x89/0x450
+<6>[   3432.3432]  [<ffffffff811ed0ad>] ? do_vfs_ioctl+0x2cd/0x4b0
+<6>[   3432.3432]  [<ffffffff810ac915>] ? pick_next_task_rt+0xb5/0x190
+<6>[   3432.3432]  [<ffffffff811ed309>] ? SyS_ioctl+0x79/0x90
+<6>[   3432.3432]  [<ffffffff81777372>] ? entry_SYSCALL_64_fastpath+0x16/0x75
+<6>[   3432.3432] ---[ end trace 259b43274eeaaa27 ]---
+<6>[   3432.3432] <3>[    0.013403] Initializing cgroup subsys net_cls
+<6>[   3432.3432] <3>[    0.013418] CPU: Physical Processor ID: 0
+<6>[   3432.3432] <3>[    0.013418] CPU: Processor Core ID: 0
+<6>[   3432.3432] <3>[    0.014112] mce: CPU supports 9 MCE banks
+<6>[   3432.3432] <3>[    0.014121] CPU0: Thermal monitoring enabled (TM1)
+<6>[   3432.3432] <3>[    0.014128] process: using mwait in idle threads
+<6>[   3432.3432] <3>[    0.014130] Last level iTLB entries: 4KB 1024, 2MB 1024, 4MB 1024

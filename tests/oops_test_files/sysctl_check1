@@ -1,0 +1,28 @@
+<6>[    3.047228] sysctl table check failed: net/ath1/%parent  Sysctl already exists
+<6>[    3.047228] Pid: 4138, comm: wlanconfig Tainted: P          2.6.26-2-686 #1
+<6>[    3.047228]  [<c0135c88>] set_fail+0x30/0x39
+<6>[    3.047228]  [<c01360b0>] sysctl_check_table+0x41f/0x463
+<6>[    3.047228]  [<c01360c7>] sysctl_check_table+0x436/0x463
+<6>[    3.047228]  [<c01360c7>] sysctl_check_table+0x436/0x463
+<6>[    3.047228]  [<c01281b9>] __register_sysctl_paths+0xbe/0x10a
+<6>[    3.047228]  [<c0128220>] register_sysctl_paths+0x1b/0x1d
+<6>[    3.047228]  [<f8e29b53>] ieee80211_sysctl_vattach+0x135/0x21a [wlan]
+<6>[    3.047228]  [<f8e148e1>] ieee80211_vap_setup+0x304/0x30d [wlan]
+<6>[    3.047228]  [<f8dce535>] ath_vap_create+0x17b/0x5cc [ath_pci]
+<6>[    3.047228]  [<f8e25e70>] ieee80211_ioctl_create_vap+0x83/0xb4 [wlan]
+<6>[    3.047228]  [<f8dcfe96>] ath_ioctl+0x1de/0x1f9 [ath_pci]
+<6>[    3.047228]  [<c02580d8>] __dev_get_by_name+0x68/0x73
+<6>[    3.047228]  [<f8dcfcb8>] ath_ioctl+0x0/0x1f9 [ath_pci]
+<6>[    3.047228]  [<c025a0a5>] dev_ifsioc+0x25d/0x277
+<6>[    3.047228]  [<c025a5d3>] dev_ioctl+0x514/0x571
+<6>[    3.047228]  [<c0252d1a>] sk_alloc+0x3a/0x47
+<6>[    3.047228]  [<c0183479>] d_alloc+0x138/0x17a
+<6>[    3.047228]  [<c0198173>] inotify_d_instantiate+0xf/0x31
+<6>[    3.047228]  [<c0172e27>] fd_install+0x1b/0x40
+<6>[    3.047228]  [<c024efb7>] sock_ioctl+0x0/0x1c1
+<6>[    3.047228]  [<c017e83c>] vfs_ioctl+0x1c/0x5d
+<6>[    3.047228]  [<c017eac7>] do_vfs_ioctl+0x24a/0x261
+<6>[    3.047228]  [<c0250a6f>] sys_socketcall+0x6c/0x19e
+<6>[    3.047228]  [<c017eb1f>] sys_ioctl+0x41/0x5a
+<6>[    3.047228]  [<c0103857>] sysenter_past_esp+0x78/0xb1
+<6>[    3.047228]  [<c02b0000>] quirk_ali7101_acpi+0x27/0x63

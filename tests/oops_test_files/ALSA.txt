@@ -1,0 +1,44 @@
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] ALSA sound/core/pcm_lib.c:154: BUG: stream = 1, pos = 0x1138, buffer size = 0x1138, period size = 0x44e
+<4>[    68764.975944] imklog 3.14.1, log source = /proc/kmsg started.
+<4>[    68764.975944] Inspecting /boot/System.map-2.6.25-14.fc9.i686
+<4>[    68764.975944] Loaded 28110 symbols from /boot/System.map-2.6.25-14.fc9.i686.
+<4>[    68764.975944] Symbols match kernel version 2.6.25.
+<4>[    68764.975944] No module symbols loaded - kernel modules not enabled.
+<4>[    68764.975944] Initializing cgroup subsys cpuset
+<4>[    68764.975944] Initializing cgroup subsys cpu
+<4>[    68764.975944] Linux version 2.6.25-14.fc9.i686 (mockbuild@) (gcc version 4.3.0 20080428 (Red Hat 4.3.0-8) (GCC) ) #1 SMP Thu May 1 06:28:41 EDT 2008
+<4>[    68764.975944] BIOS-provided physical RAM map:
+<4>[    68764.975944] BIOS-e820: 0000000000000000 - 000000000009f800
+<4>[    68764.975944] BIOS-e820: 000000000009f800 - 00000000000a0000
+<4>[    68764.975944] BIOS-e820: 00000000000ca000 - 00000000000cc000
+<4>[    68764.975944] BIOS-e820: 00000000000dc000 - 0000000000100000
+<4>[    68764.975944] BIOS-e820: 0000000000100000 - 00000000216f0000
+<4>[    68764.975944] BIOS-e820: 00000000216f0000 - 00000000216fc000
+<4>[    68764.975944] BIOS-e820: 00000000216fc000 - 0000000021700000
+<4>[    68764.975944] BIOS-e820: 0000000021700000 - 0000000021800000
+<4>[    68764.975944] BIOS-e820: 00000000fec00000 - 00000000fec10000
+<4>[    68764.975944] BIOS-e820: 00000000fee00000 - 00000000fee01000
+<4>[    68764.975944] BIOS-e820: 00000000fffe0000 - 0000000100000000
+<4>[    68764.975944] WARNING: strange, CPU MTRRs all blank?
+<4>[    68764.975944] ------------[ cut here ]------------
+<4>[    68764.975944] WARNING: at arch/x86/kernel/cpu/mtrr/main.c:696 mtrr_trim_uncached_memory+0x190/0x195
+<4>[    68764.975944] Modules linked in:
+<4>[    68764.975944] Pid: 0, comm: swapper Not tainted 2.6.25-14.fc9.i686 #1
+<4>[    68764.975944]  [warn_on_slowpath+71/115] warn_on_slowpath+0x47/0x73
+<4>[    68764.975944]  [vsnprintf+999/1056] ? vsnprintf+0x3e7/0x420
+<4>[    68764.975944]  [_spin_unlock_irqrestore+16/20] ? _spin_unlock_irqrestore+0x10/0x14
+<4>[    68764.975944]  [release_console_sem+405/413] ? release_console_sem+0x195/0x19d
+<4>[    68764.975944]  [vprintk+769/816] ? vprintk+0x301/0x330
+<4>[    68764.975944]  [vprintk+769/816] ? vprintk+0x301/0x330
+<4>[    68764.975944]  [do_early_param+48/111] ? do_early_param+0x30/0x6f
+<4>[    68764.975944]  [mtrr_trim_uncached_memory+400/405] mtrr_trim_uncached_memory+0x190/0x195
+<4>[    68764.975944]  [setup_arch+635/1097] setup_arch+0x27b/0x449
+<4>[    68764.975944]  [start_kernel+102/837] start_kernel+0x66/0x345
+<4>[    68764.975944]  =======================
+<4>[    68764.975944] ---[ end trace ca143223eefdc828 ]---

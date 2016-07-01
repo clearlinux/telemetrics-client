@@ -1,0 +1,42 @@
+<4>[    68764.975944] BUG: soft lockup - CPU#8 stuck for 22s! [ceph-osd:12347]
+<4>[    68764.975944] Modules linked in: vhost_net vhost macvtap macvlan tun nf_conntrack_ipv6 nf_defrag_ipv6 ip6table_filter ip6_tables xt_mac xt_physdev xt_set iptable_raw ip_set_hash_ip ip_set nfnetlink veth bridge stp llc iptable_mangle iptable_nat nf_nat_ipv4 nf_nat binfmt_misc openvswitch gre vxlan nf_conntrack_ipv4 nf_defrag_ipv4 xt_comment xt_multiport xt_conntrack nf_conntrack vfat fat btrfs xor raid6_pq dm_thin_pool dm_persistent_data dm_bio_prison x86_pkg_temp_thermal coretemp kvm_intel kvm crct10dif_pclmul crc32_pclmul crc32c_intel ghash_clmulni_intel microcode ipmi_devintf iTCO_wdt iTCO_vendor_support lpc_ich i2c_i801 mfd_core hpilo hpwdt ioatdma dca shpchp wmi ipmi_si ipmi_msghandler acpi_power_meter xfs libcrc32c mgag200 i2c_algo_bit drm_kms_helper ttm uas tg3 drm ptp usb_storage pps_core i2c_core hpsa
+<4>[    68764.975944] CPU: 8 PID: 12347 Comm: ceph-osd Not tainted 3.16.6-200.el7.x86_64 #1
+<4>[    68764.975944] Hardware name: HP ProLiant DL360 Gen9, BIOS P89 11/03/2014
+<4>[    68764.975944] task: ffff8820151bcf00 ti: ffff881080a34000 task.ti: ffff881080a34000
+<4>[    68764.975944] RIP: 0010:[<ffffffff810dabf6>]  [<ffffffff810dabf6>] queue_read_lock_slowpath+0x86/0x90
+<4>[    68764.975944] RSP: 0018:ffff881080a37c68  EFLAGS: 00000206
+<4>[    68764.975944] RAX: 00000000000011a4 RBX: ffffffff81012645 RCX: 00000000000011a9
+<4>[    68764.975944] BUG: soft lockup - CPU#9 stuck for 22s! [ceph-osd:12346]
+<4>[    68764.975944] Modules linked in: vhost_net vhost macvtap macvlan tun nf_conntrack_ipv6 nf_defrag_ipv6 ip6table_filter ip6_tables xt_mac xt_physdev xt_set iptable_raw ip_set_hash_ip ip_set nfnetlink veth bridge stp llc iptable_mangle iptable_nat nf_nat_ipv4 nf_nat binfmt_misc openvswitch gre vxlan nf_conntrack_ipv4 nf_defrag_ipv4 xt_comment xt_multiport xt_conntrack nf_conntrack vfat fat btrfs xor raid6_pq dm_thin_pool dm_persistent_data dm_bio_prison x86_pkg_temp_thermal coretemp kvm_intel kvm crct10dif_pclmul crc32_pclmul crc32c_intel ghash_clmulni_intel microcode ipmi_devintf iTCO_wdt iTCO_vendor_support lpc_ich i2c_i801 mfd_core hpilo hpwdt ioatdma dca shpchp wmi ipmi_si ipmi_msghandler acpi_power_meter xfs libcrc32c mgag200 i2c_algo_bit drm_kms_helper ttm uas tg3 drm ptp usb_storage pps_core i2c_core hpsa
+<4>[    68764.975944] CPU: 9 PID: 12346 Comm: ceph-osd Not tainted 3.16.6-200.el7.x86_64 #1
+<4>[    68764.975944] Hardware name: HP ProLiant DL360 Gen9, BIOS P89 11/03/2014
+<4>[    68764.975944] task: ffff8820151bd8e0 ti: ffff8816d92f8000 task.ti: ffff8816d92f8000
+<4>[    68764.975944] RIP: 0010:[<ffffffff810dabf2>]  [<ffffffff810dabf2>] queue_read_lock_slowpath+0x82/0x90
+<4>[    68764.975944] RSP: 0018:ffff8816d92fbc68  EFLAGS: 00000202
+<4>[    68764.975944] RAX: 00000000000011a4 RBX: ffffffff81012645 RCX: 00000000000011ab
+<4>[    68764.975944] RDX: 00000000000011ab RSI: 000000000000000d RDI: ffff88184167a698
+<4>[    68764.975944] RBP: ffff8816d92fbc68 R08: ffff88184167a65c R09: 0000000000000000
+<4>[    68764.975944] R10: 0000000000000000 R11: 0000000000000000 R12: ffff88207fc54638
+<4>[    68764.975944] R13: ffffffff810ceaa3 R14: ffffffff810cb8d1 R15: ffff8816d92fbc00
+<4>[    68764.975944] FS:  00007fb72f0e6700(0000) GS:ffff88207fc20000(0000) knlGS:0000000000000000
+<4>[    68764.975944] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+<4>[    68764.975944] CR2: 00000002aacf4718 CR3: 000000023edf6000 CR4: 00000000001427e0
+<4>[    68764.975944] Stack:
+<4>[    68764.975944]  ffff8816d92fbc78 ffffffff8170fcfc ffff8816d92fbce0 ffffffffa04fdceb
+<4>[    68764.975944]  0000000000000282 ffff881ee2220600 ffff882005b2ef00 ffff88207fd14638
+<4>[    68764.975944]  ffff882005b2ef00 000000004a1069d4 ffff88184167a628 ffff88152145e000
+<4>[    68764.975944] Call Trace:
+<4>[    68764.975944]  [<ffffffff8170fcfc>] _raw_read_lock+0x1c/0x30
+<4>[    68764.975944]  [<ffffffffa04fdceb>] btrfs_tree_read_lock+0x6b/0x140 [btrfs]
+<4>[    68764.975944]  [<ffffffffa049b7ab>] btrfs_read_lock_root_node+0x3b/0x50 [btrfs]
+<4>[    68764.975944]  [<ffffffffa04a087e>] btrfs_search_slot+0x52e/0xa50 [btrfs]
+<4>[    68764.975944]  [<ffffffff81317f38>] ? crypto_shash_update+0x38/0x100
+<4>[    68764.975944]  [<ffffffffa04b7708>] btrfs_lookup_xattr+0x78/0xd0 [btrfs]
+<4>[    68764.975944]  [<ffffffffa04dccf5>] __btrfs_getxattr+0x75/0x160 [btrfs]
+<4>[    68764.975944]  [<ffffffffa04dd254>] btrfs_getxattr+0x54/0x80 [btrfs]
+<4>[    68764.975944]  [<ffffffff812eea69>] get_vfs_caps_from_disk+0x69/0x120
+<4>[    68764.975944]  [<ffffffff81120e4d>] audit_copy_inode+0x6d/0xb0
+<4>[    68764.975944]  [<ffffffff81126609>] __audit_inode+0x119/0x340
+<4>[    68764.975944]  [<ffffffff8121989c>] SyS_fgetxattr+0x8c/0xd0
+<4>[    68764.975944]  [<ffffffff81710329>] system_call_fastpath+0x16/0x1b
+<4>[    68764.975944] Code: 00 f3 90 8b 07 3c ff 74 f8 66 83 47 04 01 5d c3 8b 07 3c ff 75 f8 f3 90 8b 07 3c ff 74 f8 5d c3 0f b7 47 04 66 39 c2 74 b5 f3 90 <0f> b7 47 04 66 39 c1 75 f5 eb a8 0f 1f 00 0f 1f 44 00 00 48 63 

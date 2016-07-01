@@ -1,0 +1,30 @@
+<3>[    3.014975] kernel BUG at security/selinux/ss/ebitmap.h:88!
+<3>[    3.014975] invalid opcode: 0000 [#1] SMP 
+<3>[    3.014975] last sysfs file: /sys/devices/pci0000:00/0000:00:1e.0/0000:03:01.4/class
+<3>[    3.014975] Modules linked in: fuse aes_i586 aes_generic rfcomm sco bridge stp llc bnep l2cap sunrpc cpufreq_ondemand acpi_cpufreq ip6t_REJECT nf_conntrack_ipv6 ip6table_filter ip6_tables ipv6 dm_multipath uinput snd_hda_codec_idt snd_hda_intel snd_hda_codec snd_hwdep snd_seq snd_seq_device arc4 ecb dell_wmi snd_pcm b43 wmi mac80211 cfg80211 uvcvideo videodev snd_timer snd v4l1_compat i2c_i801 iTCO_wdt iTCO_vendor_support soundcore dell_laptop snd_page_alloc btusb ssb bluetooth joydev rfkill dcdbas tg3 firewire_ohci sdhci_pci sdhci mmc_core firewire_core crc_itu_t video output nouveau ttm drm_kms_helper drm i2c_algo_bit i2c_core [last unloaded: microcode]
+<3>[    3.014975] Pid: 2577, comm: setroubleshootd Not tainted (2.6.32.26-175.fc12.i686.PAE #1) XPS M1330                       
+<3>[    3.014975] EIP: 0060:[<c0598bd2>] EFLAGS: 00210286 CPU: 0
+<3>[    3.014975] EIP is at ebitmap_get_bit+0x26/0x55
+<3>[    3.014975] EAX: f6021060 EBX: 00000840 ECX: 00000780 EDX: 8000000a
+<3>[    3.014975] ESI: f1141e60 EDI: f1141e60 EBP: f1141e3c ESP: f1141e38
+<3>[    3.014975] DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
+<3>[    3.014975] Process setroubleshootd
+<3>[    3.014975] Stack:
+<3>[    3.014975] c0b3ea50 f1141e4c c059b02b f5bb6d04 f69a46c4 f1141eb8 c059eb62 f6647990
+<3>[    3.014975]  00000059 00000002 00000002 00000008 000007d5 00000000 00000001 00000000
+<3>[    3.014975]  00000000 00000001 f10a4fc0 00000480 00000000 045e07d5 00100002 00000000
+<3>[    3.014975] Call Trace:
+<3>[    3.014975] [<c059b02b>] ? policydb_context_isvalid+0x46/0x80
+<3>[    3.014975] [<c059eb62>] ? security_compute_sid+0x190/0x26d
+<3>[    3.014975] [<c059ec82>] ? security_transition_sid+0x15/0x17
+<3>[    3.014975] [<c05949ed>] ? selinux_bprm_set_creds+0xc0/0x218
+<3>[    3.014975] [<c04c6cf5>] ? __vma_link+0x62/0x6b
+<3>[    3.014975] [<c04c6d5c>] ? vma_link+0x5e/0x7d
+<3>[    3.014975] [<c04c6e3a>] ? insert_vm_struct+0xbf/0xd2
+<3>[    3.014975] [<c058a77f>] ? security_bprm_set_creds+0x11/0x13
+<3>[    3.014975] [<c04e7bf5>] ? prepare_binprm+0xad/0xe0
+<3>[    3.014975] [<c04e840b>] ? do_execve+0x125/0x266
+<3>[    3.014975] [<c0407b63>] ? sys_execve+0x2b/0x4f
+<3>[    3.014975] [<c040903b>] ? sysenter_do_call+0x12/0x28
+<3>[    3.014975] Code: 5b 5e 5f 5d c3 55 89 e5 53 0f 1f 44 00 00 39 50 04 73 35 eb 40 8d 99 c0 00 00 00 39 d3 76 29 29 ca 00 00 c1 ca 63 83 fa 05 76 04 <0f> 0b eb fe 8b 44 90 04 83 e1 1f 31 d2 0f ad d0 d3 ea f6 c1 20 
+<3>[    3.014975] EIP: [<c0598bd2>] ebitmap_get_bit+0x26/0x55 SS:ESP 0068:f1141e38

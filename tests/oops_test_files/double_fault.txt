@@ -1,0 +1,26 @@
+<4>[    68764.975944] double fault: 0000 [#3] SMP 
+<4>[    68764.975944] last sysfs file: net/sit0/statistics/collisions
+<4>[    68764.975944] CPU 6 
+<4>[    68764.975944] Modules linked in: nls_utf8 vfat fat sit tunnel4 ext2 fuse ip6table_filter ip6_tables ebtable_nat ebtables ipt_MASQUERADE iptable_nat nf_nat bridge stp llc nfsd lockd nfs_acl auth_rpcgss exportfs sunrpc vboxpci vboxnetadp vboxnetflt vboxdrv ipv6 dm_multipath kvm_intel kvm uinput nvidia(P) snd_hda_codec_hdmi snd_hda_codec_idt snd_hda_intel snd_hda_codec snd_hwdep snd_seq snd_seq_device e1000e snd_pcm snd_timer snd uvcvideo arc4 ecb soundcore snd_page_alloc videodev iwlagn v4l1_compat v4l2_compat_ioctl32 iwlcore asix i2c_core mac80211 xhci ppdev cfg80211 wmi parport_pc parport mii rfkill dcdbas joydev sdhci_pci sdhci usb_storage mmc_core video output [last unloaded: speedstep_lib]
+<4>[    68764.975944] Pid: 19703, comm: make Tainted: P      D    2.6.31.5-127.fc12.x86_64 #1 Latitude E6430
+<4>[    68764.975944] RIP: 0010:[<ffffffff8141cd77>]  [<ffffffff8141cd77>] do_page_fault+0x17/0x299
+<4>[    68764.975944] RSP: 0018:ffff880008bbb018  EFLAGS: 00010096
+<4>[    68764.975944] RAX: 0000000000001000 RBX: ffff880008bbb068 RCX: 000000008101274e
+<4>[    68764.975944] RDX: 0000000000970430 RSI: 0000000000000000 RDI: ffff880008bbb068
+<4>[    68764.975944] RBP: ffff880008bbb058 R08: 0000000000000000 R09: 0000000000000000
+<4>[    68764.975944] R10: 0000000000000000 R11: 0000000000000000 R12: ffff880008c2ff48
+<4>[    68764.975944] R13: 0000000000000000 R14: 0000000000000000 R15: 0000000000000000
+<4>[    68764.975944] FS:  0000000000000000(0000) GS:ffff8800280e3000(0063) knlGS:00000000f77786c0
+<4>[    68764.975944] CS:  0010 DS: 002b ES: 002b CR0: 000000008005003b
+<4>[    68764.975944] CR2: ffff880008bbaff8 CR3: 000000000a879000 CR4: 00000000000426e0
+<4>[    68764.975944] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<4>[    68764.975944] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<4>[    68764.975944] Process make
+<4>[    68764.975944] Stack:
+<4>[    68764.975944] 0000000008a03163 0000000008a04163 0000000008a05163 0000000000000001
+<4>[    68764.975944]  ffff880008c2ff48 0000000000000000 0000000000000000 0000000000000000
+<4>[    68764.975944]  ffff880008bbb158 ffffffff8141af75 0000000000000000 0000000000000000
+<4>[    68764.975944] Call Trace:
+<4>[    68764.975944] Code: ff ff 48 8b 43 28 31 d2 8a 00 88 43 60 5b 89 d0 41 5c c9 c3 55 48 89 e5 41 57 41 56 41 55 49 89 f5 41 54 53 48 89 fb 48 83 ec 18 <65> 4c 8b 3c 25 90 c6 00 00 49 8b 87 80 02 00 00 48 89 45 c8 0f 
+<4>[    68764.975944] RIP  [<ffffffff8141cd77>] do_page_fault+0x17/0x299
+<4>[    68764.975944] RSP <ffff880008bbb018>
