@@ -62,8 +62,7 @@ const unsigned int count_chars(const char *check, const char character)
         if (check == NULL) {
                 return count;
         }
-        for (;*check != '\0'; ++check)
-        {
+        for (; *check != '\0'; ++check) {
                 if (*check == character) {
                         ++count;
                 }
