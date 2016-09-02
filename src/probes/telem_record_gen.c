@@ -56,6 +56,20 @@ static GOptionEntry options[] = {
         { NULL }
 };
 
+const unsigned int count_chars(const char *check, const char character)
+{
+        unsigned int count = 0U;
+        if (check == NULL) {
+                return count;
+        }
+        for (; *check != '\0'; ++check) {
+                if (*check == character) {
+                        ++count;
+                }
+        }
+        return count;
+}
+
 static void free_glib_strings(void)
 {
         if (config_file) {
@@ -119,6 +133,12 @@ int validate_opts(void)
         if (!g_str_is_ascii(opt_class)) {
                 fprintf(stderr, "Error: Non-ascii characters detected "
                         "in classification - aborting\n");
+                return ret;
+        }
+
+        if (count_chars(opt_class, '/') != 2) {
+                fprintf(stderr, "Error: Classification needs to be in "
+                        "most/to/least specific format, 2 \'/\' required.\n");
                 return ret;
         }
 
