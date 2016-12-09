@@ -1,0 +1,58 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "TELEMCTL" "1" "December 2016" "" ""
+.
+.SH "NAME"
+\fBtelemctl\fR \- Telemetry service administration tool
+.
+.SH "SYNOPSIS"
+\fBtelemctl\fR
+.
+.P
+\fB/etc/telemetrics/opt\-out\fR
+.
+.SH "DESCRIPTION"
+Control actions for telemetry services\. The command can be used to start, restart, or stop \fBtelemd(1)\fR, or to opt\-in or opt\-out of telemetry delivery of records to a central telemetry service\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fBstart\fR|\fBstop\fR|\fBrestart\fR
+Starts, stops or restarts all running telemetry services\.
+.
+.TP
+\fBopt\-in\fR
+Opts in to telemetry, and starts telemetry services\. The opt\-out file \fB/etc/telemetrics/opt\-out\fR is removed\.
+.
+.TP
+\fBopt\-out\fR
+Opts out of telemetry, and stops telemetry services\. The opt\-out file \fB/etc/telemetrics/opt\-out\fR is created\.
+.
+.SH "RETURN VALUES"
+0 on success\. A non\-zero exit code indicates a failure occurred\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright (C) 2016 Intel Corporation, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBtelemd(1)\fR
+.
+.P
+https://github\.com/clearlinux/telemetrics\-client
+.
+.P
+https://clearlinux\.org/documentation/
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
+

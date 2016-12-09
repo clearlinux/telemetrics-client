@@ -1,0 +1,105 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "TELEMETRICS\.CONF" "5" "December 2016" "" ""
+.
+.SH "NAME"
+\fBtelemetrics\.conf\fR \- Telemetry service configuration file
+.
+.SH "SYNOPSIS"
+.
+.nf
+
+/etc/telemetrics/telemetrics\.conf
+/usr/share/defaults/telemetrics/telemetrics\.conf
+.
+.fi
+.
+.SH "DESCRIPTION"
+This file contains configuration parameters for the \fBtelemd(1)\fR telemetry service daemon\. The daemon reads this file at startup if it exists\.
+.
+.SH "SYNTAX"
+The configuration file contains \fBkey=value\fR pairs, formatted as plain text, one option per line\. Comments can be added by preceding them with the \fB#\fR character\. All configuration options should be in a section marked with \fB[settings]\fR\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fBserver\fR=\fIurl\fR
+Server URL including protocol designator\.
+.
+.TP
+\fBsocket_path\fR=\fIpath\fR
+Path to the socket that \fBtelemd\fR will listen on\.
+.
+.TP
+\fBcainfo\fR=\fIpath\fR
+Certificate file to use for validation of SSL endpoint\.
+.
+.TP
+\fBtidheader\fR=\fIheader\fR
+Telemetry ID in header format, usually \fBtidheader=X\-Telemetry\-TID:<uuid>\fR post header used to group records in ingestion service, which may be ingesting for more than one set of clients\. Can be set to any string\.
+.
+.TP
+\fBrecord_expiry\fR=\fIminutes\fR
+Record expiry time in minutes\.
+.
+.TP
+\fBspool_dir\fR=\fI\fBdir\fR\fR
+Local spool directory used to store records being processed\.
+.
+.TP
+\fBspool_max_size\fR=\fIkB\fR
+maximum size of the spool directory in kB\. A value of \fB\-1\fR indicates no limit\. The block size of the files in this directory is considered, and not the actual size of the record itself\.
+.
+.TP
+\fBspool_process_time\fR=\fIseconds\fR
+Time in seconds for processing spool\. Valid range: 120\.\.3600\. Values outside this range are clamped\.
+.
+.TP
+\fBrate_limit_enabled\fR=\fI\fBtrue\fR|\fBfalse\fR\fR
+Enable rate limiting\. If this is set to false then all rate\-limiting disabled\. It is possible to disable each rate\-limit individually below\.
+.
+.TP
+\fBrecord_burst_limit\fR=\fIlimit\fR
+Rate limiting record burst limit\. Valid Range: 0\.\.\fBINT_MAX\fR, \-1 = disabled\.
+.
+.TP
+\fBrecord_window_length\fR=\fIminutes\fR
+Rate limiting record window length in minutes\. Valid Range: 0\.\.59\.
+.
+.TP
+\fBbyte_burst_limit\fR=\fIlimit\fR
+Rate limiting byte burst limit\. Valid Range: 0\.\.\fBINT_MAX\fR, \-1 = disabled\.
+.
+.TP
+\fBbyte_window_length\fR=\fIminutes\fR
+Rate limiting byte window length in minutes\. Valid Range: 0\.\.59\.
+.
+.TP
+\fBrate_limit_strategy\fR=\fIstrategy\fR
+Rate limit strategy \- what to do with record if rate\-limiting prevents delivery over network\. Valid stategies: \fBspool\fR, \fBdrop\fR\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright (C) 2016 Intel Corporation, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBtelemd(1)\fR
+.
+.P
+https://github\.com/clearlinux/telemetrics\-client
+.
+.P
+https://clearlinux\.org/documentation/
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
+
