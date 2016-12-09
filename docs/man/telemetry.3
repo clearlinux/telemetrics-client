@@ -1,15 +1,69 @@
-.TH TELEMETRY 3 "April 2015" Telemetrics
-.SH NAME
-telemetry \- Telemetry record creation and sending
-.SH SYNOPSIS
-#include <telemetry.h>
-.sp
-tm_create_record()
-.br
-tm_set_payload()
-.br
-tm_send_record()
-.br
-tm_set_config_File()
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "TELEMETRY" "3" "December 2016" "" ""
+.
+.SH "NAME"
+\fBtelemetry\fR \- C programming interface for telemetrics\-client
+.
+.SH "SYNOPSIS"
+.
+.nf
 
+#include "telemetry\.h"
+
+struct telem_ref {
+        struct telem_record *record;
+};
+
+int tm_create_record(struct telem_ref **t_ref, uint32_t severity,
+                     char *classification, uint32_t payload_version)
+int tm_set_payload(struct telem_ref *t_ref, char *payload)
+int tm_send_record(struct telem_ref *t_ref)
+void tm_free_record(struct telem_ref *t_ref)
+void tm_set_config_file(char *c_file)
+.
+.fi
+.
+.SH "DESCRIPTION"
+The functions in the telemetry library facilitate the delivery of telemetry data to the \fBtelemd(1)\fR service\.
+.
+.P
+The function \fBtm_create_record()\fR initializes a telemetry record and sets the severity and classification of that record, as well as the payload version number\. The memory needed to store the telemetry record is allocated and should be freed with \fBtm_free_record()\fR when no longer needed\.
+.
+.P
+The function \fBtm_set_payload()\fR attaches the provided telemetry record data to the telemetry record\. The current maximum payload size is 8192b\.
+.
+.P
+The function \fBtm_send_record()\fR delivers the record to the local \fBtelemd(1)\fR service\.
+.
+.P
+The function \fBtm_set_config_file()\fR can be used to provide an alternate configuration path to the telemetry library\.
+.
+.SH "RETURN VALUES"
+All these functions return \fB0\fR on success, or a non\-zero return value if an error occurred\. The functions \fBtm_free_record()\fR and \fBtm_set_config_file()\fR do not return any values\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright (C) 2016 Intel Corporation, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBtelemd(1)\fR
+.
+.P
+https://github\.com/clearlinux/telemetrics\-client
+.
+.P
+https://clearlinux\.org/documentation/
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
 

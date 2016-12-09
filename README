@@ -30,9 +30,3 @@ Build dependencies
 - (optional) libsystemd, for syslog-style logging to the systemd journal, and
   socket/path activation of telemd by systemd.
 
-
-Generating HTML documentation
-=============================
-
-At toplevel, run 'doxygen docs/Doxyfile'. The documentation is generated in
-the docs/html/ directory.

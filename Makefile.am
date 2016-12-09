@@ -14,6 +14,7 @@ DISTCHECK_CONFIGURE_FLAGS = \
 
 include $(top_srcdir)/build-aux/make/cflags.make
 include $(top_srcdir)/build-aux/make/ldflags.make
+include $(top_srcdir)/docs/local.mk
 include $(top_srcdir)/scripts/local.mk
 include $(top_srcdir)/src/local.mk
 include $(top_srcdir)/src/data/local.mk
