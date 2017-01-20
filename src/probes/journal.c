@@ -202,7 +202,13 @@ static bool add_filters(sd_journal *journal)
         }
         free(data);
 
-        r = sd_journal_add_match(journal, "SYSLOG_IDENTIFIER=crashprobe", 0);
+        r = sd_journal_add_match(journal, "PRIORITY=1", 0);
+        if (r < 0) {
+                tm_journal_match_err(r);
+                return false;
+        }
+
+        r = sd_journal_add_match(journal, "PRIORITY=2", 0);
         if (r < 0) {
                 tm_journal_match_err(r);
                 return false;
