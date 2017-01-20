@@ -186,6 +186,33 @@ static bool get_boot_id(char **data)
         return true;
 }
 
+#define JOURNAL_MATCH(data) \
+        do { \
+                r = sd_journal_add_match(journal, data, 0); \
+                if (r < 0) { \
+                        tm_journal_match_err(r); \
+                        return false; \
+                } \
+        } while (0);
+
+#define JOURNAL_AND \
+        do { \
+                r = sd_journal_add_conjunction(journal); \
+                if (r < 0) { \
+                        tm_journal_match_err(r); \
+                        return false; \
+                } \
+        } while (0);
+
+#define JOURNAL_OR \
+        do { \
+                r = sd_journal_add_disjunction(journal); \
+                if (r < 0) { \
+                        tm_journal_match_err(r); \
+                        return false; \
+                } \
+        } while (0);
+
 static bool add_filters(sd_journal *journal)
 {
         char *data = NULL;
