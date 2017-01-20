@@ -224,10 +224,14 @@ static bool add_filters(sd_journal *journal)
 
         JOURNAL_MATCH(data);
         free(data);
+        JOURNAL_AND;
         // The three highest log levels, all indicating errors
         JOURNAL_MATCH("PRIORITY=1");
         JOURNAL_MATCH("PRIORITY=2");
         JOURNAL_MATCH("PRIORITY=3");
+        JOURNAL_OR;
+        // Only set for service-level error conditions
+        JOURNAL_MATCH("EXIT_CODE=exited");
 
         return true;
 }
