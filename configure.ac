@@ -137,3 +137,27 @@ AC_CONFIG_COMMANDS([config dir],[mkdir -p src/data; touch src/data/.dirstamp])
 AC_CONFIG_FILES([Makefile])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+
+telemetrics-client $VERSION
+===========================
+
+prefix:                 $prefix
+exec_prefix:            $exec_prefix
+libdir:                 $libdir
+bindir:                 $bindir
+datarootdir:            $datarootdir
+
+compiler:               $CC
+cflags:                 $CFLAGS
+ldflags:                $LDFLAGS
+
+unitdir:                $unitpath
+tmpfilesdir:            $tmpfilespath
+sysctldir:              $sysctlpath
+systemconfdir:          $confpath
+socketdir:              $socketpath
+loglevel:               $loglevel
+logtype:                $logtype
+])
