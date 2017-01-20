@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright 2015-2017 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -148,7 +148,8 @@ static bool process_existing_entries(sd_journal *journal)
                 return false;
         }
 
-        if (!read_new_entries(journal)) {
+        ret = read_new_entries(journal);
+        if (ret < 0) {
                 return false;
         }
 
