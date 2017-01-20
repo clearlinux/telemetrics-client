@@ -61,11 +61,11 @@ static inline void tm_journal_match_err(int ret)
 static void add_to_payload(const void *data, size_t length)
 {
         if (payload != NULL) {
-                g_string_append_printf(payload, "%.*s", (int)length,
+                g_string_append_printf(payload, "%.*s\n", (int)length,
                                        (char *)data);
         } else {
                 payload = g_string_new(NULL);
-                g_string_printf(payload, "%.*s", (int)length,
+                g_string_printf(payload, "%.*s\n", (int)length,
                                 (char *)data);
         }
 }
