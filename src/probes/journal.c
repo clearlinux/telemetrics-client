@@ -222,30 +222,12 @@ static bool add_filters(sd_journal *journal)
                 return false;
         }
 
-        r = sd_journal_add_match(journal, data, 0);
-        if (r < 0) {
-                tm_journal_match_err(r);
-                return false;
-        }
+        JOURNAL_MATCH(data);
         free(data);
-
-        r = sd_journal_add_match(journal, "PRIORITY=1", 0);
-        if (r < 0) {
-                tm_journal_match_err(r);
-                return false;
-        }
-
-        r = sd_journal_add_match(journal, "PRIORITY=2", 0);
-        if (r < 0) {
-                tm_journal_match_err(r);
-                return false;
-        }
-
-        r = sd_journal_add_match(journal, "PRIORITY=3", 0);
-        if (r < 0) {
-                tm_journal_match_err(r);
-                return false;
-        }
+        // The three highest log levels, all indicating errors
+        JOURNAL_MATCH("PRIORITY=1");
+        JOURNAL_MATCH("PRIORITY=2");
+        JOURNAL_MATCH("PRIORITY=3");
 
         return true;
 }
