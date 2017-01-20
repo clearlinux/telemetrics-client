@@ -229,7 +229,8 @@ static bool add_filters(sd_journal *journal)
         JOURNAL_MATCH(data);
         free(data);
         JOURNAL_AND;
-        // The three highest log levels, all indicating errors
+        // The four highest log levels, all indicating errors
+        JOURNAL_MATCH("PRIORITY=0");
         JOURNAL_MATCH("PRIORITY=1");
         JOURNAL_MATCH("PRIORITY=2");
         JOURNAL_MATCH("PRIORITY=3");
