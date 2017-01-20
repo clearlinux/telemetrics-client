@@ -122,6 +122,16 @@ static int read_new_entries(sd_journal *journal)
 
                 add_to_payload(data, length);
 
+                // For now, we send one record per log message, in case the
+                // there is a large backlog of messages and we exceed the
+                // payload size limit (8KB). And ignore errors, hoping that it's
+                // a transient problem.
+
+                if (!send_data(error_class)) {
+                        telem_log(LOG_ERR, "Failed to send data. Ignoring.\n");
+                        return num_entries;
+                }
+
                 num_entries++;
         }
 
@@ -151,15 +161,9 @@ static bool process_existing_entries(sd_journal *journal)
         ret = read_new_entries(journal);
         if (ret < 0) {
                 return false;
-        }
-
-        if (!payload) {
+        } else if (ret == 0) {
                 telem_log(LOG_DEBUG, "No existing entries found\n");
                 return true;
-        }
-
-        if (!send_data(error_class)) {
-                return false;
         }
 
         return true;
@@ -276,10 +280,6 @@ static bool process_journal(void)
                                 if (r == 0) {
                                         continue;
                                 } else if (r < 0) {
-                                        return false;
-                                }
-
-                                if (!send_data(error_class)) {
                                         return false;
                                 }
                         }
