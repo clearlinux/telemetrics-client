@@ -77,7 +77,7 @@ static bool send_data(char *class)
 
         if ((ret = tm_create_record(&handle, severity, class,
                                     payload_version)) < 0) {
-                telem_log(LOG_ERR, "Failed to create record: %s",
+                telem_log(LOG_ERR, "Failed to create record: %s\n",
                           strerror(-ret));
                 goto fail;
         }
@@ -86,7 +86,7 @@ static bool send_data(char *class)
         payload = NULL;
 
         if ((ret = tm_set_payload(handle, (char *)payload_str)) < 0) {
-                telem_log(LOG_ERR, "Failed to set payload: %s", strerror(-ret));
+                telem_log(LOG_ERR, "Failed to set payload: %s\n", strerror(-ret));
                 free(payload_str);
                 tm_free_record(handle);
                 goto fail;
@@ -95,7 +95,7 @@ static bool send_data(char *class)
         free(payload_str);
 
         if ((ret = tm_send_record(handle)) < 0) {
-                telem_log(LOG_ERR, "Failed to send record: %s", strerror(-ret));
+                telem_log(LOG_ERR, "Failed to send record: %s\n", strerror(-ret));
                 tm_free_record(handle);
                 goto fail;
         }
