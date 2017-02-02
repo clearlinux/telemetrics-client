@@ -477,13 +477,6 @@ void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, ch
                 start++;
         }
 
-        if (*start && *start == '?') {
-                start++;
-                if (*start && isspace(*start)) {
-                        start++;
-                }
-        }
-
         offset_ptr = strchr(start, '+');
         end = offset_ptr ? offset_ptr : (start + strlen(start));
         frame->function = strndup(start, (size_t)(end - start));
