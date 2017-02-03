@@ -568,6 +568,23 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
+        /* On Clear Linux OS, missing symbols may appear if automatic debuginfo
+         * downloads are still in flight. So if any missing symbols appear on
+         * the first run (indicated by the presence of "??? - ["), wait 10
+         * seconds and try again.
+         */
+        if (strstr(backtrace->str, "??? - [")) {
+                sleep(10);
+
+                if (prepare_corefile(&e_core, core_fd) < 0) {
+                        goto fail;
+                }
+
+                if (process_corefile(&backtrace) < 0) {
+                        goto fail;
+                }
+        }
+
         g_string_prepend(backtrace, header->str);
 
         if (!send_data(&backtrace, default_severity, clr_class)) {
