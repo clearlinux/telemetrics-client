@@ -176,6 +176,55 @@ static int temp_core_file(void)
         return tmp;
 }
 
+/* There are a number of initialization routines required to initialize the Elf
+ * and Dwfl objects used by libdwfl to later process a core file. The argument
+ * e_core is the address of an Elf pointer declared by the caller, and core_fd
+ * is the open file descriptor for the core file.
+ */
+static int prepare_corefile(Elf **e_core, int core_fd)
+{
+        // Cleanup previous corefile processing if needed
+        if (d_core) {
+                dwfl_end(d_core);
+        }
+        if (*e_core) {
+                elf_end(*e_core);
+        }
+
+        // Boilerplate initialization for elfutils (libdwfl)
+        if (!(*e_core = elf_begin(core_fd, ELF_C_READ, NULL))) {
+                tm_elf_err("Failed to get file descriptor for ELF core file");
+                goto fail;
+        }
+
+        if (!(d_core = dwfl_begin(&cb))) {
+                tm_dwfl_err("Failed to start new libdwfl session");
+                goto fail;
+        }
+
+        int core_modules = 0;
+        core_modules = dwfl_core_file_report(d_core, *e_core, NULL);
+        if (core_modules == -1) {
+                tm_dwfl_err("Failed to report modules for ELF core file");
+                goto fail;
+        }
+
+        if (dwfl_report_end(d_core, NULL, NULL) != 0) {
+                tm_dwfl_err("Failed to finish reporting modules");
+                goto fail;
+        }
+
+        if ((core_for_pid = dwfl_core_file_attach(d_core, *e_core)) < 0) {
+                tm_dwfl_err("Failed to prepare libdwfl session for thread"
+                            " iteration");
+                goto fail;
+        }
+
+        return 0;
+fail:
+        return -1;
+}
+
 /* This callback is invoked for every frame in a thread. From a Dwfl_Frame, we
  * are able to extract the program counter (PC), and from that, the procedure
  * name via a Dwfl_Module.
@@ -373,7 +422,6 @@ static void free_glib_strings(void)
 int main(int argc, char **argv)
 {
         Elf *e_core = NULL;
-        int core_modules = 0;
         int ret = EXIT_FAILURE;
         int core_fd = STDIN_FILENO;
         GString *backtrace = NULL;
@@ -468,30 +516,7 @@ int main(int argc, char **argv)
 
         elf_version(EV_CURRENT);
 
-        if (!(e_core = elf_begin(core_fd, ELF_C_READ, NULL))) {
-                tm_elf_err("Failed to get file descriptor for ELF core file");
-                goto fail;
-        }
-
-        if (!(d_core = dwfl_begin(&cb))) {
-                tm_dwfl_err("Failed to start new libdwfl session");
-                goto fail;
-        }
-
-        core_modules = dwfl_core_file_report(d_core, e_core, NULL);
-        if (core_modules == -1) {
-                tm_dwfl_err("Failed to report modules for ELF core file");
-                goto fail;
-        }
-
-        if (dwfl_report_end(d_core, NULL, NULL) != 0) {
-                tm_dwfl_err("Failed to finish reporting modules");
-                goto fail;
-        }
-
-        if ((core_for_pid = dwfl_core_file_attach(d_core, e_core)) < 0) {
-                tm_dwfl_err("Failed to prepare libdwfl session for thread"
-                            " iteration");
+        if (prepare_corefile(&e_core, core_fd) < 0) {
                 goto fail;
         }
 
