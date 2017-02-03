@@ -354,6 +354,41 @@ fail:
         return false;
 }
 
+/* This is the entry point for libdwfl to unwind the backtrace from the core
+ * file. All data necessary for processing is referenced by d_core (a *Dwfl),
+ * which must be initialized prior to calling this function.  The callback
+ * function for processing each core thread is passed as the second argument to
+ * dwfl_getthreads(). The backtrace argument is the address of a pointer to a
+ * GString object declared by the caller which stores the backtrace data as a
+ * string.
+ */
+static int process_corefile(GString **backtrace)
+{
+        if (*backtrace) {
+                g_string_free(*backtrace, TRUE);
+        }
+        *backtrace = g_string_new(NULL);
+
+        if (dwfl_getthreads(d_core, thread_cb, backtrace) != DWARF_CB_OK) {
+                /* When errors occur during the unwinding, we reach this point.
+                 * If an error string is set for the particular error, send an
+                 * "error" record to capture at least a partial backtrace if
+                 * some frames were processed.
+                 */
+                if (errorstr != NULL) {
+                        telem_log(LOG_ERR, "%s", errorstr);
+                        g_string_append_printf(header, "Error: %s", errorstr);
+                        g_string_prepend(*backtrace, header->str);
+                        send_data(backtrace, error_severity, error_class);
+                }
+                goto fail;
+        }
+
+        return 0;
+fail:
+        return -1;
+}
+
 static bool in_clr_build(gchar *fullpath)
 {
         /*
@@ -529,14 +564,7 @@ int main(int argc, char **argv)
                 g_string_append_printf(header, "Signal: %d\n", signal_num);
         }
 
-        backtrace = g_string_new(NULL);
-        if (dwfl_getthreads(d_core, thread_cb, &backtrace) != DWARF_CB_OK) {
-                if (errorstr != NULL) {
-                        telem_log(LOG_ERR, "%s", errorstr);
-                        g_string_append_printf(header, "Error: %s", errorstr);
-                        g_string_prepend(backtrace, header->str);
-                        send_data(&backtrace, error_severity, error_class);
-                }
+        if (process_corefile(&backtrace) < 0) {
                 goto fail;
         }
 
