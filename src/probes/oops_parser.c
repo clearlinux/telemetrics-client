@@ -21,9 +21,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include "oops_parser.h"
 #include "log.h"
+#include "probe.h"
 
 #define NUM_TAINTED_FLAGS 16
 
@@ -704,13 +706,14 @@ void append_registers_to_bt(GString **backtrace)
         struct reg_s *reg_entry = reg_head;
 
         while (reg_entry != NULL) {
-                #ifdef DEBUG
-                g_string_append_printf(*backtrace, "Register %s: %" PRIx64 "\n", reg_entry->reg_name,
-                                       reg_entry->reg_value);
-                #else
-                g_string_append_printf(*backtrace, "Register %s: %s\n", reg_entry->reg_name,
-                                       reg_entry->reg_value ? "Non-zero" : "Zero");
-                #endif
+                // Global override for privacy filters
+                if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
+                        g_string_append_printf(*backtrace, "Register %s: %" PRIx64 "\n", reg_entry->reg_name,
+                                               reg_entry->reg_value);
+                } else {
+                        g_string_append_printf(*backtrace, "Register %s: %s\n", reg_entry->reg_name,
+                                               reg_entry->reg_value ? "Non-zero" : "Zero");
+                }
                 reg_entry = reg_entry->next;
         }
 
