@@ -226,6 +226,18 @@ static bool add_filters(sd_journal *journal)
                 return false;
         }
 
+        /* The semantics of how journal entry matching works is described in
+         * detail in sd_journal_add_match(3).
+         *
+         * The matches declared here correspond to the logical expression:
+         *
+         * BOOTID && ((P0 || P1 || P2 || P3) || EXITED)
+         *
+         * BOOTID is short for _BOOT_ID=VAL, where VAL is the boot ID for the
+         * current boot. P0, P1, etc stand for PRIORITY=0, etc. And EXITED is
+         * short for EXIT_CODE=exited.
+         */
+
         JOURNAL_MATCH(data);
         free(data);
         JOURNAL_AND;
