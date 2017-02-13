@@ -44,7 +44,8 @@ endif
 
 
 %C%_crashprobe_SOURCES = \
-	%D%/crash_probe.c
+	%D%/crash_probe.c \
+	%D%/probe.h
 %C%_crashprobe_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(GLIB_CFLAGS)
@@ -120,7 +121,8 @@ endif
 
 %C%_oopsprobe_SOURCES = \
         %D%/oops_probe.c \
-	%D%/oops_parser.c
+	%D%/oops_parser.c \
+	%D%/probe.h
 %C%_oopsprobe_CFLAGS = \
         $(AM_CFLAGS) \
         $(GLIB_CFLAGS)

@@ -38,6 +38,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "probe.h"
 #include "telemetry.h"
 
 static Dwfl *d_core = NULL;
@@ -391,6 +392,11 @@ fail:
 
 static bool in_clr_build(gchar *fullpath)
 {
+        // Global override for privacy filters
+        if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
+                return false;
+        }
+
         /*
          * The build environment for Clear Linux packages is set up by 'mock',
          * and the chroot in which rpmbuild builds the packages has this prefix.
@@ -405,6 +411,11 @@ static bool in_clr_build(gchar *fullpath)
 
 static bool is_banned_path(gchar *fullpath)
 {
+        // Global override for privacy filters
+        if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
+                return false;
+        }
+
         // Anything outside of /usr/, or in /usr/local/, we consider third-party
         if (g_regex_match_simple("^[!/]usr[!/]", fullpath, 0, 0) == FALSE) {
                 return true;
