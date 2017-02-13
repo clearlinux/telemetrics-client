@@ -403,17 +403,17 @@ static bool in_clr_build(gchar *fullpath)
         return false;
 }
 
-static bool filter_binaries(gchar *fullpath)
+static bool is_banned_path(gchar *fullpath)
 {
         // Anything outside of /usr/, or in /usr/local/, we consider third-party
         if (g_regex_match_simple("^[!/]usr[!/]", fullpath, 0, 0) == FALSE) {
-                return false;
+                return true;
         } else if (g_regex_match_simple("^[!/]usr[!/]local[!/]", fullpath,
                                         0, 0) == TRUE) {
-                return false;
+                return true;
         }
 
-        return true;
+        return false;
 }
 
 static gchar *config_file = NULL;
@@ -506,7 +506,7 @@ int main(int argc, char **argv)
                 goto success;
         }
 
-        if (proc_path && !filter_binaries(proc_path)) {
+        if (proc_path && is_banned_path(proc_path)) {
                 telem_log(LOG_NOTICE, "Ignoring core (third-party binary)\n");
 
                 backtrace = g_string_new("Crash from third party\n");
