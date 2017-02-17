@@ -162,7 +162,6 @@ static bool process_existing_entries(sd_journal *journal)
         if (ret < 0) {
                 return false;
         } else if (ret == 0) {
-                telem_log(LOG_DEBUG, "No existing entries found\n");
                 return true;
         }
 
