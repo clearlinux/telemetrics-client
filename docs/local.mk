@@ -13,8 +13,8 @@ MANLINKS = \
 
 manpages:
 	for MANPAGE in $(MANPAGES); do \
-		ronn --roff < $${MANPAGE}.md > $${MANPAGE}; \
-		ronn --html < $${MANPAGE}.md > $${MANPAGE}.html; \
+		rst2man.py $${MANPAGE}.rst > $${MANPAGE}; \
+		rst2html.py $${MANPAGE}.rst > $${MANPAGE}.html; \
 	done
 
 dist_man_MANS = \
