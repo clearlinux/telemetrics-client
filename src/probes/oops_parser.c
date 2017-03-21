@@ -388,13 +388,16 @@ void parse_single_line(char *line, size_t size)
                 } else if (strstr(start, "[ end trace")) {
                         end_found = true;
                 } else if (!in_stack_dump) {
-                        if (starts_with(start, line_end, " [<") ||
-                            starts_with(start, line_end, " <") ||      //case : <EOI> [<fff73..]
-                            starts_with(start, line_end, "Call Trace:")) {
+                        // This line indicates the beginning of a stack trace;
+                        // the next line is most likely the topmost frame.
+                        if (starts_with(start, line_end, "Call Trace:")) {
                                 in_stack_dump = true;
                         }
                 } else if (in_stack_dump) {
-                        if (!(starts_with(start, line_end, " [") || starts_with(start, line_end, " <")) ||
+                        // In Linux 4.10+, the oops format changed, so we look
+                        // for a single leading space character to indicate a
+                        // stack frame line.
+                        if (!(starts_with(start, line_end, " ")) ||
                             (strlen(start) < 8) ||
                             (strstr(start, "Code:") != NULL) ||
                             (strstr(start, "Instruction Dump::") != NULL)) {
@@ -437,9 +440,20 @@ struct stack_frame {
 void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, char *start)
 {
         /*
-         * Format is as :
+         * Format is:
+         *
          *  [<ffffffffa1002128>] do_one_initcall+0xb8/0x1e0
          *  [<ffffffffa118784a>] ? __vunmap+0x9a/0x100
+         *
+         * OR
+         *
+         *  <IRQ>  [<ffffffff816606a8>] dump_stack+0x19/0x1b
+         *
+         * OR (in 4.10+)
+         *
+         *  do_one_initcall+0xb8/0x1e0
+         *  ? __vunmap+0x9a/0x100
+         *
          */
 
         struct stack_frame *frame = NULL;
@@ -448,18 +462,22 @@ void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, ch
         if (!start) {
                 return;
         }
-        start = start + 2;
+
+        // Skip leading spaces
+        start = skip_spaces(start);
 
         //case: <IRQ>  [<ffffffff816606a8>] dump_stack+0x19/0x1b
-        if (!strncmp(start, "IRQ>", 4) || !strncmp(start, "NMI>", 4) ||
-            !strncmp(start, "EOI>", 4) || !strncmp(start, "<EOE>>", 6)) {
-                while (*start && *start != '[') {
+        if (!strncmp(start, "<IRQ>", 5) || !strncmp(start, "<NMI>", 5) ||
+            !strncmp(start, "<EOI>", 5) || !strncmp(start, "<<EOE>>", 7)) {
+                while (*start && !isspace(*start)) {
                         start++;
                 }
-                if (*start == '\0') {
+                if (start && *start == '\0') {
                         return;
                 }
-                start++;
+
+                // Skip intervening space
+                start = skip_spaces(start);
         }
 
         frame = malloc(sizeof(struct stack_frame));
@@ -474,19 +492,29 @@ void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, ch
                 *tail = frame;
         }
 
-        if (*start == '<') {
+        // Skip memory address parsing if the address is absent (as in Linux 4.10+).
+        if (!strncmp(start, "[", 1)) {
                 start++;
-                frame->addr = (uint64_t)strtoll(start, (char **)&start, 16);
+
+                if (*start == '<') {
+                        start++;
+                        frame->addr = (uint64_t)strtoll(start, (char **)&start, 16);
+                } else {
+                        frame->addr = 0;
+                }
+
+                // Skip up to the space after the closing bracket
+                while (*start && !isspace(*start)) {
+                        start++;
+                }
+                if (start && *start == '\0') {
+                        return;
+                }
+
+                // Skip intervening space
+                start = skip_spaces(start);
         } else {
                 frame->addr = 0;
-        }
-
-        /* Skip up to the space after the closing bracket */
-        while (*start && !isspace(*start)) {
-                start++;
-        }
-        if (*start) {
-                start++;
         }
 
         offset_ptr = strchr(start, '+');
@@ -742,16 +770,27 @@ GString *parse_backtrace(struct oops_log_msg *msg)
         GString *backtrace = NULL;
         int frame_counter = 1;
         char *modules = NULL, *kernel_version = NULL, *tainted = NULL;
+        // Since lines are processed from last to first, the stack trace lines
+        // will appear first.
+        bool in_trace = true;
 
         for (int i = msg->length - 1; i > 0; i--) {
                 /* Check if this line is part of a stack trace */
                 line = msg->lines[i];
 
-                if (starts_with(line, line + strlen(line), " [") ||
-                    starts_with(line, line + strlen(line), " <")) {
+                if (in_trace && starts_with(line, line + strlen(line), " ")) {
                         stack_frame_append(&head, &tail, line);
                         continue;
                 }
+
+                // We've reached the end of the stack trace
+                if (starts_with(line, line + strlen(line), "Call Trace:")) {
+                        in_trace = false;
+                }
+
+                // Stack trace lines must be consecutive, so if this point is
+                // reached, we're outside the trace boundary.
+                in_trace = false;
 
                 if (str_starts_with_casei(line, "Modules linked in: ")) {
                         modules = line + strlen("Modules linked in: ");
