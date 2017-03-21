@@ -184,11 +184,21 @@ char *skip_timestamp(char *line)
         return start;
 }
 
-char *skip_spaces(char *line)
+char *skip_space(char *line)
 {
         char *start = line;
 
         if (*start && isspace(*start)) {
+                start++;
+        }
+        return start;
+}
+
+char *skip_spaces(char *line)
+{
+        char *start = line;
+
+        while (*start && isspace(*start)) {
                 start++;
         }
         return start;
@@ -346,7 +356,7 @@ void parse_single_line(char *line, size_t size)
         line_end = line + size;
         start = skip_log_level(line);
         start = skip_timestamp(start);
-        start = skip_spaces(start);
+        start = skip_space(start);
 
         struct oops_pattern *pattern;
         if (oops_msg.length == 0) {
