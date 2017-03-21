@@ -1,0 +1,51 @@
+<4>[    68764.975947] BUG: unable to handle kernel paging request at 0000000000002658
+<4>[    68764.975947] IP: [<ffffffffa07f92e5>] _nv007245rm+0x54/0xc4 [nvidia]
+<4>[    68764.975947] PGD 22d005067 PUD 22d006067 PMD 0 
+<4>[    68764.975947] Oops: 0000 [#1] SMP 
+<4>[    68764.975947] Modules linked in: nf_conntrack_netbios_ns nf_conntrack_broadcast ipt_MASQUERADE be2iscsi iscsi_boot_sysfs bnx2i cnic uio cxgb4i cxgb4 cxgb3i cxgb3 mdio ip6table_mangle libcxgbi ib_iser rdma_cm ib_addr iw_cm ib_cm ib_sa ib_mad ib_core iscsi_tcp libiscsi_tcp ip6t_REJECT libiscsi scsi_transport_iscsi nf_conntrack_ipv6 nf_defrag_ipv6 iptable_nat nf_nat_ipv4 nf_nat iptable_mangle nf_conntrack_ipv4 nf_defrag_ipv4 xt_conntrack nf_conntrack ebtable_filter ebtables rfcomm ip6table_filter ip6_tables bnep nls_utf8 hfsplus binfmt_misc snd_hda_codec_hdmi arc4 brcmsmac cordic brcmutil mac80211 cfg80211 joydev iTCO_wdt iTCO_vendor_support nvidia(POF) coretemp applesmc input_polldev microcode uvcvideo i2c_i801 intel_ips snd_hda_codec_cirrus videobuf2_vmalloc videobuf2_memops videobuf2_core videodev btusb media bluetooth snd_hda_intel snd_hda_codec rfkill snd_hwdep bcm5974 snd_seq snd_seq_device snd_pcm lpc_ich mfd_core bcma snd_page_alloc snd_timer vhost_net tun snd macvtap macvlan soundcore kvm_intel kvm apple_gmux apple_bl uinput crc32c_intel i915 ghash_clmulni_intel i2c_algo_bit drm_kms_helper firewire_ohci drm firewire_core tg3 crc_itu_t i2c_core video usb_storage sunrpc
+<4>[    68764.975947] CPU 2 
+<4>[    68764.975947] Pid: 1059, comm: Xorg Tainted: PF          O 3.7.9-201.fc18.x86_64 #1 Apple Inc. MacBookPro6,2/Mac-F22586C8
+<4>[    68764.975947] RIP: 0010:[<ffffffffa07f92e5>]  [<ffffffffa07f92e5>] _nv007245rm+0x54/0xc4 [nvidia]
+<4>[    68764.975947] RSP: 0018:ffff88022d0639b8  EFLAGS: 00010282
+<4>[    68764.975947] RAX: 0000000000000000 RBX: ffff88022d190008 RCX: 0000000000000000
+<4>[    68764.975947] RDX: 0000000000000000 RSI: 0000000000000015 RDI: 0000000000000000
+<4>[    68764.975947] RBP: ffff88022d30df08 R08: 0000000000000002 R09: ffff88023f342508
+<4>[    68764.975947] R10: ffff88022d951030 R11: 0000000000000000 R12: 0000000000000000
+<4>[    68764.975947] R13: ffff88023f3b0008 R14: 0000000000000000 R15: ffff88022da96008
+<4>[    68764.975947] FS:  00007f771f4f2940(0000) GS:ffff88024fc80000(0000) knlGS:0000000000000000
+<4>[    68764.975947] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+<4>[    68764.975947] CR2: 0000000000002658 CR3: 000000022d004000 CR4: 00000000000007e0
+<4>[    68764.975947] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+<4>[    68764.975947] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+<4>[    68764.975947] Process Xorg
+<4>[    68764.975947] Stack:
+<4>[    68764.975947]  ffff88022d33a008 ffff88022d33a008 0000000000000002 ffff88023f3b0008
+<4>[    68764.975947]  ffff88022d190008 ffffffffa07deec8 ffff88023d67b008 ffff88022d190008
+<4>[    68764.975947]  ffff88023f3b0008 ffff88023f3b0008 ffff88022da94808 ffffffffa083e77f
+<4>[    68764.975947] Call Trace:
+<4>[    68764.975947]  ? _nv007312rm+0x7f8/0x938 [nvidia]
+<4>[    68764.975947]  ? _nv007847rm+0x80/0x276 [nvidia]
+<4>[    68764.975947]  ? _nv004049rm+0x85fb/0xaef0 [nvidia]
+<4>[    68764.975947]  ? _nv004049rm+0x705f/0xaef0 [nvidia]
+<4>[    68764.975947]  ? _nv010019rm+0x25/0x40 [nvidia]
+<4>[    68764.975947]  ? _nv014983rm+0x7c9/0x943 [nvidia]
+<4>[    68764.975947]  ? _nv001097rm+0x42b/0x661 [nvidia]
+<4>[    68764.975947]  ? rm_init_adapter+0xac/0x146 [nvidia]
+<4>[    68764.975947]  nv_kern_open+0x4b4/0x800 [nvidia]
+<4>[    68764.975947]  ? chrdev_open+0x9b/0x180
+<4>[    68764.975947]  ? do_dentry_open+0x203/0x290
+<4>[    68764.975947]  ? cdev_put+0x30/0x30
+<4>[    68764.975947]  ? finish_open+0x35/0x50
+<4>[    68764.975947]  ? do_last+0x6de/0xe00
+<4>[    68764.975947]  ? inode_permission+0x18/0x50
+<4>[    68764.975947]  link_path_walk+0x77/0x870
+<4>[    68764.975947]  path_openat+0xbc/0x4d0
+<4>[    68764.975947]  ? do_filp_open+0x41/0xa0
+<4>[    68764.975947]  ? __alloc_fd+0x42/0x110
+<4>[    68764.975947]  ? do_sys_open+0xf4/0x1e0
+<4>[    68764.975947]  ? __audit_syscall_entry+0xcc/0x300
+<4>[    68764.975947]  ? sys_open+0x21/0x30
+<4>[    68764.975947]  ? system_call_fastpath+0x16/0x1b
+<4>[    68764.975947] Code: e0 05 00 00 00 00 00 00 41 bc 00 00 00 00 eb 18 44 89 e2 48 89 de 4c 89 ef ff 93 48 1a 00 00 01 83 e0 05 00 00 41 ff c4 4c 89 f7 <41> ff 96 58 26 00 00 44 39 e0 77 d9 ba 74 06 10 00 be 00 00 00 
+<4>[    68764.975947] RIP  [<ffffffffa07f92e5>] _nv007245rm+0x54/0xc4 [nvidia]
+<4>[    68764.975947]  RSP <ffff88022d0639b8>
