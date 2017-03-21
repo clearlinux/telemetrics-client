@@ -623,6 +623,53 @@ START_TEST(bug_kernel_handle_payload)
 }
 END_TEST
 
+START_TEST(bug_kernel_handle_payload_new_format)
+{
+        char *oopsfile = NULL;
+
+        oopsfile = TESTOOPSDIR "/bug_kernel_handle_new.txt";
+        setup_payload(oopsfile);
+
+        telem_log(LOG_ERR, "Bug kernel handle backtrace: %s\n", pl->str);
+
+        ck_assert(pl->len > 0);
+        ck_assert_str_eq(reason, "BUG: unable to handle kernel paging request at 0000000000002658");
+
+        ck_assert(strstr(pl->str, "Kernel Version : 3.7.9-201.fc18.x86_64 #1 Apple Inc. MacBookPro6,2/Mac-F22586C8"));
+        ck_assert(strstr(pl->str, "Tainted : PF"));
+
+        ck_assert(strstr(pl->str, "Modules : nf_conntrack_netbios_ns nf_conntrack_broadcast ipt_MASQUERADE be2iscsi"));
+        ck_assert(strstr(pl->str, "drm_kms_helper firewire_ohci drm firewire_core tg3 crc_itu_t i2c_core video usb_storage sunrpc"));
+
+        ck_assert(strstr(pl->str, "#1 ? _nv007312rm"));
+        ck_assert(strstr(pl->str, "#2 ? _nv007847rm"));
+        ck_assert(strstr(pl->str, "#3 ? _nv004049rm"));
+        ck_assert(strstr(pl->str, "#4 ? _nv004049rm"));
+        ck_assert(strstr(pl->str, "#5 ? _nv010019rm"));
+        ck_assert(strstr(pl->str, "#6 ? _nv014983rm"));
+        ck_assert(strstr(pl->str, "#7 ? _nv001097rm"));
+        ck_assert(strstr(pl->str, "#8 ? rm_init_adapter"));
+        ck_assert(strstr(pl->str, "#9 nv_kern_open"));
+        ck_assert(strstr(pl->str, "#10 ? chrdev_open"));
+        ck_assert(strstr(pl->str, "#11 ? do_dentry_open"));
+        ck_assert(strstr(pl->str, "#12 ? cdev_put"));
+        ck_assert(strstr(pl->str, "#13 ? finish_open"));
+        ck_assert(strstr(pl->str, "#14 ? do_last"));
+        ck_assert(strstr(pl->str, "#15 ? inode_permission"));
+        ck_assert(strstr(pl->str, "#16 link_path_walk"));
+        ck_assert(strstr(pl->str, "#17 path_openat"));
+        ck_assert(strstr(pl->str, "#18 ? do_filp_open"));
+        ck_assert(strstr(pl->str, "#19 ? __alloc_fd"));
+        ck_assert(strstr(pl->str, "#20 ? do_sys_open"));
+        ck_assert(strstr(pl->str, "#21 ? __audit_syscall_entry"));
+        ck_assert(strstr(pl->str, "#22 ? sys_open"));
+        ck_assert(strstr(pl->str, "#23 ? system_call_fastpath"));
+
+        g_string_free(pl, true);
+
+}
+END_TEST
+
 Suite *config_suite(void)
 {
         // A suite is comprised of test cases, defined below
@@ -648,6 +695,7 @@ Suite *config_suite(void)
         tcase_add_test(t, double_fault_payload);
         tcase_add_test(t, bad_page_map_payload);
         tcase_add_test(t, bug_kernel_handle_payload);
+        tcase_add_test(t, bug_kernel_handle_payload_new_format);
 
         //TODO fix
         //tcase_add_test(t, badness_payload);
