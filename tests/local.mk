@@ -72,6 +72,7 @@ EXTRA_DIST += \
 	%D%/oops_test_files/badness.txt \
 	%D%/oops_test_files/bad_page_map.txt \
 	%D%/oops_test_files/bug_kernel_handle.txt \
+	%D%/oops_test_files/bug_kernel_handle_new.txt \
 	%D%/oops_test_files/double_fault_DONE.txt \
 	%D%/oops_test_files/double_fault.txt \
 	%D%/oops_test_files/general_protection_fault.txt \
