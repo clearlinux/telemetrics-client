@@ -17,6 +17,10 @@ SYNOPSIS
 
 ``/etc/telemetrics/telemetrics.conf``
 
+``/usr/share/defaults/telemetrics/telemetrics.conf``
+
+``/etc/telemetrics/opt-in-static-machine-id``
+
 
 DESCRIPTION
 ===========
@@ -36,6 +40,26 @@ OPTIONS
 
   * ``-V``, ``--version``:
     Print the program version.
+
+
+FILES
+=====
+
+* ``/usr/share/defaults/telemetrics/telemetrics.conf``
+
+    If no custom configuration file is found, ``telemd`` uses the
+    settings in this file.
+
+* ``/etc/telemetrics/telemetrics.conf``
+
+    Custom configuration file that ``telemd`` reads. See ``telemetrics.conf``\(5).
+
+
+* ``/etc/telemetrics/opt-in-static-machine-id``
+
+    If this file exists, the first line of this file will be sent to
+    the server as the machine ID. Otherwise, the machine ID will be
+    random and changed regularly.
 
 
 EXIT STATUS
