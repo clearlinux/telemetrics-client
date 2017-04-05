@@ -35,6 +35,10 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBtelemd\fP <flags>
 .sp
 \fB/etc/telemetrics/telemetrics.conf\fP
+.sp
+\fB/usr/share/defaults/telemetrics/telemetrics.conf\fP
+.sp
+\fB/etc/telemetrics/opt\-in\-static\-machine\-id\fP
 .SH DESCRIPTION
 .sp
 The \fBtelemd\fP program delivers locally generated telemetry records to a remote
@@ -52,6 +56,33 @@ Display this help message.
 .IP \(bu 2
 \fB\-V\fP, \fB\-\-version\fP:
 Print the program version.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH FILES
+.INDENT 0.0
+.IP \(bu 2
+\fB/usr/share/defaults/telemetrics/telemetrics.conf\fP
+.INDENT 2.0
+.INDENT 3.5
+If no custom configuration file is found, \fBtelemd\fP uses the
+settings in this file.
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB/etc/telemetrics/telemetrics.conf\fP
+.INDENT 2.0
+.INDENT 3.5
+Custom configuration file that \fBtelemd\fP reads. See \fBtelemetrics.conf\fP(5).
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fB/etc/telemetrics/opt\-in\-static\-machine\-id\fP
+.INDENT 2.0
+.INDENT 3.5
+If this file exists, the first line of this file will be sent to
+the server as the machine ID. Otherwise, the machine ID will be
+random and changed regularly.
 .UNINDENT
 .UNINDENT
 .UNINDENT
