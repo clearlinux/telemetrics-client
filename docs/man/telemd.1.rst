@@ -72,7 +72,7 @@ SEE ALSO
 ========
 
 * ``telemetry``\(3)
-* ``telemetrics-client.conf``\(5)
+* ``telemetrics.conf``\(5)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
 
