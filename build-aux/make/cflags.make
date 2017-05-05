@@ -2,7 +2,6 @@ AM_CFLAGS = \
 	-std=gnu99 \
 	-pedantic \
 	-Wall \
-	-fstack-protector \
 	-Wformat \
 	-Wformat-security \
 	-Wimplicit-function-declaration \
@@ -12,7 +11,6 @@ AM_CFLAGS = \
 	-Wconversion \
 	-Wunreachable-code \
 	-funsigned-char \
-	-fstack-protector-strong \
 	-fPIE \
 	-fPIC
 
