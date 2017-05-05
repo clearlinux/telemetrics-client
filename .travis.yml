@@ -25,8 +25,12 @@ addons:
             - libelf-dev
             - libdw-dev
 
+install:
+        - wget http://downloads.sourceforge.net/project/check/check/0.10.0/check-0.10.0.tar.gz
+        - tar -xvf check-0.10.0.tar.gz
+        - pushd check-0.10.0 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make -j48 && sudo make install && popd
 
 script:
-    - ./configure && make
+    - ./configure && make && make check
 
-
+after_failure: cat test-suite.log
