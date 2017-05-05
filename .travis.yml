@@ -18,6 +18,8 @@ addons:
             - libcurl4-openssl-dev
             - gcc-5
             - valgrind
+            - autoconf 
+            - automake
 
 
 script:
