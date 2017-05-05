@@ -18,12 +18,12 @@ addons:
         packages:
             - libglib2.0-dev
             - libcurl4-openssl-dev
-            - gcc-5
             - valgrind
             - autoconf 
             - automake
             - check
             - libelf-dev
+            - libdw-dev
 
 
 script:
