@@ -54,10 +54,10 @@ static Dwfl *d_core = NULL;
 static char *debuginfo_path = "-/usr/lib/debug";
 
 static unsigned int frame_counter = 0;
-static gchar *proc_name = NULL;
+static char *proc_name = NULL;
 static pid_t core_for_pid = 0;
 static GString *header = NULL;
-static gchar *errorstr = NULL;
+static char *errorstr = NULL;
 
 static uint32_t unknown_severity = 2;
 static uint32_t default_severity = 3;
@@ -85,7 +85,7 @@ static inline void tm_dwfl_err(const char *msg)
         telem_log(LOG_ERR, "%s: %s\n", msg, dwfl_errmsg(-1));
 }
 
-static gchar *replace_exclamations(gchar *str)
+static char *replace_exclamations(char *str)
 {
         return g_strdelimit(str, "!", '/');
 }
@@ -390,7 +390,7 @@ fail:
         return -1;
 }
 
-static bool in_clr_build(gchar *fullpath)
+static bool in_clr_build(char *fullpath)
 {
         // Global override for privacy filters
         if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
@@ -409,7 +409,7 @@ static bool in_clr_build(gchar *fullpath)
         return false;
 }
 
-static bool is_banned_path(gchar *fullpath)
+static bool is_banned_path(char *fullpath)
 {
         // Global override for privacy filters
         if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
@@ -427,10 +427,10 @@ static bool is_banned_path(gchar *fullpath)
         return false;
 }
 
-static gchar *config_file = NULL;
-static gchar *core_file = NULL;
-static gchar *proc_path = NULL;
-static gint signal_num = -1;
+static char *config_file = NULL;
+static char *core_file = NULL;
+static char *proc_path = NULL;
+static int signal_num = -1;
 static gboolean version_p = FALSE;
 static gboolean verbose = FALSE;
 

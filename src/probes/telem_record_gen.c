@@ -31,13 +31,13 @@
 #include "common.h"
 #include "telemetry.h"
 
-static gchar *config_file = NULL;
+static char *config_file = NULL;
 static gboolean version_p = FALSE;
 static uint32_t severity = 1;
-static gchar *opt_class = NULL;
-static gchar *opt_payload = NULL;
+static char *opt_class = NULL;
+static char *opt_payload = NULL;
 static uint32_t payload_version = 1;
-static gchar *opt_payload_file = NULL;
+static char *opt_payload_file = NULL;
 
 static GOptionEntry options[] = {
         { "config-file", 'f', 0, G_OPTION_ARG_FILENAME, &config_file,
@@ -156,7 +156,7 @@ int allocate_payload_buffer(char **payload)
 {
         int ret = 0;
 
-        *payload = (char *)malloc(sizeof(gchar) * MAX_PAYLOAD_SIZE);
+        *payload = (char *)malloc(MAX_PAYLOAD_SIZE);
 
         if (*payload == NULL) {
                 goto out1;
@@ -183,7 +183,7 @@ int get_payload_from_file(char **payload)
                 goto out;
         }
 
-        bytes_in = fread(*payload, sizeof(gchar),
+        bytes_in = fread(*payload, 1,
                          MAX_PAYLOAD_SIZE - 1, fp);
 
         /* if fread fails */
@@ -216,7 +216,7 @@ void get_payload_from_stdin(char **payload)
         size_t bytes_in = 0;
         int c;
 
-        bytes_in = fread(*payload, sizeof(gchar), MAX_PAYLOAD_SIZE - 1, stdin);
+        bytes_in = fread(*payload, 1, MAX_PAYLOAD_SIZE - 1, stdin);
 
         if (bytes_in == MAX_PAYLOAD_SIZE - 1) {
                 /* Throw away the rest of stdin */
