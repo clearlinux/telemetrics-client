@@ -22,7 +22,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
-#include <glib.h>
 #include <sys/stat.h>
 
 #include "log.h"
