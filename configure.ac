@@ -21,7 +21,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-PKG_CHECK_MODULES([CHECK], [check >= 0.9.10])
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.12])
 PKG_CHECK_MODULES([CURL], [libcurl])
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
 AC_CHECK_LIB([elf], [elf_begin], [have_elflib=yes], [AC_MSG_ERROR([Unable to find libelf from elfutils])])
