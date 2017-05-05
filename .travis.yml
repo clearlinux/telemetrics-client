@@ -15,7 +15,7 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - glib-dev
-            - libcurl-dev
+            - libcurl4-openssl-dev
             - gcc-5
             - valgrind
 
