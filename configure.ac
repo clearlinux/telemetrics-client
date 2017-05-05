@@ -21,6 +21,8 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
+
+# check >= 0.9.12 is required for TAP output
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.12])
 PKG_CHECK_MODULES([CURL], [libcurl])
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
