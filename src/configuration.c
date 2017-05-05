@@ -90,7 +90,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
 
         keyfile = g_key_file_new();
 
-        if (!g_key_file_load_from_file(keyfile, (gchar *)config_file, flags, &error)) {
+        if (!g_key_file_load_from_file(keyfile, config_file, flags, &error)) {
 #ifdef DEBUG
                 fprintf(stderr, "ERR: Failed to read config file: %s\n",
                         error->message);

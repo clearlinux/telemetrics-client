@@ -100,7 +100,7 @@ void handle_crash_dump(char *dump, size_t size)
 
 char *read_contents(char *filename, size_t *bytes)
 {
-        gchar *dump_file;
+        char *dump_file;
         FILE *fp = NULL;
         char *contents = NULL;
         long sz = 0;

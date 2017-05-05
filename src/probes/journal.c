@@ -82,7 +82,7 @@ static bool send_data(char *class)
                 goto fail;
         }
 
-        gchar *payload_str = g_string_free(payload, FALSE);
+        char *payload_str = g_string_free(payload, FALSE);
         payload = NULL;
 
         if ((ret = tm_set_payload(handle, (char *)payload_str)) < 0) {
@@ -299,7 +299,7 @@ static bool process_journal(void)
         }
 }
 
-static gchar *config_file = NULL;
+static char *config_file = NULL;
 static gboolean version_p = FALSE;
 
 static GOptionEntry options[] = {
