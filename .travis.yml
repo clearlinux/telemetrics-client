@@ -23,6 +23,7 @@ addons:
             - autoconf 
             - automake
             - check
+            - libelf-dev
 
 
 script:
