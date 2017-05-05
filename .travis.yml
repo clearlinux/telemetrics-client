@@ -27,6 +27,6 @@ addons:
 
 
 script:
-    - ./configure && make && make distcheck 
+    - ./configure && make
 
 
