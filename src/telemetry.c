@@ -29,6 +29,7 @@
 #include <sys/un.h>
 #include <limits.h>
 #include <inttypes.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "configuration.h"
@@ -806,8 +807,8 @@ int payload_is_ascii(char *payload, size_t len)
         int ret = 0;
 
         for (i = 0; i < len; i++) {
-                if (!g_ascii_isprint((gchar)payload[i]) &&
-                    !g_ascii_isspace((gchar)payload[i])) {
+                if (!isprint(payload[i]) &&
+                    !isspace(payload[i])) {
                         ret = -EINVAL;
                         break;
                 }
