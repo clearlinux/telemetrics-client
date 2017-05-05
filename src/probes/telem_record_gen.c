@@ -24,6 +24,7 @@
 
 #include <glib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "config.h"
 #include "log.h"
@@ -32,10 +33,10 @@
 
 static gchar *config_file = NULL;
 static gboolean version_p = FALSE;
-static guint severity = 1;
+static uint32_t severity = 1;
 static gchar *opt_class = NULL;
 static gchar *opt_payload = NULL;
-static guint payload_version = 1;
+static uint32_t payload_version = 1;
 static gchar *opt_payload_file = NULL;
 
 static GOptionEntry options[] = {
