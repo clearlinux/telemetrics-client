@@ -806,8 +806,8 @@ int payload_is_ascii(char *payload, size_t len)
         int ret = 0;
 
         for (i = 0; i < len; i++) {
-                if (!g_ascii_isprint((gchar)payload[i]) &&
-                    !g_ascii_isspace((gchar)payload[i])) {
+                if (!g_ascii_isprint(payload[i]) &&
+                    !g_ascii_isspace(payload[i])) {
                         ret = -EINVAL;
                         break;
                 }
