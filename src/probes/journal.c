@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <glib.h>
 
 /* Certain static analysis tools do not understand GCC's __INCLUDE_LEVEL__
  * macro; the conditional definition below is used to fix the build with
@@ -299,41 +298,29 @@ static bool process_journal(void)
 }
 
 static char *config_file = NULL;
-static gboolean version_p = FALSE;
 
-static GOptionEntry options[] = {
-        { "config-file", 'f', 0, G_OPTION_ARG_FILENAME, &config_file,
-          "Path to configuration file (not implemented yet)", NULL },
-        { "version", 'V', 0, G_OPTION_ARG_NONE, &version_p,
-          "Print the program version", NULL },
-        { NULL }
-};
 
-static void free_glib_strings(void)
+static void free_strings(void)
 {
-        if (config_file) {
-                g_free(config_file);
-        }
+	free(config_file);
 }
 
 int main(int argc, char **argv)
 {
         int ret = EXIT_FAILURE;
-        GError *error = NULL;
-        GOptionContext *context;
+	int opt;
 
-        context = g_option_context_new("- collect data from systemd journal");
-        g_option_context_add_main_entries(context, options, NULL);
-        g_option_context_set_translate_func(context, NULL, NULL, NULL);
-        if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                printf("Failed to parse options: %s\n", error->message);
-                goto fail;
-        }
+	while ((opt = getopt(argc, argv, "f:V")) != -1) {
+		switch (opt) {
+		case 'V':
+	                printf(PACKAGE_VERSION "\n");
+        	        goto success;
+		case 'f':
+			config_file = strdup(optarg);
+			break;
+		}
+	}
 
-        if (version_p) {
-                printf(PACKAGE_VERSION "\n");
-                goto success;
-        }
 
         if (!process_journal()) {
                 goto fail;
@@ -342,14 +329,10 @@ int main(int argc, char **argv)
 success:
         ret = EXIT_SUCCESS;
 fail:
-        free_glib_strings();
+        free_strings();
 
         if (journal) {
                 sd_journal_close(journal);
-        }
-
-        if (context) {
-                g_option_context_free(context);
         }
 
         if (payload) {
