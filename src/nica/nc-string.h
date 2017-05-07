@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "macros.h"
 
@@ -75,6 +76,9 @@ static inline void nc_string_free(nc_string *str)
  * @return a boolean value indicating success
  */
 _nica_public_ bool nc_string_cat(nc_string *str, const char *append);
+
+_nica_public_ bool nc_string_prepend(nc_string *s, const char *prepend);
+
 
 /**
  * Determine if string A is equal to string B

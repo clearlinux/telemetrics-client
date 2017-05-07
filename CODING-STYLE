@@ -62,7 +62,7 @@ Coding Style
 - To make type casts stand out more, include no space between the cast and the
   variable, etc. to cast:
 
-        GString **foo = (GString **)bar;
+        nc_string **foo = (nc_string **)bar;
 
 - Whenever arithmetic operators are used, always include one space before and
   after each operator:
