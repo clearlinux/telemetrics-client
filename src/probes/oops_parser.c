@@ -739,17 +739,17 @@ void parse_registers(char *line)
 
 }
 
-void append_registers_to_bt(GString **backtrace)
+void append_registers_to_bt(nc_string **backtrace)
 {
         struct reg_s *reg_entry = reg_head;
 
         while (reg_entry != NULL) {
                 // Global override for privacy filters
                 if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
-                        g_string_append_printf(*backtrace, "Register %s: %" PRIx64 "\n", reg_entry->reg_name,
+                        nc_string_append_printf(*backtrace, "Register %s: %" PRIx64 "\n", reg_entry->reg_name,
                                                reg_entry->reg_value);
                 } else {
-                        g_string_append_printf(*backtrace, "Register %s: %s\n", reg_entry->reg_name,
+                        nc_string_append_printf(*backtrace, "Register %s: %s\n", reg_entry->reg_name,
                                                reg_entry->reg_value ? "Non-zero" : "Zero");
                 }
                 reg_entry = reg_entry->next;
@@ -762,12 +762,12 @@ void append_registers_to_bt(GString **backtrace)
         }
 }
 
-GString *parse_backtrace(struct oops_log_msg *msg)
+nc_string *parse_backtrace(struct oops_log_msg *msg)
 {
         struct stack_frame *head = NULL, *tail = NULL, *elem = NULL;
         //int in_stack_dump = 0;
         char *line = NULL;
-        GString *backtrace = NULL;
+        nc_string *backtrace = NULL;
         int frame_counter = 1;
         char *modules = NULL, *kernel_version = NULL, *tainted = NULL;
         // Since lines are processed from last to first, the stack trace lines
@@ -805,23 +805,23 @@ GString *parse_backtrace(struct oops_log_msg *msg)
                 parse_registers(line);
         }
 
-        backtrace = g_string_new(NULL);
+        backtrace = nc_string_dup("");
         if (kernel_version) {
-                g_string_append_printf(backtrace, "Kernel Version : %s\n", kernel_version);
+                nc_string_append_printf(backtrace, "Kernel Version : %s\n", kernel_version);
                 free(kernel_version);
         }
 
         if (tainted) {
-                g_string_append_printf(backtrace, "Tainted : %s\n", tainted);
+                nc_string_append_printf(backtrace, "Tainted : %s\n", tainted);
                 free(tainted);
         }
 
         if (modules) {
-                g_string_append_printf(backtrace, "Modules : %s\n", modules);
+                nc_string_append_printf(backtrace, "Modules : %s\n", modules);
         }
 
         if (head) {
-                g_string_append_printf(backtrace, "Backtrace :\n");
+                nc_string_append_printf(backtrace, "Backtrace :\n");
         }
 
         if (reg_head) {
@@ -829,7 +829,7 @@ GString *parse_backtrace(struct oops_log_msg *msg)
         }
 
         for (elem = head; elem != NULL; elem = elem->next, frame_counter++) {
-                g_string_append_printf(backtrace, "#%d %s - [%s]\n", frame_counter,
+                nc_string_append_printf(backtrace, "#%d %s - [%s]\n", frame_counter,
                                        elem->function ? elem->function : "???",
                                        elem->module);
         }
@@ -838,15 +838,15 @@ GString *parse_backtrace(struct oops_log_msg *msg)
         return backtrace;
 }
 
-GString *parse_payload(struct oops_log_msg *msg)
+nc_string *parse_payload(struct oops_log_msg *msg)
 {
-        GString *payload, *backtrace;
+        nc_string *payload, *backtrace;
 
-        payload = g_string_new("Crash Report:\n");
-        g_string_append_printf(payload, "Reason: %s\n", msg->lines[0]);
+        payload = nc_string_dup("Crash Report:\n");
+        nc_string_append_printf(payload, "Reason: %s\n", msg->lines[0]);
         backtrace = parse_backtrace(msg);
-        g_string_append (payload, backtrace->str);
-        g_string_free(backtrace, true);
+        nc_string_cat(payload, backtrace->str);
+        nc_string_free(backtrace);
         return payload;
 
 }
