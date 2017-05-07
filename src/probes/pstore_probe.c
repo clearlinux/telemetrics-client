@@ -61,7 +61,7 @@ static bool send_data(char *backtrace, char *class, uint32_t severity)
 
 void handle_complete_oops_message(struct oops_log_msg *msg)
 {
-        GString *payload;
+        nc_string *payload;
 
 #ifdef DEBUG
         for (int i = 0; i < msg->length; i++) {
@@ -74,7 +74,7 @@ void handle_complete_oops_message(struct oops_log_msg *msg)
         printf("Payload Parsed :%s\n", payload->str);
 #endif
         send_data(payload->str, (char *)msg->pattern->classification, (uint32_t)msg->pattern->severity);
-        g_string_free(payload, true);
+        nc_string_free(payload);
 }
 
 void handle_crash_dump(char *dump, size_t size)
