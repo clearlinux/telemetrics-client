@@ -36,6 +36,7 @@
 #include <libelf.h>
 #include <elfutils/libdwfl.h>
 
+#include "src/nica/nc-string.h"
 #include "config.h"
 #include "log.h"
 #include "probe.h"
@@ -56,7 +57,7 @@ static char *debuginfo_path = "-/usr/lib/debug";
 static unsigned int frame_counter = 0;
 static char *proc_name = NULL;
 static pid_t core_for_pid = 0;
-static GString *header = NULL;
+static nc_string *header = NULL;
 static char *errorstr = NULL;
 
 static uint32_t unknown_severity = 2;
@@ -238,7 +239,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         const char *procname;
         const char *modname;
         bool activation;
-        GString **bt = (GString **)userdata;
+        nc_string **bt = (nc_string **)userdata;
 
         if (!dwfl_frame_pc(frame, &pc, &activation)) {
                 errorstr = g_strdup_printf("Failed to find program counter for"
@@ -270,14 +271,14 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         procname = dwfl_module_addrname(module, pc_adjusted);
 
         if (procname && modname) {
-                g_string_append_printf(*bt, "#%u %s() - [%s]\n",
+                nc_string_append_printf(*bt, "#%u %s() - [%s]\n",
                                        frame_counter++, procname, modname);
         } else if (modname) {
-                g_string_append_printf(*bt, "#%u ??? - [%s]\n",
+                nc_string_append_printf(*bt, "#%u ??? - [%s]\n",
                                        frame_counter++, modname);
         } else {
                 // TODO: decide on "no symbol" representation
-                g_string_append_printf(*bt, "#%u (no symbols)\n",
+                nc_string_append_printf(*bt, "#%u (no symbols)\n",
                                        frame_counter++);
         }
 
@@ -287,12 +288,12 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
 static int thread_cb(Dwfl_Thread *thread, void *userdata)
 {
         int ret;
-        GString **bt = (GString **)userdata;
+        nc_string **bt = (nc_string **)userdata;
         pid_t tid;
 
         tid = dwfl_thread_tid(thread);
 
-        g_string_append_printf(*bt, "\nBacktrace (TID %u):\n",
+        nc_string_append_printf(*bt, "\nBacktrace (TID %u):\n",
                                (unsigned int)tid);
 
         ret = dwfl_thread_getframes(thread, frame_cb, userdata);
@@ -319,14 +320,14 @@ static int thread_cb(Dwfl_Thread *thread, void *userdata)
         frame_counter = 0;
 
 #if 0
-        g_string_append_printf(*bt, "\nRegisters (TID %u):\nTODO\n", current,
+        nc_string_append_printf(*bt, "\nRegisters (TID %u):\nTODO\n", current,
                                (unsigned int)tid);
 #endif
 
         return DWARF_CB_OK;
 }
 
-static bool send_data(GString **backtrace, uint32_t severity, char *class)
+static bool send_data(nc_string **backtrace, uint32_t severity, char *class)
 {
         struct telem_ref *handle = NULL;
         int ret;
@@ -360,15 +361,15 @@ fail:
  * which must be initialized prior to calling this function.  The callback
  * function for processing each core thread is passed as the second argument to
  * dwfl_getthreads(). The backtrace argument is the address of a pointer to a
- * GString object declared by the caller which stores the backtrace data as a
+ * nc_string object declared by the caller which stores the backtrace data as a
  * string.
  */
-static int process_corefile(GString **backtrace)
+static int process_corefile(nc_string **backtrace)
 {
         if (*backtrace) {
-                g_string_free(*backtrace, TRUE);
+                nc_string_free(*backtrace);
         }
-        *backtrace = g_string_new(NULL);
+        *backtrace = nc_string_dup("");
 
         if (dwfl_getthreads(d_core, thread_cb, backtrace) != DWARF_CB_OK) {
                 /* When errors occur during the unwinding, we reach this point.
@@ -378,7 +379,7 @@ static int process_corefile(GString **backtrace)
                  */
                 if (errorstr != NULL) {
                         telem_log(LOG_ERR, "%s", errorstr);
-                        g_string_append_printf(header, "Error: %s", errorstr);
+                        nc_string_append_printf(header, "Error: %s", errorstr);
                         g_string_prepend(*backtrace, header->str);
                         send_data(backtrace, error_severity, error_class);
                 }
@@ -470,7 +471,7 @@ int main(int argc, char **argv)
         Elf *e_core = NULL;
         int ret = EXIT_FAILURE;
         int core_fd = STDIN_FILENO;
-        GString *backtrace = NULL;
+        nc_string *backtrace = NULL;
         GError *error = NULL;
         GOptionContext *context;
 
@@ -509,7 +510,7 @@ int main(int argc, char **argv)
         if (proc_path && in_clr_build(proc_path)) {
                 telem_log(LOG_NOTICE, "Ignoring core (from mock build)\n");
 
-                backtrace = g_string_new("Crash from Clear package build\n");
+                backtrace = nc_string_dup("Crash from Clear package build\n");
 
                 if (!send_data(&backtrace, unknown_severity, clr_build_class)) {
                         goto fail;
@@ -520,7 +521,7 @@ int main(int argc, char **argv)
         if (proc_path && is_banned_path(proc_path)) {
                 telem_log(LOG_NOTICE, "Ignoring core (third-party binary)\n");
 
-                backtrace = g_string_new("Crash from third party\n");
+                backtrace = nc_string_dup("Crash from third party\n");
 
                 if (!send_data(&backtrace, unknown_severity, unknown_class)) {
                         goto fail;
@@ -566,13 +567,13 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        header = g_string_new(NULL);
+        header = nc_string_dup("");
         g_string_printf(header, "Process: %s\nPID: %u\n",
                         proc_path ? replace_exclamations(proc_path) : proc_name,
                         (unsigned int)core_for_pid);
 
         if (signal_num >= 0) {
-                g_string_append_printf(header, "Signal: %d\n", signal_num);
+                nc_string_append_printf(header, "Signal: %d\n", signal_num);
         }
 
         if (process_corefile(&backtrace) < 0) {
@@ -618,11 +619,11 @@ fail:
         }
 
         if (header) {
-                g_string_free(header, TRUE);
+                nc_string_free(header);
         }
 
         if (backtrace) {
-                g_string_free(backtrace, TRUE);
+                nc_string_free(backtrace);
         }
 
         if (errorstr) {
