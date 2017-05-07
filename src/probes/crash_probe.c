@@ -380,7 +380,7 @@ static int process_corefile(nc_string **backtrace)
                 if (errorstr != NULL) {
                         telem_log(LOG_ERR, "%s", errorstr);
                         nc_string_append_printf(header, "Error: %s", errorstr);
-                        g_string_prepend(*backtrace, header->str);
+                        nc_string_prepend(*backtrace, header->str);
                         send_data(backtrace, error_severity, error_class);
                 }
                 goto fail;
@@ -567,8 +567,7 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        header = nc_string_dup("");
-        g_string_printf(header, "Process: %s\nPID: %u\n",
+        header = nc_string_dup_printf("Process: %s\nPID: %u\n",
                         proc_path ? replace_exclamations(proc_path) : proc_name,
                         (unsigned int)core_for_pid);
 
@@ -597,7 +596,7 @@ int main(int argc, char **argv)
                 }
         }
 
-        g_string_prepend(backtrace, header->str);
+        nc_string_prepend(backtrace, header->str);
 
         if (!send_data(&backtrace, default_severity, clr_class)) {
                 goto fail;
