@@ -45,6 +45,7 @@ endif
 
 %C%_crashprobe_SOURCES = \
 	%D%/crash_probe.c \
+	%D%/../nica/nc-string.c \
 	%D%/probe.h
 %C%_crashprobe_CFLAGS = \
 	$(AM_CFLAGS) \
