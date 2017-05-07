@@ -150,6 +150,7 @@ bin_PROGRAMS += \
 	%D%/journalprobe
 
 %C%_journalprobe_SOURCES = \
+	%D%/../nica/nc-string.c \
 	%D%/journal.c
 %C%_journalprobe_CFLAGS = \
 	$(AM_CFLAGS) \
