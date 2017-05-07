@@ -26,12 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <glib.h>
 
 #include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#include <glib.h>
 
 #include <libelf.h>
 #include <elfutils/libdwfl.h>
@@ -88,7 +87,14 @@ static inline void tm_dwfl_err(const char *msg)
 
 static char *replace_exclamations(char *str)
 {
-        return g_strdelimit(str, "!", '/');
+	char *c;
+	while (1) {
+		c = strchr(str, '!');
+		if (!c)
+			break;
+		*c = '/';
+	}
+        return str;
 }
 
 static void drop_privs(void)
@@ -242,9 +248,12 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         nc_string **bt = (nc_string **)userdata;
 
         if (!dwfl_frame_pc(frame, &pc, &activation)) {
-                errorstr = g_strdup_printf("Failed to find program counter for"
+		int ret;
+                ret = asprintf(&errorstr, "Failed to find program counter for"
                                            " current frame: %s\n",
                                            dwfl_errmsg(-1));
+		if (ret < 0)
+			return DWARF_CB_ABORT;
                 return DWARF_CB_ABORT;
         }
 
@@ -261,7 +270,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         module = dwfl_addrmodule(d_core, pc_adjusted);
 
         if (!module) {
-                errorstr = g_strdup("Failed to find module for current"
+                errorstr = strdup("Failed to find module for current"
                                     " frame\n");
                 return DWARF_CB_ABORT;
         }
@@ -300,11 +309,12 @@ static int thread_cb(Dwfl_Thread *thread, void *userdata)
 
         switch (ret) {
                 case -1:
-                        errorstr = g_strdup_printf("Error while iterating"
+                        if (asprintf(&errorstr, "Error while iterating"
                                                    " through frames for thread"
                                                    " %u: %s\n",
                                                    (unsigned int)tid,
-                                                   dwfl_errmsg(-1));
+                                                   dwfl_errmsg(-1)) < 0)
+				errorstr = NULL;
                         return DWARF_CB_ABORT;
                 case DWARF_CB_ABORT:
                         /* already set the error string in frame_cb */
@@ -455,15 +465,9 @@ static GOptionEntry options[] = {
 
 static void free_glib_strings(void)
 {
-        if (core_file) {
-                g_free(core_file);
-        }
-        if (proc_name) {
-                g_free(proc_name);
-        }
-        if (proc_path) {
-                g_free(proc_path);
-        }
+        free(core_file);
+        free(proc_name);
+	free(proc_path);
 }
 
 int main(int argc, char **argv)
@@ -626,7 +630,7 @@ fail:
         }
 
         if (errorstr) {
-                g_free(errorstr);
+                free(errorstr);
         }
 
         if (d_core) {

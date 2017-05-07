@@ -23,6 +23,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "configuration.h"
 #include "util.h"
@@ -133,11 +135,11 @@ void initialize_config(void)
 
         /* No config file provided on command line */
         if (!config_file) {
-                if (g_file_test(etc_config_file, G_FILE_TEST_IS_REGULAR)) {
+                if (access(etc_config_file, R_OK) == 0) {
                         config_file = etc_config_file;
                 } else {
-                        if (g_file_test(default_config_file,
-                                        G_FILE_TEST_IS_REGULAR)) {
+                        if (access(default_config_file,
+                                        R_OK) == 0) {
                                 config_file = default_config_file;
                         } else {
                                 /* If there is no default config, exit with failure */
