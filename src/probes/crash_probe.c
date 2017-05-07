@@ -493,17 +493,17 @@ int main(int argc, char **argv)
         g_option_context_add_main_entries(context, options, NULL);
         g_option_context_set_translate_func(context, NULL, NULL, NULL);
         if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                g_print("Failed to parse options: %s\n", error->message);
+                printf("Failed to parse options: %s\n", error->message);
                 exit(EXIT_FAILURE);
         }
 
         if (version_p) {
-                g_print(PACKAGE_VERSION "\n");
+                printf(PACKAGE_VERSION "\n");
                 exit(EXIT_SUCCESS);
         }
 
         if (!proc_name) {
-                g_print("Missing required -p option. See --help output\n");
+                printf("Missing required -p option. See --help output\n");
                 exit(EXIT_FAILURE);
         }
 
@@ -555,7 +555,7 @@ int main(int argc, char **argv)
                                 goto fail;
                         }
                 } else {
-                        g_print("Cannot process core file. Use the -c option,"
+                        printf("Cannot process core file. Use the -c option,"
                                 " or pass the core file on stdin.\n");
                         goto fail;
                 }
