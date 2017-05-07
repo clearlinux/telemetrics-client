@@ -17,11 +17,9 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
-#include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <glib.h>
 #include <sys/inotify.h>
 #include <poll.h>
 
