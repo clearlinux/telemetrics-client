@@ -73,17 +73,9 @@ const unsigned int count_chars(const char *check, const char character)
 
 static void free_glib_strings(void)
 {
-        if (config_file) {
-                g_free(config_file);
-        }
-
-        if (opt_class) {
-                g_free(opt_class);
-        }
-
-        if (opt_payload) {
-                g_free(opt_payload);
-        }
+        free(config_file);
+        free(opt_class);
+	free(opt_payload);
 }
 
 int parse_options(int argc, char **argv)

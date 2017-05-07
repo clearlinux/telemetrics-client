@@ -12,7 +12,7 @@
  * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -100,7 +100,7 @@ void handle_crash_dump(char *dump, size_t size)
 
 char *read_contents(char *filename, size_t *bytes)
 {
-        char *dump_file;
+        char *dump_file = NULL;
         FILE *fp = NULL;
         char *contents = NULL;
         long sz = 0;
@@ -108,7 +108,9 @@ char *read_contents(char *filename, size_t *bytes)
         char *hdr_end;
         size_t hdr_len;
 
-        dump_file = g_strconcat(pstore_dump_path, "/", filename, NULL);
+	if (asprintf(&dump_file,  "%s/%s", pstore_dump_path, filename) < 0)
+		goto end;
+
         fp = fopen(dump_file, "r");
         if (fp == NULL) {
                 telem_log(LOG_ERR, "Failed to open pstore dump file %s:%s\n", dump_file, strerror(errno));
@@ -170,7 +172,7 @@ end:
                 fclose(fp);
         }
 
-        g_free(dump_file);
+        free(dump_file);
         return contents;
 }
 
