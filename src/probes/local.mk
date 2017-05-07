@@ -69,6 +69,7 @@ endif
 
 %C%_pstoreprobe_SOURCES = \
 	%D%/pstore_probe.c \
+	%D%/../nica/nc-string.c \
 	%D%/oops_parser.c
 %C%_pstoreprobe_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -92,6 +93,7 @@ endif
         %D%/klog_scanner.c \
 	%D%/klog_scanner.h \
 	%D%/oops_parser.h \
+	%D%/../nica/nc-string.c \
 	%D%/oops_parser.c
 %C%_klogscanner_CFLAGS = \
         $(AM_CFLAGS) \
@@ -122,6 +124,7 @@ endif
 %C%_oopsprobe_SOURCES = \
         %D%/oops_probe.c \
 	%D%/oops_parser.c \
+	%D%/../nica/nc-string.c \
 	%D%/probe.h
 %C%_oopsprobe_CFLAGS = \
         $(AM_CFLAGS) \

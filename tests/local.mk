@@ -61,6 +61,7 @@ endif
         %D%/read_oopsfile.h \
         %D%/read_oopsfile.c \
         %D%/check_probes.c \
+	src/nica/nc-string.c \
 	src/probes/klog_scanner.c \
 	src/probes/klog_scanner.h \
 	src/probes/oops_parser.c \
