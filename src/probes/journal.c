@@ -60,10 +60,10 @@ static void add_to_payload(const void *data, size_t length)
 {
         if (payload != NULL) {
                 nc_string_append_printf(payload, "%.*s\n", (int)length,
-                                       (char *)data);
+                                        (char *)data);
         } else {
                 payload = nc_string_dup_printf("%.*s\n", (int)length,
-                                (char *)data);
+                                               (char *)data);
         }
 }
 
@@ -80,7 +80,7 @@ static bool send_data(char *class)
         }
 
         char *payload_str = strdup(payload->str);
-	nc_string_free(payload);
+        nc_string_free(payload);
         payload = NULL;
 
         if ((ret = tm_set_payload(handle, (char *)payload_str)) < 0) {
@@ -299,28 +299,26 @@ static bool process_journal(void)
 
 static char *config_file = NULL;
 
-
 static void free_strings(void)
 {
-	free(config_file);
+        free(config_file);
 }
 
 int main(int argc, char **argv)
 {
         int ret = EXIT_FAILURE;
-	int opt;
+        int opt;
 
-	while ((opt = getopt(argc, argv, "f:V")) != -1) {
-		switch (opt) {
-		case 'V':
-	                printf(PACKAGE_VERSION "\n");
-        	        goto success;
-		case 'f':
-			config_file = strdup(optarg);
-			break;
-		}
-	}
-
+        while ((opt = getopt(argc, argv, "f:V")) != -1) {
+                switch (opt) {
+                        case 'V':
+                                printf(PACKAGE_VERSION "\n");
+                                goto success;
+                        case 'f':
+                                config_file = strdup(optarg);
+                                break;
+                }
+        }
 
         if (!process_journal()) {
                 goto fail;

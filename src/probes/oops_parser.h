@@ -74,4 +74,3 @@ bool handle_entire_oops(char *buf, long size, struct oops_log_msg *msg);
 void oops_msg_cleanup(struct oops_log_msg *msg);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
-

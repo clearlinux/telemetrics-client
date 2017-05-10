@@ -81,7 +81,7 @@
 #ifdef TM_LOG_STDERR
 #define telem_log(priority, ...) do { \
                 if (priority <= MAX_LOG_LEVEL) { \
-                        fprintf(stderr, __VA_ARGS__ ); \
+                        fprintf(stderr, __VA_ARGS__); \
                 } \
 } while (0);
 #endif

@@ -511,11 +511,11 @@ bool post_record_http(char *headers[], char *body, bool spool)
         if (res) {
                 size_t len = strlen(errorbuf);
                 if (len) {
-                    telem_log(LOG_ERR, "Failed sending record: %s%s", errorbuf,
-                              ((errorbuf[len - 1] != '\n') ? "\n" : ""));
+                        telem_log(LOG_ERR, "Failed sending record: %s%s", errorbuf,
+                                  ((errorbuf[len - 1] != '\n') ? "\n" : ""));
                 } else {
-                    telem_log(LOG_ERR, "Failed sending record: %s\n",
-                              curl_easy_strerror(res));
+                        telem_log(LOG_ERR, "Failed sending record: %s\n",
+                                  curl_easy_strerror(res));
                 }
         } else if (http_response != 201 && http_response != 200) {
                 /*  201 means the record was  successfully created

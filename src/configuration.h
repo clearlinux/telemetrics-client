@@ -46,7 +46,7 @@ enum config_int_keys {
 enum config_bool_keys {
         CONF_BOOL_MIN = 0,
         CONF_RATE_LIMIT_ENABLED,
-	CONF_DAEMON_RECYCLING_ENABLED,
+        CONF_DAEMON_RECYCLING_ENABLED,
         CONF_BOOL_MAX
 };
 

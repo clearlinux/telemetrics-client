@@ -87,13 +87,14 @@ static inline void tm_dwfl_err(const char *msg)
 
 static char *replace_exclamations(char *str)
 {
-	char *c;
-	while (1) {
-		c = strchr(str, '!');
-		if (!c)
-			break;
-		*c = '/';
-	}
+        char *c;
+        while (1) {
+                c = strchr(str, '!');
+                if (!c) {
+                        break;
+                }
+                *c = '/';
+        }
         return str;
 }
 
@@ -242,19 +243,20 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         Dwarf_Addr pc;
         Dwarf_Addr pc_adjusted;
         Dwfl_Module *module;
-	Dwfl_Line *line;
+        Dwfl_Line *line;
         const char *procname;
         const char *modname;
         bool activation;
         nc_string **bt = (nc_string **)userdata;
 
         if (!dwfl_frame_pc(frame, &pc, &activation)) {
-		int ret;
+                int ret;
                 ret = asprintf(&errorstr, "Failed to find program counter for"
-                                           " current frame: %s\n",
-                                           dwfl_errmsg(-1));
-		if (ret < 0)
-			return DWARF_CB_ABORT;
+                               " current frame: %s\n",
+                               dwfl_errmsg(-1));
+                if (ret < 0) {
+                        return DWARF_CB_ABORT;
+                }
                 return DWARF_CB_ABORT;
         }
 
@@ -272,7 +274,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
 
         if (!module) {
                 errorstr = strdup("Failed to find module for current"
-                                    " frame\n");
+                                  " frame\n");
                 return DWARF_CB_ABORT;
         }
 
@@ -280,29 +282,29 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
                                    NULL);
         procname = dwfl_module_addrname(module, pc_adjusted);
 
-	line = dwfl_module_getsrc (module, pc_adjusted);
+        line = dwfl_module_getsrc (module, pc_adjusted);
 
         if (procname && modname) {
                 nc_string_append_printf(*bt, "#%u %s() - [%s]",
-                                       frame_counter++, procname, modname);
+                                        frame_counter++, procname, modname);
         } else if (modname) {
                 nc_string_append_printf(*bt, "#%u ??? - [%s]",
-                                       frame_counter++, modname);
+                                        frame_counter++, modname);
         } else {
                 // TODO: decide on "no symbol" representation
                 nc_string_append_printf(*bt, "#%u (no symbols)",
-                                       frame_counter++);
+                                        frame_counter++);
         }
 
-	if (line) {
-		const char *src;
-		int lineno, linecol;
-		src =  dwfl_lineinfo (line, &pc_adjusted, &lineno, &linecol, NULL, NULL);
-		if (src) {
-			nc_string_append_printf(*bt, " - %s:%i", src, lineno);
-		}
-	}
-	nc_string_append_printf(*bt, "\n");
+        if (line) {
+                const char *src;
+                int lineno, linecol;
+                src =  dwfl_lineinfo (line, &pc_adjusted, &lineno, &linecol, NULL, NULL);
+                if (src) {
+                        nc_string_append_printf(*bt, " - %s:%i", src, lineno);
+                }
+        }
+        nc_string_append_printf(*bt, "\n");
         return DWARF_CB_OK;
 }
 
@@ -315,18 +317,19 @@ static int thread_cb(Dwfl_Thread *thread, void *userdata)
         tid = dwfl_thread_tid(thread);
 
         nc_string_append_printf(*bt, "\nBacktrace (TID %u):\n",
-                               (unsigned int)tid);
+                                (unsigned int)tid);
 
         ret = dwfl_thread_getframes(thread, frame_cb, userdata);
 
         switch (ret) {
                 case -1:
                         if (asprintf(&errorstr, "Error while iterating"
-                                                   " through frames for thread"
-                                                   " %u: %s\n",
-                                                   (unsigned int)tid,
-                                                   dwfl_errmsg(-1)) < 0)
-				errorstr = NULL;
+                                     " through frames for thread"
+                                     " %u: %s\n",
+                                     (unsigned int)tid,
+                                     dwfl_errmsg(-1)) < 0) {
+                                errorstr = NULL;
+                        }
                         return DWARF_CB_ABORT;
                 case DWARF_CB_ABORT:
                         /* already set the error string in frame_cb */
@@ -343,7 +346,7 @@ static int thread_cb(Dwfl_Thread *thread, void *userdata)
 
 #if 0
         nc_string_append_printf(*bt, "\nRegisters (TID %u):\nTODO\n", current,
-                               (unsigned int)tid);
+                                (unsigned int)tid);
 #endif
 
         return DWARF_CB_OK;
@@ -479,7 +482,7 @@ static void free_glib_strings(void)
 {
         free(core_file);
         free(proc_name);
-	free(proc_path);
+        free(proc_path);
 }
 
 int main(int argc, char **argv)
@@ -572,7 +575,7 @@ int main(int argc, char **argv)
                         }
                 } else {
                         printf("Cannot process core file. Use the -c option,"
-                                " or pass the core file on stdin.\n");
+                               " or pass the core file on stdin.\n");
                         goto fail;
                 }
         }
@@ -584,8 +587,8 @@ int main(int argc, char **argv)
         }
 
         header = nc_string_dup_printf("Process: %s\nPID: %u\n",
-                        proc_path ? replace_exclamations(proc_path) : proc_name,
-                        (unsigned int)core_for_pid);
+                                      proc_path ? replace_exclamations(proc_path) : proc_name,
+                                      (unsigned int)core_for_pid);
 
         if (signal_num >= 0) {
                 nc_string_append_printf(header, "Signal: %d\n", signal_num);

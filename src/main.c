@@ -232,7 +232,7 @@ int main(int argc, char **argv)
         time_t last_spool_run_time = time(NULL);
         time_t last_daemon_start_time = time(NULL);
 
-	bool daemon_recycling_enabled = daemon_recycling_enabled_config();
+        bool daemon_recycling_enabled = daemon_recycling_enabled_config();
 
         ret = update_machine_id();
         if (ret == -1) {
@@ -338,7 +338,7 @@ int main(int argc, char **argv)
                 } else {
                         time_t now = time(NULL);
                         /* If spool is empty and time to recycle the daemon has elapsed*/
-			if (daemon_recycling_enabled && (daemon.current_spool_size == 0) &&
+                        if (daemon_recycling_enabled && (daemon.current_spool_size == 0) &&
                             difftime(now, last_daemon_start_time) >= TM_DAEMON_EXIT_TIME) {
                                 /* Exit */
                                 telem_log(LOG_INFO, "Daemon exiting for recycling\n");

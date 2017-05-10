@@ -50,7 +50,7 @@ START_TEST(check_read_valid_config)
         ck_assert_str_eq(config.strValues[CONF_CAINFO], "/tmp/cacert.crt");
         ck_assert_str_eq(config.strValues[CONF_TIDHEADER],
                          "X-Telemetry-TID: 6907c830-eed9-4ce9-81ae-76daf8d88f0f");
-	ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == true);
+        ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == true);
 
 }
 END_TEST
@@ -76,7 +76,7 @@ START_TEST(check_config_initialised)
         ck_assert_str_eq(get_cainfo_config(), "/tmp/cacert.crt");
         ck_assert_str_eq(get_tidheader_config(),
                          "X-Telemetry-TID: 6907c830-eed9-4ce9-81ae-76daf8d88f0f");
-	ck_assert(daemon_recycling_enabled_config() == true);
+        ck_assert(daemon_recycling_enabled_config() == true);
 }
 END_TEST
 

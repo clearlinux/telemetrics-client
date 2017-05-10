@@ -747,10 +747,10 @@ void append_registers_to_bt(nc_string **backtrace)
                 // Global override for privacy filters
                 if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
                         nc_string_append_printf(*backtrace, "Register %s: %" PRIx64 "\n", reg_entry->reg_name,
-                                               reg_entry->reg_value);
+                                                reg_entry->reg_value);
                 } else {
                         nc_string_append_printf(*backtrace, "Register %s: %s\n", reg_entry->reg_name,
-                                               reg_entry->reg_value ? "Non-zero" : "Zero");
+                                                reg_entry->reg_value ? "Non-zero" : "Zero");
                 }
                 reg_entry = reg_entry->next;
         }
@@ -830,8 +830,8 @@ nc_string *parse_backtrace(struct oops_log_msg *msg)
 
         for (elem = head; elem != NULL; elem = elem->next, frame_counter++) {
                 nc_string_append_printf(backtrace, "#%d %s - [%s]\n", frame_counter,
-                                       elem->function ? elem->function : "???",
-                                       elem->module);
+                                        elem->function ? elem->function : "???",
+                                        elem->module);
         }
 
         stack_frame_free(&head);
@@ -859,4 +859,3 @@ nc_string *parse_payload(struct oops_log_msg *msg)
  */
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
-

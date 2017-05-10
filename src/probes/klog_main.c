@@ -51,8 +51,9 @@ int main(void)
 
                 buflen = (size_t)log_size;
 
-                if (loopcount++ > 0 && buflen > MAX_BUF)
+                if (loopcount++ > 0 && buflen > MAX_BUF) {
                         buflen = MAX_BUF;
+                }
 
                 // Gets the contents of the kernel ring buffer
                 bufp = (char *)calloc(buflen, sizeof(char));

@@ -75,7 +75,7 @@ static void free_glib_strings(void)
 {
         free(config_file);
         free(opt_class);
-	free(opt_payload);
+        free(opt_payload);
 }
 
 int parse_options(int argc, char **argv)
@@ -311,4 +311,3 @@ fail:
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
-
