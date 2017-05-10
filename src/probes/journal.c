@@ -37,7 +37,7 @@
 #include "config.h"
 #include "log.h"
 #include "telemetry.h"
-#include "src/nica/nc-string.h"
+#include "nica/nc-string.h"
 #define BOOT_ID_LEN 33
 
 static nc_string *payload = NULL;

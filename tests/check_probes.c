@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "src/nica/nc-string.h"
+#include "nica/nc-string.h"
 #include "log.h"
 #include "read_oopsfile.h"
 #include "src/probes/klog_scanner.h"

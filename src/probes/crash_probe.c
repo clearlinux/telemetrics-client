@@ -35,7 +35,7 @@
 #include <libelf.h>
 #include <elfutils/libdwfl.h>
 
-#include "src/nica/nc-string.h"
+#include "nica/nc-string.h"
 #include "config.h"
 #include "log.h"
 #include "probe.h"

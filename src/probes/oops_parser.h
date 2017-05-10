@@ -17,7 +17,7 @@
 
 #define MAX_LINES 100
 
-#include "src/nica/nc-string.h"
+#include "nica/nc-string.h"
 #include <stdbool.h>
 #include <regex.h>
 
