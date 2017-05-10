@@ -18,6 +18,7 @@ include $(top_srcdir)/docs/local.mk
 include $(top_srcdir)/scripts/local.mk
 include $(top_srcdir)/src/local.mk
 include $(top_srcdir)/src/data/local.mk
+include $(top_srcdir)/src/nica/local.mk
 include $(top_srcdir)/src/probes/local.mk
 include $(top_srcdir)/tests/local.mk
 
