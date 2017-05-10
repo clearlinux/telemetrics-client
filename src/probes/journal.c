@@ -301,10 +301,10 @@ static bool process_journal(void)
 static char *config_file = NULL;
 
 static const struct option prog_opts[] = {
-	{ "help", no_argument, 0, 'h' },
-	{ "config-file", required_argument, 0, 'f' },
-	{ "version", no_argument, 0, 'V' },
-	{ 0, 0, 0, 0 }
+        { "help", no_argument, 0, 'h' },
+        { "config-file", required_argument, 0, 'f' },
+        { "version", no_argument, 0, 'V' },
+        { 0, 0, 0, 0 }
 };
 
 static void print_help(void)
