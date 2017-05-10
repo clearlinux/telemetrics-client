@@ -108,7 +108,7 @@ char *read_contents(char *filename, size_t *bytes)
         char *hdr_end;
         size_t hdr_len;
 
-        if (asprintf(&dump_file,  "%s/%s", pstore_dump_path, filename) < 0) {
+        if (asprintf(&dump_file, "%s/%s", pstore_dump_path, filename) < 0) {
                 goto end;
         }
 

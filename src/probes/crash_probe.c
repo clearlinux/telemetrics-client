@@ -282,7 +282,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
                                    NULL);
         procname = dwfl_module_addrname(module, pc_adjusted);
 
-        line = dwfl_module_getsrc (module, pc_adjusted);
+        line = dwfl_module_getsrc(module, pc_adjusted);
 
         if (procname && modname) {
                 nc_string_append_printf(*bt, "#%u %s() - [%s]",
@@ -299,7 +299,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         if (line) {
                 const char *src;
                 int lineno, linecol;
-                src =  dwfl_lineinfo (line, &pc_adjusted, &lineno, &linecol, NULL, NULL);
+                src =  dwfl_lineinfo(line, &pc_adjusted, &lineno, &linecol, NULL, NULL);
                 if (src) {
                         nc_string_append_printf(*bt, " - %s:%i", src, lineno);
                 }
