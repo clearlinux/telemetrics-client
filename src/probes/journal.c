@@ -15,6 +15,7 @@
  */
 
 #define _GNU_SOURCE
+#include <getopt.h>
 #include <poll.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -299,6 +300,27 @@ static bool process_journal(void)
 
 static char *config_file = NULL;
 
+static const struct option prog_opts[] = {
+	{ "help", no_argument, 0, 'h' },
+	{ "config-file", required_argument, 0, 'f' },
+	{ "version", no_argument, 0, 'V' },
+	{ 0, 0, 0, 0 }
+};
+
+static void print_help(void)
+{
+        printf("Usage:\n");
+        printf("  journalprobe [OPTIONS] - collect data from systemd journal\n");
+        printf("\n");
+        printf("Help Options:\n");
+        printf("  -h, --help            Show help options\n");
+        printf("\n");
+        printf("Application Options:\n");
+        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
+        printf("  -V, --version         Print the program version\n");
+        printf("\n");
+}
+
 static void free_strings(void)
 {
         free(config_file);
@@ -309,8 +331,11 @@ int main(int argc, char **argv)
         int ret = EXIT_FAILURE;
         int opt;
 
-        while ((opt = getopt(argc, argv, "f:V")) != -1) {
+        while ((opt = getopt_long(argc, argv, "hf:V", prog_opts, NULL)) != -1) {
                 switch (opt) {
+                        case 'h':
+                                print_help();
+                                goto success;
                         case 'V':
                                 printf(PACKAGE_VERSION "\n");
                                 goto success;
