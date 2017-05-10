@@ -22,8 +22,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <glib.h>
-
 /* Certain static analysis tools do not understand GCC's __INCLUDE_LEVEL__
  * macro; the conditional definition below is used to fix the build with
  * systemd's _sd-common.h, included by the public systemd headers, which rely on
@@ -39,10 +37,10 @@
 #include "config.h"
 #include "log.h"
 #include "telemetry.h"
-
+#include "src/nica/nc-string.h"
 #define BOOT_ID_LEN 33
 
-static GString *payload = NULL;
+static nc_string *payload = NULL;
 static uint32_t severity = 2;
 static uint32_t payload_version = 1;
 static char error_class[30] = "org.clearlinux/journal/error";
@@ -61,11 +59,10 @@ static inline void tm_journal_match_err(int ret)
 static void add_to_payload(const void *data, size_t length)
 {
         if (payload != NULL) {
-                g_string_append_printf(payload, "%.*s\n", (int)length,
+                nc_string_append_printf(payload, "%.*s\n", (int)length,
                                        (char *)data);
         } else {
-                payload = g_string_new(NULL);
-                g_string_printf(payload, "%.*s\n", (int)length,
+                payload = nc_string_dup_printf("%.*s\n", (int)length,
                                 (char *)data);
         }
 }
@@ -82,7 +79,8 @@ static bool send_data(char *class)
                 goto fail;
         }
 
-        char *payload_str = g_string_free(payload, FALSE);
+        char *payload_str = strdup(payload->str);
+	nc_string_free(payload);
         payload = NULL;
 
         if ((ret = tm_set_payload(handle, (char *)payload_str)) < 0) {
@@ -300,41 +298,29 @@ static bool process_journal(void)
 }
 
 static char *config_file = NULL;
-static gboolean version_p = FALSE;
 
-static GOptionEntry options[] = {
-        { "config-file", 'f', 0, G_OPTION_ARG_FILENAME, &config_file,
-          "Path to configuration file (not implemented yet)", NULL },
-        { "version", 'V', 0, G_OPTION_ARG_NONE, &version_p,
-          "Print the program version", NULL },
-        { NULL }
-};
 
-static void free_glib_strings(void)
+static void free_strings(void)
 {
-        if (config_file) {
-                g_free(config_file);
-        }
+	free(config_file);
 }
 
 int main(int argc, char **argv)
 {
         int ret = EXIT_FAILURE;
-        GError *error = NULL;
-        GOptionContext *context;
+	int opt;
 
-        context = g_option_context_new("- collect data from systemd journal");
-        g_option_context_add_main_entries(context, options, NULL);
-        g_option_context_set_translate_func(context, NULL, NULL, NULL);
-        if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                g_print("Failed to parse options: %s\n", error->message);
-                goto fail;
-        }
+	while ((opt = getopt(argc, argv, "f:V")) != -1) {
+		switch (opt) {
+		case 'V':
+	                printf(PACKAGE_VERSION "\n");
+        	        goto success;
+		case 'f':
+			config_file = strdup(optarg);
+			break;
+		}
+	}
 
-        if (version_p) {
-                g_print(PACKAGE_VERSION "\n");
-                goto success;
-        }
 
         if (!process_journal()) {
                 goto fail;
@@ -343,18 +329,14 @@ int main(int argc, char **argv)
 success:
         ret = EXIT_SUCCESS;
 fail:
-        free_glib_strings();
+        free_strings();
 
         if (journal) {
                 sd_journal_close(journal);
         }
 
-        if (context) {
-                g_option_context_free(context);
-        }
-
         if (payload) {
-                g_string_free(payload, TRUE);
+                nc_string_free(payload);
         }
 
         return ret;

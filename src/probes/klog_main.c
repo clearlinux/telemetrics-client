@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <malloc.h>
+#include <signal.h>
 
 #include "log.h"
 #include "oops_parser.h"

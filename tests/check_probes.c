@@ -22,16 +22,16 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
-#include <glib.h>
 
+#include "src/nica/nc-string.h"
 #include "log.h"
 #include "read_oopsfile.h"
 #include "src/probes/klog_scanner.h"
 #include "src/probes/oops_parser.h"
 
 char reason[1024];
-GString *bt;
-GString *pl;
+nc_string *bt;
+nc_string *pl;
 
 void callback_func(struct oops_log_msg *msg)
 {
@@ -119,7 +119,7 @@ START_TEST(watchdog_payload)
         ck_assert(strstr(pl->str, "#20 ? clockevents_register_device"));
         ck_assert(strstr(pl->str, "#21 start_secondary"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 
 }
 END_TEST
@@ -144,7 +144,7 @@ START_TEST(alsa_bug_payload)
         ck_assert(strstr(pl->str, "#2 ? vsnprintf"));
         ck_assert(strstr(pl->str, "#3 ? _spin_unlock_irqrestore"));
         ck_assert(strstr(pl->str, "#10 start_kernel"));
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -182,7 +182,7 @@ START_TEST(warning_payload)
         ck_assert(strstr(pl->str, "#12 ? SyS_ioctl"));
         ck_assert(strstr(pl->str, "#13 ? entry_SYSCALL_64_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -222,7 +222,7 @@ START_TEST(warn_on_payload)
         ck_assert(strstr(pl->str, "#16 cpu_startup_entry"));
         ck_assert(strstr(pl->str, "#17 start_secondary"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -300,7 +300,7 @@ START_TEST(sysctl2_payload)
         ck_assert(strstr(pl->str, "#13 ? copy_net_ns"));
         ck_assert(strstr(pl->str, "#14 ? create_new_namespaces"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -337,7 +337,7 @@ START_TEST(softlockup_payload)
         ck_assert(strstr(pl->str, "#12 SyS_fgetxattr"));
         ck_assert(strstr(pl->str, "#13 system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -370,7 +370,7 @@ START_TEST(rtnl_payload)
         ck_assert(strstr(pl->str, "#12 ? SyS_setsockopt"));
         ck_assert(strstr(pl->str, "#13 ? system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -400,7 +400,7 @@ START_TEST(kernel_null_pointer_payload)
         ck_assert(strstr(pl->str, "#6 sys_inotify_rm_watch"));
         ck_assert(strstr(pl->str, "#7 system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -432,7 +432,7 @@ START_TEST(kernel_bug_payload)
         ck_assert(strstr(pl->str, "#8 ptregscall_common"));
         ck_assert(strstr(pl->str, "#9 sysret_signal"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -498,7 +498,7 @@ START_TEST(irq_payload)
         ck_assert(strstr(pl->str, "#45 ? kernel_init_freeable"));
         ck_assert(strstr(pl->str, "#46 ? do_early_param"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 
 }
 END_TEST
@@ -530,7 +530,7 @@ START_TEST(general_protection_fault_payload)
         ck_assert(strstr(pl->str, "#7 SyS_pipe"));
         ck_assert(strstr(pl->str, "#8 system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -552,7 +552,7 @@ START_TEST(double_fault_payload)
         ck_assert(strstr(pl->str, "Modules : nls_utf8 vfat fat sit tunnel4 ext2 fuse ip6table_filter ip6_tables ebtable_nat"));
         ck_assert(strstr(pl->str, "joydev sdhci_pci sdhci usb_storage mmc_core video output [last unloaded: speedstep_lib]"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -571,7 +571,7 @@ START_TEST(bad_page_map_payload)
         ck_assert(strstr(pl->str, "Kernel Version : 3.12-1-amd64 #1 Debian 3.12.9-1"));
         ck_assert(strstr(pl->str, "Tainted : Not tainted"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 
 }
 END_TEST
@@ -618,7 +618,7 @@ START_TEST(bug_kernel_handle_payload)
         ck_assert(strstr(pl->str, "#22 ? sys_open"));
         ck_assert(strstr(pl->str, "#23 ? system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 
 }
 END_TEST
@@ -665,7 +665,7 @@ START_TEST(bug_kernel_handle_payload_new_format)
         ck_assert(strstr(pl->str, "#22 ? sys_open"));
         ck_assert(strstr(pl->str, "#23 ? system_call_fastpath"));
 
-        g_string_free(pl, true);
+        nc_string_free(pl);
 
 }
 END_TEST

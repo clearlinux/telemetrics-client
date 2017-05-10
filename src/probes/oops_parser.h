@@ -17,7 +17,7 @@
 
 #define MAX_LINES 100
 
-#include <glib.h>
+#include "src/nica/nc-string.h"
 #include <stdbool.h>
 #include <regex.h>
 
@@ -63,7 +63,7 @@ void oops_parser_init(oops_handler_t handler);
 void parse_single_line(char *line, size_t size);
 
 /* Parses a payload from an oops msg*/
-GString *parse_payload(struct oops_log_msg *msg);
+nc_string *parse_payload(struct oops_log_msg *msg);
 
 /* Given an entire oops log, verifies that the log is an oops log and
  * extracts the lines into an oops struct.

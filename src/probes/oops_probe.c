@@ -17,17 +17,17 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
-#include <glib.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <glib.h>
 #include <sys/inotify.h>
 #include <poll.h>
 
 #include "oops_parser.h"
 #include "log.h"
 #include "telemetry.h"
+
+#include "nica/nc-string.h"
 
 char *oops_dir_path = KERNELOOPSDIR;
 
@@ -68,7 +68,7 @@ void handle_oops_file(const char *fname)
         char *filename = NULL, *contents = NULL;
         long sz;
         size_t size, bytes_read;
-        GString *payload;
+        nc_string *payload;
 
         ret = asprintf(&filename, "%s/%s", oops_dir_path, fname);
         if (ret == -1) {
@@ -138,7 +138,7 @@ void handle_oops_file(const char *fname)
 
                 oops_msg_cleanup(&oops_msg);
                 send_data(payload->str, (char *)oops_msg.pattern->classification, (uint32_t)oops_msg.pattern->severity);
-                g_string_free(payload, true);
+                nc_string_free(payload);
         } else {
                 /* File does no contain an oops! */
                 telem_log(LOG_ERR, "Did not find an oops in the oops directort\n");

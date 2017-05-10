@@ -12,7 +12,7 @@
  * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -61,7 +61,7 @@ static bool send_data(char *backtrace, char *class, uint32_t severity)
 
 void handle_complete_oops_message(struct oops_log_msg *msg)
 {
-        GString *payload;
+        nc_string *payload;
 
 #ifdef DEBUG
         for (int i = 0; i < msg->length; i++) {
@@ -74,7 +74,7 @@ void handle_complete_oops_message(struct oops_log_msg *msg)
         printf("Payload Parsed :%s\n", payload->str);
 #endif
         send_data(payload->str, (char *)msg->pattern->classification, (uint32_t)msg->pattern->severity);
-        g_string_free(payload, true);
+        nc_string_free(payload);
 }
 
 void handle_crash_dump(char *dump, size_t size)
@@ -100,7 +100,7 @@ void handle_crash_dump(char *dump, size_t size)
 
 char *read_contents(char *filename, size_t *bytes)
 {
-        char *dump_file;
+        char *dump_file = NULL;
         FILE *fp = NULL;
         char *contents = NULL;
         long sz = 0;
@@ -108,7 +108,9 @@ char *read_contents(char *filename, size_t *bytes)
         char *hdr_end;
         size_t hdr_len;
 
-        dump_file = g_strconcat(pstore_dump_path, "/", filename, NULL);
+	if (asprintf(&dump_file,  "%s/%s", pstore_dump_path, filename) < 0)
+		goto end;
+
         fp = fopen(dump_file, "r");
         if (fp == NULL) {
                 telem_log(LOG_ERR, "Failed to open pstore dump file %s:%s\n", dump_file, strerror(errno));
@@ -170,7 +172,7 @@ end:
                 fclose(fp);
         }
 
-        g_free(dump_file);
+        free(dump_file);
         return contents;
 }
 

@@ -73,17 +73,9 @@ const unsigned int count_chars(const char *check, const char character)
 
 static void free_glib_strings(void)
 {
-        if (config_file) {
-                g_free(config_file);
-        }
-
-        if (opt_class) {
-                g_free(opt_class);
-        }
-
-        if (opt_payload) {
-                g_free(opt_payload);
-        }
+        free(config_file);
+        free(opt_class);
+	free(opt_payload);
 }
 
 int parse_options(int argc, char **argv)
@@ -98,7 +90,7 @@ int parse_options(int argc, char **argv)
         g_option_context_set_translate_func(context, NULL, NULL, NULL);
 
         if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                g_print("Failed to parse options: %s\n", error->message);
+                printf("Failed to parse options: %s\n", error->message);
                 goto fail;
         }
 
@@ -294,7 +286,7 @@ int main(int argc, char **argv)
         }
 
         if (version_p) {
-                g_print(PACKAGE_VERSION "\n");
+                printf(PACKAGE_VERSION "\n");
                 goto success;
         }
 
