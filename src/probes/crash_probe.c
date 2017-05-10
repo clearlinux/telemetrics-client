@@ -17,6 +17,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <grp.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -456,33 +457,38 @@ static bool is_banned_path(char *fullpath)
 static char *config_file = NULL;
 static char *core_file = NULL;
 static char *proc_path = NULL;
-static int signal_num = -1;
-static gboolean version_p = FALSE;
-static gboolean verbose = FALSE;
+static long int signal_num = -1;
+static bool verbose = false;
 
-static GOptionEntry options[] = {
-        { "config-file", 'f', 0, G_OPTION_ARG_FILENAME, &config_file,
-          "Path to configuration file (not implemented yet)", NULL },
-        { "core-file", 'c', 0, G_OPTION_ARG_FILENAME, &core_file,
-          "Path to core file to process", NULL },
-        { "process-name", 'p', 0, G_OPTION_ARG_STRING, &proc_name,
-          "Name of process for crash report (required)", NULL },
-        { "process-path", 'E', 0, G_OPTION_ARG_STRING, &proc_path,
-          "Absolute path of crashed process, with ! or / delimiters", NULL },
-        { "signal", 's', 0, G_OPTION_ARG_INT, &signal_num,
-          "Signal number that crashed the process", NULL },
-        { "version", 'V', 0, G_OPTION_ARG_NONE, &version_p,
-          "Print the program version", NULL },
-        { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose,
-          "Print the crash probe payload to stdout", NULL },
-        { NULL }
+static const struct option prog_opts[] = {
+        { "help", no_argument, 0, 'h' },
+        { "config-file", required_argument, 0, 'f' },
+        { "core-file", required_argument, 0, 'c' },
+        { "process-name", required_argument, 0, 'p' },
+        { "process-path", required_argument, 0, 'E' },
+        { "signal", required_argument, 0, 's' },
+        { "version", no_argument, 0, 'V' },
+        { "verbose", no_argument, 0, 'v' },
+        { 0, 0, 0, 0 }
 };
 
-static void free_glib_strings(void)
+static void print_help(void)
 {
-        free(core_file);
-        free(proc_name);
-        free(proc_path);
+        printf("Usage:\n");
+        printf("  crashprobe [OPTIONS] - collect data from core files\n");
+        printf("\n");
+        printf("Help Options:\n");
+        printf("  -h, --help            Show help options\n");
+        printf("\n");
+        printf("Application Options:\n");
+        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
+        printf("  -c, --core-file       Path to core file to process\n");
+        printf("  -p, --process-name    Name of process for crash report (required)\n");
+        printf("  -E, --process-path    Absolute path of crashed process, with ! or / delimiters\n");
+        printf("  -s, --signal          Signal number that crashed the process\n");
+        printf("  -V, --version         Print the program version\n");
+        printf("  -v, --verbose         Print the crash payload to stdout\n");
+        printf("\n");
 }
 
 int main(int argc, char **argv)
@@ -491,8 +497,6 @@ int main(int argc, char **argv)
         int ret = EXIT_FAILURE;
         int core_fd = STDIN_FILENO;
         nc_string *backtrace = NULL;
-        GError *error = NULL;
-        GOptionContext *context;
 
         if (fcntl(STDERR_FILENO, F_GETFL) < 0) {
                 // redirect stderr to avoid bad things to happen with
@@ -508,17 +512,47 @@ int main(int argc, char **argv)
 
         drop_privs();
 
-        context = g_option_context_new("- collect data from core files");
-        g_option_context_add_main_entries(context, options, NULL);
-        g_option_context_set_translate_func(context, NULL, NULL, NULL);
-        if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                printf("Failed to parse options: %s\n", error->message);
-                exit(EXIT_FAILURE);
-        }
+        int opt;
 
-        if (version_p) {
-                printf(PACKAGE_VERSION "\n");
-                exit(EXIT_SUCCESS);
+        while ((opt = getopt_long(argc, argv, "hf:c:p:E:s:Vv", prog_opts, NULL)) != -1) {
+                switch (opt) {
+                        case 'h':
+                                print_help();
+                                goto success;
+                        case 'V':
+                                printf(PACKAGE_VERSION "\n");
+                                goto success;
+                        case 'f':
+                                config_file = strdup(optarg);
+                                break;
+                        case 'c':
+                                core_file = strdup(optarg);
+                                break;
+                        case 'p':
+                                proc_name = strdup(optarg);
+                                break;
+                        case 'E':
+                                proc_path = strdup(optarg);
+                                break;
+                        case 's':
+                                errno = 0;
+                                char *endptr = NULL;
+
+                                signal_num = strtol(optarg, &endptr, 10);
+
+                                if (errno != 0) {
+                                        telem_perror("Failed to convert signal number");
+                                        goto fail;
+                                }
+                                if (endptr && *endptr != '\0') {
+                                        telem_log(LOG_ERR, "Invalid signal number. Must be an integer\n");
+                                        goto fail;
+                                }
+                                break;
+                        case 'v':
+                                verbose = true;
+                                break;
+                }
         }
 
         if (!proc_name) {
@@ -591,7 +625,7 @@ int main(int argc, char **argv)
                                       (unsigned int)core_for_pid);
 
         if (signal_num >= 0) {
-                nc_string_append_printf(header, "Signal: %d\n", signal_num);
+                nc_string_append_printf(header, "Signal: %ld\n", signal_num);
         }
 
         if (process_corefile(&backtrace) < 0) {
@@ -630,11 +664,9 @@ success:
 
         ret = EXIT_SUCCESS;
 fail:
-        free_glib_strings();
-
-        if (context) {
-                g_option_context_free(context);
-        }
+        free(core_file);
+        free(proc_name);
+        free(proc_path);
 
         if (header) {
                 nc_string_free(header);
