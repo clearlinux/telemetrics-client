@@ -15,6 +15,7 @@
  */
 
 #define _GNU_SOURCE
+#include <ctype.h>
 #include <getopt.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -167,10 +168,12 @@ int validate_opts(void)
                 return ret;
         }
 
-        if (!g_str_is_ascii(opt_class)) {
-                fprintf(stderr, "Error: Non-ascii characters detected "
-                        "in classification - aborting\n");
-                return ret;
+        for (int c = 0; c < strlen(opt_class); c++) {
+                if (isascii(opt_class[c]) == 0) {
+                        fprintf(stderr, "Error: Non-ascii characters detected "
+                                "in classification - aborting\n");
+                        return ret;
+                }
         }
 
         if (count_chars(opt_class, '/') != 2) {
