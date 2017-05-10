@@ -15,6 +15,7 @@
  */
 
 #define _GNU_SOURCE
+#include <getopt.h>
 #include <poll.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -32,30 +33,42 @@
 #include "telemetry.h"
 
 static char *config_file = NULL;
-static gboolean version_p = FALSE;
 static uint32_t severity = 1;
 static char *opt_class = NULL;
 static char *opt_payload = NULL;
 static uint32_t payload_version = 1;
 static char *opt_payload_file = NULL;
 
-static GOptionEntry options[] = {
-        { "config-file", 'f', 0, G_OPTION_ARG_FILENAME, &config_file,
-          "Path to configuration file (not implemented yet)", NULL },
-        { "version", 'V', 0, G_OPTION_ARG_NONE, &version_p,
-          "Print the program version", NULL },
-        { "severity", 's', 0, G_OPTION_ARG_INT, &severity,
-          "Severity level (1-4) - (default 1)", NULL },
-        { "class", 'c', 0, G_OPTION_ARG_STRING, &opt_class,
-          "Classification level_1/level_2/level_3", NULL },
-        { "payload", 'p', 0, G_OPTION_ARG_STRING, &opt_payload,
-          "Record body (max size = 8k)", NULL },
-        { "payload-file", 'P', 0, G_OPTION_ARG_STRING, &opt_payload_file,
-          "File to read payload from", NULL },
-        { "record-version", 'R', 0, G_OPTION_ARG_INT, &payload_version,
-          "Version number for format of payload (default 1)", NULL },
-        { NULL }
+static const struct option prog_opts[] = {
+        { "help", no_argument, 0, 'h' },
+        { "config-file", required_argument, 0, 'f' },
+        { "version", no_argument, 0, 'V' },
+        { "severity", required_argument, 0, 's' },
+        { "class", required_argument, 0, 'c' },
+        { "payload", required_argument, 0, 'p' },
+        { "payload-file", required_argument, 0, 'P' },
+        { "record-version", required_argument, 0, 'R' },
+        { 0, 0, 0, 0 }
 };
+
+static void print_help(void)
+{
+        printf("Usage:\n");
+        printf("  telem-record-gen [OPTIONS] - create and send a custom telemetry record\n");
+        printf("\n");
+        printf("Help Options:\n");
+        printf("  -h, --help            Show help options\n");
+        printf("\n");
+        printf("Application Options:\n");
+        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
+        printf("  -V, --version         Print the program version\n");
+        printf("  -s, --severity        Severity level (1-4) - (default 1)\n");
+        printf("  -c, --class           Classification level_1/level_2/level_3\n");
+        printf("  -p, --payload         Record body (max size = 8k)\n");
+        printf("  -P, --payload-file    File to read payload from\n");
+        printf("  -R, --record-version  Version number for format of payload (default 1)\n");
+        printf("\n");
+}
 
 const unsigned int count_chars(const char *check, const char character)
 {
@@ -71,36 +84,67 @@ const unsigned int count_chars(const char *check, const char character)
         return count;
 }
 
-static void free_glib_strings(void)
-{
-        free(config_file);
-        free(opt_class);
-        free(opt_payload);
-}
-
 int parse_options(int argc, char **argv)
 {
         int ret = 0;
-        GError *error = NULL;
-        GOptionContext *context;
+        char *endptr = NULL;
+        long unsigned int tmp = 0;
 
-        context = g_option_context_new(
-                "- create and send a custom telemetry record\n");
-        g_option_context_add_main_entries(context, options, NULL);
-        g_option_context_set_translate_func(context, NULL, NULL, NULL);
+        int opt;
+        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:", prog_opts, NULL)) != -1) {
+                switch (opt) {
+                        case 'h':
+                                print_help();
+                                exit(EXIT_SUCCESS);
+                        case 'V':
+                                printf(PACKAGE_VERSION "\n");
+                                exit(EXIT_SUCCESS);
+                        case 's':
+                                errno = 0;
 
-        if (!g_option_context_parse(context, &argc, &argv, &error)) {
-                printf("Failed to parse options: %s\n", error->message);
-                goto fail;
+                                tmp = strtoul(optarg, &endptr, 10);
+
+                                if (errno != 0) {
+                                        telem_perror("Failed to convert severity number");
+                                        goto fail;
+                                }
+                                if (endptr && *endptr != '\0') {
+                                        telem_log(LOG_ERR, "Invalid severity number. Must be an integer\n");
+                                        goto fail;
+                                }
+
+                                severity = (uint32_t)tmp;
+                                break;
+                        case 'c':
+                                opt_class = strdup(optarg);
+                                break;
+                        case 'p':
+                                opt_payload = strdup(optarg);
+                                break;
+                        case 'P':
+                                opt_payload_file = strdup(optarg);
+                                break;
+                        case 'R':
+                                errno = 0;
+
+                                tmp = strtoul(optarg, &endptr, 10);
+
+                                if (errno != 0) {
+                                        telem_perror("Failed to convert record-version number");
+                                        goto fail;
+                                }
+                                if (endptr && *endptr != '\0') {
+                                        telem_log(LOG_ERR, "Invalid record-version number. Must be an integer\n");
+                                        goto fail;
+                                }
+
+                                payload_version = (uint32_t)tmp;
+                                break;
+                }
         }
 
         ret = 1;
-
 fail:
-        if (context) {
-                g_option_context_free(context);
-        }
-
         return ret;
 }
 
@@ -285,11 +329,6 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        if (version_p) {
-                printf(PACKAGE_VERSION "\n");
-                goto success;
-        }
-
         if (!validate_opts()) {
                 goto fail;
         }
@@ -302,10 +341,11 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-success:
         ret = EXIT_SUCCESS;
 fail:
-        free_glib_strings();
+        free(config_file);
+        free(opt_class);
+        free(opt_payload);
 
         return ret;
 }
