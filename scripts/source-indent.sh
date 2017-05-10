@@ -14,6 +14,6 @@ if [ "$?" -ne 0 ]; then
   exit 1
 fi
 
-find .. -path "../*/*.[ch]" -exec uncrustify {} -c tm.cfg --no-backup \;
+find .. -path "../*/*.[ch]" ! -path "../src/nica/*" -exec uncrustify {} -c tm.cfg --no-backup \;
 
 # vi: ts=8 sw=2 sts=2 et tw=80
