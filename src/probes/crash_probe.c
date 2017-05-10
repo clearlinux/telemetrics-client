@@ -242,6 +242,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
         Dwarf_Addr pc;
         Dwarf_Addr pc_adjusted;
         Dwfl_Module *module;
+	Dwfl_Line *line;
         const char *procname;
         const char *modname;
         bool activation;
@@ -279,18 +280,29 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
                                    NULL);
         procname = dwfl_module_addrname(module, pc_adjusted);
 
+	line = dwfl_module_getsrc (module, pc_adjusted);
+
         if (procname && modname) {
-                nc_string_append_printf(*bt, "#%u %s() - [%s]\n",
+                nc_string_append_printf(*bt, "#%u %s() - [%s]",
                                        frame_counter++, procname, modname);
         } else if (modname) {
-                nc_string_append_printf(*bt, "#%u ??? - [%s]\n",
+                nc_string_append_printf(*bt, "#%u ??? - [%s]",
                                        frame_counter++, modname);
         } else {
                 // TODO: decide on "no symbol" representation
-                nc_string_append_printf(*bt, "#%u (no symbols)\n",
+                nc_string_append_printf(*bt, "#%u (no symbols)",
                                        frame_counter++);
         }
 
+	if (line) {
+		const char *src;
+		int lineno, linecol;
+		src =  dwfl_lineinfo (line, &pc_adjusted, &lineno, &linecol, NULL, NULL);
+		if (src) {
+			nc_string_append_printf(*bt, " - %s:%i", src, lineno);
+		}
+	}
+	nc_string_append_printf(*bt, "\n");
         return DWARF_CB_OK;
 }
 
