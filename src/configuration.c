@@ -16,7 +16,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <glib.h>
 #include <errno.h>
 #include <limits.h>
 #include <dirent.h>
@@ -30,10 +29,12 @@
 #include "util.h"
 #include "common.h"
 
+#include "nica/inifile.h"
+
 static char *config_file = NULL;
 static char *default_config_file = DATADIR "/defaults/telemetrics/telemetrics.conf";
 static char *etc_config_file = "/etc/telemetrics/telemetrics.conf";
-static GKeyFile *keyfile = NULL;
+static NcHashmap *keyfile = NULL;
 static bool cmd_line_cfg = false;
 
 /* Conf strings, integers, and booleans expected in the conf file */
@@ -83,16 +84,12 @@ void set_config_file(char *filename)
 
 bool read_config_from_file(char *config_file, struct configuration *config)
 {
-        GError *error = NULL;
-        GKeyFileFlags flags = G_KEY_FILE_NONE;
-
         if (keyfile != NULL) {
-                g_key_file_free(keyfile);
+		nc_hashmap_free(keyfile);
         }
 
-        keyfile = g_key_file_new();
-
-        if (!g_key_file_load_from_file(keyfile, config_file, flags, &error)) {
+	keyfile = nc_ini_file_parse(config_file);
+        if (!keyfile) {
 #ifdef DEBUG
                 fprintf(stderr, "ERR: Failed to read config file: %s\n",
                         error->message);
@@ -100,24 +97,35 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 return false;
         } else {
                 for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
-                        config->strValues[i] = g_key_file_get_string(keyfile,
-                                                                     "settings", config_key_str[i], &error);
-                        if (error != NULL) {
-                                return false;
-                        }
+                        config->strValues[i] = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_str[i]);
+			fprintf(stderr, "Looking for %s found %s \n", config_key_str[i], config->strValues[i]);
+			if (config->strValues[i] == NULL) {
+				return false;
+			}
                 }
                 for (int i = CONF_INT_MIN + 1; i < CONF_INT_MAX; i++) {
-                        config->intValues[i] = g_key_file_get_int64(keyfile,
-                                                                    "settings", config_key_int[i], &error);
-                        if (error != NULL) {
-                                return false;
+			char *ptr;
+			ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_int[i]);
+			if (ptr) {
+	                        config->intValues[i] = strtoll(ptr, NULL, 10);
+			} else {
+				return false;
                         }
                 }
 
                 for (int i = CONF_BOOL_MIN + 1; i < CONF_BOOL_MAX; i++) {
-                        config->boolValues[i] = g_key_file_get_boolean(keyfile,
-                                                                       "settings", config_key_bool[i], &error);
-                        if (error != NULL) {
+			char *ptr;
+			ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"),  config_key_bool[i]);
+			config->boolValues[i] = false;
+
+			if (ptr) {			
+				if (strcasecmp(ptr, "TRUE")==0) {
+		                        config->boolValues[i] = true;
+				}
+				if (strcasecmp(ptr, "1")==0) {
+		                        config->boolValues[i] = true;
+				}
+                        } else {
                                 return false;
                         }
                 }
@@ -180,8 +188,6 @@ void free_configuration(void)
         for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
                 free(config.strValues[i]);
         }
-
-        g_key_file_free(keyfile);
 
         if (cmd_line_cfg) {
                 free(config_file);

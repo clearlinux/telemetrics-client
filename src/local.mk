@@ -44,6 +44,8 @@ noinst_LTLIBRARIES = %D%/libtelem-shared.la
 	%D%/util.c \
 	%D%/util.h \
 	%D%/configuration.c \
+	%D%/nica/inifile.c \
+	%D%/nica/hashmap.c \
 	%D%/configuration.h \
 	%D%/common.c \
 	%D%/common.h
