@@ -427,13 +427,12 @@ static bool in_clr_build(char *fullpath)
          * The build environment for Clear Linux packages is set up by 'mock',
          * and the chroot in which rpmbuild builds the packages has this prefix.
          */
-	if (strstr(fullpath,"/builddir/build/BUILD/"))
-		return true;
+        if ((strstr(fullpath, "/builddir/build/BUILD/")) ||
+            (strstr(fullpath, "!builddir!build!BUILD!"))) {
+                return true;
+        }
 
-	if (strstr(fullpath,"!builddir!build!BUILD!"))
-		return true;
-
-	return false;
+        return false;
 }
 
 static bool is_banned_path(char *fullpath)
@@ -445,17 +444,15 @@ static bool is_banned_path(char *fullpath)
 
         // Anything outside of /usr/, or in /usr/local/, we consider third-party
 
-	if (strncmp(fullpath, "/usr/", 5) != 0)
-		return true;
+        if ((strncmp(fullpath, "/usr/", 5) != 0) &&
+            (strncmp(fullpath, "!usr!", 5) != 0)) {
+                return true;
+        }
 
-	if (strncmp(fullpath, "!usr!", 5) != 0)
-		return true;
-
-	if (strncmp(fullpath,"/usr/local/", 11) == 0)
-		return true;
-	if (strncmp(fullpath,"!usr!local!", 11) == 0)
-		return true;
-
+        if ((strncmp(fullpath, "/usr/local/", 11) == 0) ||
+            (strncmp(fullpath, "!usr!local!", 11) == 0)) {
+                return true;
+        }
 
         return false;
 }
