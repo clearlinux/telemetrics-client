@@ -15,7 +15,6 @@
  */
 
 #define _GNU_SOURCE
-#include <glib.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
