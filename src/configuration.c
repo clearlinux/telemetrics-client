@@ -97,7 +97,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 return false;
         } else {
                 for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
-                        config->strValues[i] = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_str[i]);
+                        config->strValues[i] = strdup(nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_str[i]));
 			fprintf(stderr, "Looking for %s found %s \n", config_key_str[i], config->strValues[i]);
 			if (config->strValues[i] == NULL) {
 				return false;
