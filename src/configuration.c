@@ -85,10 +85,10 @@ void set_config_file(char *filename)
 bool read_config_from_file(char *config_file, struct configuration *config)
 {
         if (keyfile != NULL) {
-		nc_hashmap_free(keyfile);
+                nc_hashmap_free(keyfile);
         }
 
-	keyfile = nc_ini_file_parse(config_file);
+        keyfile = nc_ini_file_parse(config_file);
         if (!keyfile) {
 #ifdef DEBUG
                 fprintf(stderr, "ERR: Failed to read config file: %s\n",
@@ -98,33 +98,33 @@ bool read_config_from_file(char *config_file, struct configuration *config)
         } else {
                 for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
                         config->strValues[i] = strdup(nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_str[i]));
-			fprintf(stderr, "Looking for %s found %s \n", config_key_str[i], config->strValues[i]);
-			if (config->strValues[i] == NULL) {
-				return false;
-			}
+                        fprintf(stderr, "Looking for %s found %s \n", config_key_str[i], config->strValues[i]);
+                        if (config->strValues[i] == NULL) {
+                                return false;
+                        }
                 }
                 for (int i = CONF_INT_MIN + 1; i < CONF_INT_MAX; i++) {
-			char *ptr;
-			ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_int[i]);
-			if (ptr) {
-	                        config->intValues[i] = strtoll(ptr, NULL, 10);
-			} else {
-				return false;
+                        char *ptr;
+                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_int[i]);
+                        if (ptr) {
+                                config->intValues[i] = strtoll(ptr, NULL, 10);
+                        } else {
+                                return false;
                         }
                 }
 
                 for (int i = CONF_BOOL_MIN + 1; i < CONF_BOOL_MAX; i++) {
-			char *ptr;
-			ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"),  config_key_bool[i]);
-			config->boolValues[i] = false;
+                        char *ptr;
+                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"),  config_key_bool[i]);
+                        config->boolValues[i] = false;
 
-			if (ptr) {			
-				if (strcasecmp(ptr, "TRUE")==0) {
-		                        config->boolValues[i] = true;
-				}
-				if (strcasecmp(ptr, "1")==0) {
-		                        config->boolValues[i] = true;
-				}
+                        if (ptr) {
+                                if (strcasecmp(ptr, "TRUE") == 0) {
+                                        config->boolValues[i] = true;
+                                }
+                                if (strcasecmp(ptr, "1") == 0) {
+                                        config->boolValues[i] = true;
+                                }
                         } else {
                                 return false;
                         }
