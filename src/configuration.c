@@ -97,7 +97,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 return false;
         } else {
                 for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
-                        config->strValues[i] = strdup(nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_str[i]));
+                        config->strValues[i] = strdup(nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_str[i]));
                         fprintf(stderr, "Looking for %s found %s \n", config_key_str[i], config->strValues[i]);
                         if (config->strValues[i] == NULL) {
                                 return false;
@@ -105,7 +105,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 }
                 for (int i = CONF_INT_MIN + 1; i < CONF_INT_MAX; i++) {
                         char *ptr;
-                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"), config_key_int[i]);
+                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_int[i]);
                         if (ptr) {
                                 config->intValues[i] = strtoll(ptr, NULL, 10);
                         } else {
@@ -115,7 +115,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
 
                 for (int i = CONF_BOOL_MIN + 1; i < CONF_BOOL_MAX; i++) {
                         char *ptr;
-                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile,  "settings"),  config_key_bool[i]);
+                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_bool[i]);
                         config->boolValues[i] = false;
 
                         if (ptr) {
