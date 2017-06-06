@@ -51,14 +51,10 @@ noinst_LTLIBRARIES = %D%/libtelem-shared.la
 	%D%/common.h
 
 %C%_libtelem_shared_la_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
+	$(AM_CFLAGS)
 
 %C%_libtelem_shared_la_LDFLAGS = \
 	$(AM_LDFLAGS)
-
-%C%_libtelem_shared_la_LIBADD = \
-	$(GLIB_LIBS)
 
 lib_LTLIBRARIES = \
 	%D%/libtelemetry.la
@@ -71,12 +67,10 @@ include_HEADERS = %D%/telemetry.h
 noinst_HEADERS = %D%/log.h
 
 %C%_libtelemetry_la_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
+	$(AM_CFLAGS)
 
 %C%_libtelemetry_la_LDFLAGS = \
 	$(AM_LDFLAGS) \
-	$(GLIB_LIBS) \
 	-version-info $(SHAREDLIB_CURRENT):$(SHAREDLIB_REVISION):$(SHAREDLIB_AGE) \
 	-Wl,--version-script=$(top_srcdir)/src/telemetry.sym
 
