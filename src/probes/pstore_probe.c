@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <glib.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -26,6 +25,7 @@
 #include "log.h"
 #include "telemetry.h"
 #include "oops_parser.h"
+#include "nica/hashmap.h"
 
 char *pstore_dump_path = PSTOREDIR;
 
@@ -202,8 +202,8 @@ int main(int argc, char **argv)
         DIR *pstore_dir;
         struct dirent *entry;
         struct chunk_list  *elem, *head;
-        GHashTableIter iter;
-        gpointer key, value;
+        NcHashmapIter iter;
+        void *key, *value;
         int max_part;
         size_t totalsize = 0;
         char *crash_dump = NULL;
@@ -212,7 +212,7 @@ int main(int argc, char **argv)
          * Hash table used to store chunks belonging to a oops counter
          *  key -> count, value->head of linked list of chunks
          */
-        GHashTable *hash = g_hash_table_new(g_int_hash, g_int_equal);
+        NcHashmap *hash = nc_hashmap_new(nc_simple_hash, nc_simple_compare);
 
         pstore_dir = opendir(pstore_dump_path);
         if (pstore_dir == NULL) {
@@ -250,23 +250,20 @@ int main(int argc, char **argv)
                 elem->contents = read_contents(entry->d_name, &(elem->size));
                 elem->next = NULL;
 
-                gpointer head = g_hash_table_lookup(hash, (void *)(&elem->count));
+                void *head = nc_hashmap_get(hash, NC_HASH_KEY(elem->count));
                 if (head != NULL) {
                         elem->next = (struct chunk_list *)head;
                 }
 
-                gint *key = g_new(gint, 1);
-                *key = elem->count;
-                g_hash_table_insert(hash, key, elem);
-
+                nc_hashmap_put(hash, NC_HASH_KEY(elem->count), elem);
         }
 
         closedir(pstore_dir);
 
-        g_hash_table_iter_init (&iter, hash);
-        while (g_hash_table_iter_next (&iter, &key, &value)) {
+        nc_hashmap_iter_init(hash, &iter);
+        while (nc_hashmap_iter_next(&iter, (void **)&key, (void **)&value)) {
                 #ifdef DEBUG
-                printf("Count in the hash: %d\n", *((int *)key));
+                printf("Count in the hash: %d\n", NC_UNHASH_KEY(key));
                 #endif
 
                 head = (struct chunk_list *)value;
