@@ -25,7 +25,6 @@ AC_PROG_MAKE_SET
 # check >= 0.9.12 is required for TAP output
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.12])
 PKG_CHECK_MODULES([CURL], [libcurl])
-PKG_CHECK_MODULES([GLIB], [glib-2.0])
 AC_CHECK_LIB([elf], [elf_begin], [have_elflib=yes], [AC_MSG_ERROR([Unable to find libelf from elfutils])])
 AC_CHECK_LIB([dw], [dwfl_begin], [have_dwlib=yes], [AC_MSG_ERROR([Unable to find libdw from elfutils])])
 AS_IF([test "x$have_elflib" = "xyes" -a "x$have_dwlib" = "xyes"],

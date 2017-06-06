@@ -16,7 +16,6 @@ addons:
         sources:
             - ubuntu-toolchain-r-test
         packages:
-            - libglib2.0-dev
             - libcurl4-gnutls-dev
             - valgrind
             - autoconf 

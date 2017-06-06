@@ -23,8 +23,6 @@ Build dependencies
 
 - libcurl
 
-- glib
-
 - elfutils, which provides libelf and libdwfl libraries..
 
 - (optional) libsystemd, for syslog-style logging to the systemd journal, and

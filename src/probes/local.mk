@@ -15,10 +15,8 @@ bin_PROGRAMS += \
 
 %C%_telem_record_gen_SOURCES = %D%/telem_record_gen.c
 %C%_telem_record_gen_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
-%C%_telem_record_gen_LDADD = $(top_builddir)/src/libtelemetry.la \
-	$(GLIB_LIBS)
+	$(AM_CFLAGS)
+%C%_telem_record_gen_LDADD = $(top_builddir)/src/libtelemetry.la
 %C%_telem_record_gen_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
@@ -48,13 +46,11 @@ endif
 	src/nica/nc-string.c \
 	%D%/probe.h
 %C%_crashprobe_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
+	$(AM_CFLAGS)
 %C%_crashprobe_LDADD = \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la \
-	@ELFUTILS_LIBS@ \
-	$(GLIB_LIBS)
+	@ELFUTILS_LIBS@
 %C%_crashprobe_LDFLAGS = \
        $(AM_LDFLAGS) \
        -pie
@@ -73,12 +69,10 @@ endif
 	src/nica/nc-string.c \
 	%D%/oops_parser.c
 %C%_pstoreprobe_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
+	$(AM_CFLAGS)
 %C%_pstoreprobe_LDADD = \
 	$(top_builddir)/src/libtelemetry.la \
-	$(top_builddir)/src/libtelem-shared.la \
-	$(GLIB_LIBS)
+	$(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
@@ -97,11 +91,9 @@ endif
 	src/nica/nc-string.c \
 	%D%/oops_parser.c
 %C%_klogscanner_CFLAGS = \
-        $(AM_CFLAGS) \
-	$(GLIB_CFLAGS)
+        $(AM_CFLAGS)
 %C%_klogscanner_LDADD = \
-        $(top_builddir)/src/libtelemetry.la \
-	$(GLIB_LIBS)
+        $(top_builddir)/src/libtelemetry.la
 %C%_klogscanner_LDFLAGS = \
         $(AM_LDFLAGS) \
         -pie
@@ -128,12 +120,10 @@ endif
 	src/nica/nc-string.c \
 	%D%/probe.h
 %C%_oopsprobe_CFLAGS = \
-        $(AM_CFLAGS) \
-        $(GLIB_CFLAGS)
+        $(AM_CFLAGS)
 %C%_oopsprobe_LDADD = \
         $(top_builddir)/src/libtelemetry.la \
-        $(top_builddir)/src/libtelem-shared.la \
-        $(GLIB_LIBS)
+        $(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
@@ -154,13 +144,11 @@ bin_PROGRAMS += \
 	%D%/journal.c
 %C%_journalprobe_CFLAGS = \
 	$(AM_CFLAGS) \
-	$(GLIB_CFLAGS) \
 	$(SYSTEMD_ID128_CFLAGS) \
 	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_journalprobe_LDADD = \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la \
-	$(GLIB_LIBS) \
 	$(SYSTEMD_ID128_LIBS) \
 	$(SYSTEMD_JOURNAL_LIBS)
 %C%_journalprobe_LDFLAGS = \

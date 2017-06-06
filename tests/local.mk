@@ -24,12 +24,10 @@ dist_check_SCRIPTS = \
 
 %C%_check_config_CFLAGS = \
 	$(AM_CFLAGS) \
-	@CHECK_CFLAGS@ \
-	@GLIB_CFLAGS@ 
+	@CHECK_CFLAGS@
 
 %C%_check_config_LDADD = \
 	@CHECK_LIBS@ \
-	@GLIB_LIBS@ \
 	$(top_builddir)/src/libtelem-shared.la
 
 %C%_check_daemon_SOURCES = \
@@ -40,11 +38,9 @@ dist_check_SCRIPTS = \
 %C%_check_daemon_CFLAGS = \
 	$(AM_CFLAGS) \
 	@CHECK_CFLAGS@ \
-	@GLIB_CFLAGS@ \
 	@CURL_CFLAGS@
 %C%_check_daemon_LDADD = \
 	@CHECK_LIBS@ \
-	@GLIB_LIBS@ \
 	@CURL_LIBS@ \
 	$(top_builddir)/src/libtelem-shared.la
 
@@ -96,11 +92,9 @@ EXTRA_DIST += \
 
 %C%_check_probes_CFLAGS = \
         $(AM_CFLAGS) \
-        @CHECK_CFLAGS@ \
-        @GLIB_CFLAGS@
+        @CHECK_CFLAGS@
 %C%_check_probes_LDADD = \
         @CHECK_LIBS@ \
-        @GLIB_LIBS@ \
         $(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
@@ -118,11 +112,9 @@ endif
 
 %C%_check_libtelemetry_CFLAGS = \
 	$(AM_CFLAGS) \
-	@CHECK_CFLAGS@ \
-	@GLIB_CFLAGS@
+	@CHECK_CFLAGS@
 %C%_check_libtelemetry_LDADD = \
 	@CHECK_LIBS@ \
-        @GLIB_LIBS@ \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la
 
