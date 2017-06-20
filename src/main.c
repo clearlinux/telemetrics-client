@@ -30,6 +30,7 @@
 #include <sys/signalfd.h>
 #include <signal.h>
 #include <malloc.h>
+#include <curl/curl.h>
 
 #include "config.h"
 #include "common.h"
@@ -120,6 +121,8 @@ int main(int argc, char **argv)
                 }
         }
         initialize_daemon(&daemon);
+
+        curl_global_init(CURL_GLOBAL_ALL);
 
         sigemptyset(&mask);
 
@@ -371,6 +374,8 @@ clean_exit:
         if (LIST_EMPTY(&(daemon.client_head))) {
                 telem_log(LOG_INFO, "Client list cleared\n");
         }
+
+        curl_global_cleanup();
 
         return 0;
 }
