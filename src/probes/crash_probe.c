@@ -68,6 +68,10 @@ static char clr_build_class[40] = "org.clearlinux/crash/clr-build";
 static char error_class[30] = "org.clearlinux/crash/error";
 static char unknown_class[30] = "org.clearlinux/crash/unknown";
 
+static char temp_core[] = "/tmp/corefile-XXXXXX";
+static bool keep_core = false;
+
+
 static const Dwfl_Callbacks cb =
 {
         .find_elf = dwfl_build_id_find_elf,
@@ -147,22 +151,13 @@ static int temp_core_file(void)
         int tmp;
         ssize_t ret;
 
-        char core[PATH_MAX] = "/tmp/corefile-XXXXXX";
-
         /* mkstemp() opens the file with O_EXCL and 0600 permissions, so no need
          * to change umask or manipulate the fd to meet those requirements.
          */
-        if ((tmp = mkstemp(core)) < 0) {
+        if ((tmp = mkstemp(temp_core)) < 0) {
                 telem_perror("Failed to create temp core file");
                 return -1;
         }
-
-#ifndef DEBUG
-        if (unlink(core) < 0) {
-                telem_perror("Failed to unlink temp core file");
-                return -1;
-        }
-#endif
 
         while (true) {
                 // Use Linux-specific splice(2) here;
@@ -563,28 +558,6 @@ int main(int argc, char **argv)
                 exit(EXIT_FAILURE);
         }
 
-        if (proc_path && in_clr_build(proc_path)) {
-                telem_log(LOG_NOTICE, "Ignoring core (from mock build)\n");
-
-                backtrace = nc_string_dup("Crash from Clear package build\n");
-
-                if (!send_data(&backtrace, unknown_severity, clr_build_class)) {
-                        goto fail;
-                }
-                goto success;
-        }
-
-        if (proc_path && is_banned_path(proc_path)) {
-                telem_log(LOG_NOTICE, "Ignoring core (third-party binary)\n");
-
-                backtrace = nc_string_dup("Crash from third party\n");
-
-                if (!send_data(&backtrace, unknown_severity, unknown_class)) {
-                        goto fail;
-                }
-                goto success;
-        }
-
         if (core_file) {
                 core_fd = open(core_file, O_RDONLY);
                 if (core_fd == -1) {
@@ -615,6 +588,32 @@ int main(int argc, char **argv)
                                " or pass the core file on stdin.\n");
                         goto fail;
                 }
+        }
+
+        if (proc_path && in_clr_build(proc_path)) {
+                telem_log(LOG_NOTICE, "Ignoring core (from mock build)\n");
+
+                backtrace = nc_string_dup("Crash from Clear package build\n");
+
+                keep_core = true;
+
+                if (!send_data(&backtrace, unknown_severity, clr_build_class)) {
+                        goto fail;
+                }
+                goto success;
+        }
+
+        if (proc_path && is_banned_path(proc_path)) {
+                telem_log(LOG_NOTICE, "Ignoring core (third-party binary)\n");
+
+                backtrace = nc_string_dup("Crash from third party\n");
+
+                keep_core = true;
+
+                if (!send_data(&backtrace, unknown_severity, unknown_class)) {
+                        goto fail;
+                }
+                goto success;
         }
 
         elf_version(EV_CURRENT);
@@ -693,6 +692,10 @@ fail:
 
         if (core_fd >= 0 && core_fd != STDIN_FILENO) {
                 close(core_fd);
+        }
+
+        if (!core_file && !keep_core) {
+                unlink(temp_core);
         }
 
         return ret;
