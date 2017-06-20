@@ -462,6 +462,11 @@ bool post_record_http(char *headers[], char *body, bool spool)
         const char *cert_file = get_cainfo_config();
         const char *tid_header = get_tidheader_config();
 
+        // Initialize the libcurl global environment once per POST. This lets us
+        // clean up the environment after each POST so that when the daemon is
+        // sitting idle, it will be consuming as little memory as possible.
+        curl_global_init(CURL_GLOBAL_ALL);
+
         curl = curl_easy_init();
         if (!curl) {
                 telem_log(LOG_ERR, "curl_easy_init(): Unable to start libcurl"
@@ -532,6 +537,9 @@ bool post_record_http(char *headers[], char *body, bool spool)
 
         curl_slist_free_all(custom_headers);
         curl_easy_cleanup(curl);
+
+        curl_global_cleanup();
+
         return res ? false : true;
 }
 
