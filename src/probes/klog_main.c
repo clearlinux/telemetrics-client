@@ -58,7 +58,7 @@ int main(void)
                 bufp = (char *)calloc(buflen, sizeof(char));
 
                 malloc_trim(0);
-                bytes = klogctl(SYSLOG_ACTION_READ, bufp, log_size);
+                bytes = klogctl(SYSLOG_ACTION_READ, bufp, (int)buflen);
                 if (bytes < 0) {
                         telem_log(LOG_ERR, "Cannot read contents of kernel ring buffer: %s\n", strerror(errno));
                         return 1;
