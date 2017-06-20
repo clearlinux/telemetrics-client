@@ -23,7 +23,6 @@ int main(void)
         char *bufp = NULL;
         size_t buflen = 0;
         int bytes = 0;
-        int loopcount = 0;
 
         oops_parser_init(write_oops_to_file);
 
@@ -51,7 +50,7 @@ int main(void)
 
                 buflen = (size_t)log_size;
 
-                if (loopcount++ > 0 && buflen > MAX_BUF) {
+                if (buflen > MAX_BUF) {
                         buflen = MAX_BUF;
                 }
 
