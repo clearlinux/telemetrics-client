@@ -666,6 +666,11 @@ success:
 
         ret = EXIT_SUCCESS;
 fail:
+        // Do not remove the core file if any errors occur
+        if (ret == EXIT_FAILURE) {
+                keep_core = true;
+        }
+
         free(core_file);
         free(proc_name);
         free(proc_path);
