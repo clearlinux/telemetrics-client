@@ -699,6 +699,8 @@ fail:
                 close(core_fd);
         }
 
+        // Remove the core file by default, except when the --core-file option
+        // is specified, or when keep_core is overridden to true.
         if (!core_file && !keep_core) {
                 unlink(temp_core);
         }
