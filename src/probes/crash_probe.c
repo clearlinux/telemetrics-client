@@ -411,6 +411,18 @@ fail:
         return -1;
 }
 
+static bool startswith(const char *full, const char *prefix)
+{
+        while (*prefix) {
+                if (*prefix != *full) {
+                        return false;
+                }
+                full++;
+                prefix++;
+        }
+        return true;
+}
+
 static bool in_clr_build(char *fullpath)
 {
         // Global override for privacy filters
@@ -422,8 +434,8 @@ static bool in_clr_build(char *fullpath)
          * The build environment for Clear Linux packages is set up by 'mock',
          * and the chroot in which rpmbuild builds the packages has this prefix.
          */
-        if ((strstr(fullpath, "/builddir/build/BUILD/")) ||
-            (strstr(fullpath, "!builddir!build!BUILD!"))) {
+        if (startswith(fullpath, "/builddir/build/BUILD/") ||
+            startswith(fullpath, "!builddir!build!BUILD!")) {
                 return true;
         }
 
@@ -439,13 +451,13 @@ static bool is_banned_path(char *fullpath)
 
         // Anything outside of /usr/, or in /usr/local/, we consider third-party
 
-        if ((strncmp(fullpath, "/usr/", 5) != 0) &&
-            (strncmp(fullpath, "!usr!", 5) != 0)) {
+        if (!startswith(fullpath, "/usr/") &&
+            !startswith(fullpath, "!usr!")) {
                 return true;
         }
 
-        if ((strncmp(fullpath, "/usr/local/", 11) == 0) ||
-            (strncmp(fullpath, "!usr!local!", 11) == 0)) {
+        if (startswith(fullpath, "/usr/local/") ||
+            startswith(fullpath, "!usr!local!")) {
                 return true;
         }
 
