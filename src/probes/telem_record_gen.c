@@ -150,7 +150,7 @@ fail:
 
 int validate_opts(void)
 {
-        size_t i;
+        size_t len;
         int ret = 0;
 
         /* classification */
@@ -159,15 +159,15 @@ int validate_opts(void)
                 return ret;
 
         }
-        i = strlen(opt_class);
+        len = strlen(opt_class);
 
-        if ((i == 0) || (i > 120)) {
+        if ((len == 0) || (len > 120)) {
                 fprintf(stderr, "Error: Valid size for classification "
                         "is 1-120 chars\n");
                 return ret;
         }
 
-        for (int c = 0; c < strlen(opt_class); c++) {
+        for (int c = 0; c < len; c++) {
                 if (isascii(opt_class[c]) == 0) {
                         fprintf(stderr, "Error: Non-ascii characters detected "
                                 "in classification - aborting\n");
