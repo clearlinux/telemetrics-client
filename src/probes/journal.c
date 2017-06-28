@@ -38,6 +38,7 @@
 #include "config.h"
 #include "log.h"
 #include "telemetry.h"
+#include "probe.h"
 #include "nica/nc-string.h"
 #define BOOT_ID_LEN 33
 
@@ -227,9 +228,14 @@ static bool add_filters(sd_journal *journal)
         /* The semantics of how journal entry matching works is described in
          * detail in sd_journal_add_match(3).
          *
-         * The matches declared here correspond to the logical expression:
+         * When the privacy filter override is enabled, the matches declared
+         * here correspond to this logical expression:
          *
-         * BOOTID && ((P0 || P1 || P2 || P3) || EXITED)
+         *   BOOTID && ((P0 || P1 || P2 || P3) || EXITED)
+         *
+         * Otherwise, the expression is:
+         *
+         *   BOOTID && EXITED
          *
          * BOOTID is short for _BOOT_ID=VAL, where VAL is the boot ID for the
          * current boot. P0, P1, etc stand for PRIORITY=0, etc. And EXITED is
@@ -239,12 +245,20 @@ static bool add_filters(sd_journal *journal)
         JOURNAL_MATCH(data);
         free(data);
         JOURNAL_AND;
-        // The four highest log levels, all indicating errors
-        JOURNAL_MATCH("PRIORITY=0");
-        JOURNAL_MATCH("PRIORITY=1");
-        JOURNAL_MATCH("PRIORITY=2");
-        JOURNAL_MATCH("PRIORITY=3");
-        JOURNAL_OR;
+
+        // Filter messages with the four highest log levels, all indicating
+        // errors, but only when the privacy filters override is in effect;
+        // because the log messages contain arbitrary strings, and this probe
+        // does not yet keep a whitelist of allowed patterns or a blacklist of
+        // banned patterns.
+        if (access(TM_PRIVACY_FILTERS_OVERRIDE, F_OK) == 0) {
+                JOURNAL_MATCH("PRIORITY=0");
+                JOURNAL_MATCH("PRIORITY=1");
+                JOURNAL_MATCH("PRIORITY=2");
+                JOURNAL_MATCH("PRIORITY=3");
+                JOURNAL_OR;
+        }
+
         // Only set for service-level error conditions
         JOURNAL_MATCH("EXIT_CODE=exited");
 
