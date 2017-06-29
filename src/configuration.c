@@ -97,8 +97,14 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 return false;
         } else {
                 for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
-                        config->strValues[i] = strdup(nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_str[i]));
-                        if (config->strValues[i] == NULL) {
+                        char *ptr;
+                        ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_str[i]);
+                        if (ptr) {
+                                config->strValues[i] = strdup(ptr);
+                                if (config->strValues[i] == NULL) {
+                                        return false;
+                                }
+                        } else {
                                 return false;
                         }
                 }
