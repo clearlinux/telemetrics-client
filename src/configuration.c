@@ -105,6 +105,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                         return false;
                                 }
                         } else {
+                                fprintf(stderr, "ERR: missing key with string value: %s\n", config_key_str[i]);
                                 return false;
                         }
                 }
@@ -114,6 +115,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                         if (ptr) {
                                 config->intValues[i] = strtoll(ptr, NULL, 10);
                         } else {
+                                fprintf(stderr, "ERR: missing key with integer value: %s\n", config_key_int[i]);
                                 return false;
                         }
                 }
@@ -131,6 +133,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                         config->boolValues[i] = true;
                                 }
                         } else {
+                                fprintf(stderr, "ERR: missing key with boolean value: %s\n", config_key_bool[i]);
                                 return false;
                         }
                 }
