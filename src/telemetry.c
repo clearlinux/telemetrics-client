@@ -401,6 +401,64 @@ static int set_timestamp_header(struct telem_ref *t_ref)
 }
 
 /**
+ * Sets cpu model for telemetry record. The information from cpu is extracted
+ * from /proc/cpuinfo, specifically "model name" attribute.
+ *
+ * @param t_ref Telemetry Record reference obtained from tm_create_record.
+ *
+ * @return 0 if successful, or a negative errno-style value if not.
+ *
+ */
+static int set_cpu_model_header(struct telem_ref *t_ref)
+{
+        FILE *fs = NULL;
+        char buf[SMALL_LINE_BUF] = { 0 };
+        char *model_name = NULL;
+        const char *attr_name = "model name";
+        int status = 0;
+        size_t attr_len = sizeof(attr_name);
+        size_t size = 0;
+
+        fs = fopen("/proc/cpuinfo", "r");
+        if (fs != NULL) {
+                while (fgets(buf, SMALL_LINE_BUF, fs)) {
+                        if(strncmp(attr_name, buf, attr_len) == 0){
+                            model_name = strchr(buf, ':');
+                            break;
+                        }
+                }
+		fclose(fs);
+		if (model_name != NULL) {
+		        puts("HELLO");	
+                	size = strlen(model_name);
+                	if (size > 2) {
+                    		model_name = (char *) model_name + 2 * sizeof(char);
+                        }
+			size = strlen(model_name);
+			(model_name)[size - 1] = '\0';
+                        status = set_header(
+                                &(t_ref->record->headers[TM_CPU_MODEL]),
+                                TM_CPU_MODEL_STR, model_name,
+                                &(t_ref->record->header_size));			
+
+		} else {
+			fprintf(stderr, "NOTICE: Unable to find attribute:%s\n", attr_name);
+                        status = set_header(
+                                &(t_ref->record->headers[TM_CPU_MODEL]),
+                                TM_CPU_MODEL_STR, "blank",
+                                &(t_ref->record->header_size));
+		}
+        } else {
+#ifdef DEBUG
+                fprint(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
+#endif
+               status = -1;
+        }
+
+        return status;
+}
+
+/**
  * A healper function for set_host_type_header that reads the first line out of
  * a file and chomps the newline if necessary. If the file does not exist the
  * function returns "no_<key>_file". If the file exists but contains only
@@ -495,6 +553,91 @@ static int get_dmi_value(const char *source, const char *key, char **buf)
         }
 
         return ret;
+}
+
+/**
+ * Sets the board name for telemetry record, this record is a combination of
+ * board name and board vendor. This information is read from dmi filesystem
+ * Board Name (board_name) and Board Vendor (board_vendor).
+ *
+ * @param t_ref Telemetry Record reference obtained from tm_create_record.
+ *
+ * @return 0 if successful, or a negative errno-style value if not.
+ *
+ */
+static int set_board_name_header(struct telem_ref *t_ref)
+{
+        int status = 0;
+        int rc;
+        char *buf = NULL;
+        char *bn = NULL;
+        char *bv = NULL;
+
+        rc  = get_dmi_value("/sys/class/dmi/id/board_name", "bn", &bn);
+        if (rc < 0) {
+                status = rc;
+                goto cleanup;
+        }
+
+        rc  = get_dmi_value("/sys/class/dmi/id/board_vendor", "bv", &bv);
+        if (rc < 0) {
+                status = rc;
+                goto cleanup;
+        }
+
+        rc = asprintf(&buf, "%s|%s", bn, bv);
+
+        if (rc < 0) {
+                status = -ENOMEM;
+                goto cleanup;
+        } else {
+                status = set_header(
+                        &(t_ref->record->headers[TM_BOARD_NAME]),
+                        TM_BOARD_NAME_STR, buf,
+                        &(t_ref->record->header_size));
+                free(buf);
+        }
+
+cleanup:
+        if (bn != NULL) {
+                free(bn);
+        }
+
+        if (bv != NULL) {
+                free(bv);
+        }
+
+
+        return status;
+}
+
+/**
+ * Sets BIOS version header for telemetry record, this information is
+ * read from dmi filesystem BIOS Version (bios_version).
+ *
+ * @param t_ref Telemetry Record reference obtained from tm_create_record.
+ *
+ * @return 0 if successful, or a negative errno-style value if not.
+ *
+ */
+static int set_bios_version_header(struct telem_ref *t_ref)
+{
+        int status = 0;
+        int rc = 0;
+        char *bios_version  = NULL;
+
+        rc  = get_dmi_value("/sys/class/dmi/id/bios_version", "bv", &bios_version);
+        if (rc < 0) {
+                status = rc;
+        } else {
+                status = set_header(
+                        &(t_ref->record->headers[TM_BIOS_VERSION]),
+                        TM_BIOS_VERSION_STR, bios_version,
+                        &(t_ref->record->header_size));
+                free(bios_version);
+        }
+
+        return status;
 }
 
 /**
@@ -727,6 +870,24 @@ int allocate_header(struct telem_ref *t_ref, uint32_t severity,
         i++;
 
         if ((ret = set_system_name_header(t_ref)) < 0) {
+                goto free_and_fail;
+        }
+
+        i++;
+
+        if ((ret = set_board_name_header(t_ref)) < 0) {
+                goto free_and_fail;
+        }
+
+        i++;
+
+        if ((ret = set_cpu_model_header(t_ref)) < 0) {
+                goto free_and_fail;
+        }
+
+        i++;
+
+        if ((ret = set_bios_version_header(t_ref)) < 0) {
                 goto free_and_fail;
         }
 

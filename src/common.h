@@ -35,6 +35,10 @@
 #define TM_KERNEL_VERSION 8
 #define TM_PAYLOAD_VERSION 9
 #define TM_SYSTEM_NAME 10
+#define TM_BOARD_NAME 11
+#define TM_CPU_MODEL 12
+#define TM_BIOS_VERSION 13
+
 
 #define TM_RECORD_VERSION_STR "record_format_version"
 #define TM_CLASSIFICATION_STR "classification"
@@ -47,8 +51,11 @@
 #define TM_KERNEL_VERSION_STR "kernel_version"
 #define TM_PAYLOAD_VERSION_STR "payload_format_version"
 #define TM_SYSTEM_NAME_STR "system_name"
+#define TM_BOARD_NAME_STR "board_name"
+#define TM_CPU_MODEL_STR "cpu_model"
+#define TM_BIOS_VERSION_STR "bios_version"
 
-#define NUM_HEADERS 11
+#define NUM_HEADERS 14
 
 /* For internal library usage. Bump the version whenever we change the record
  * structure (e.g. adding or removing a header field). Note that the value
