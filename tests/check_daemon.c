@@ -295,7 +295,10 @@ START_TEST(check_process_record_with_correct_size_and_data)
                         "machine_id: 1234\ncreation_timestamp: 1418672344\narch:x86_64\n"
                         "host_type: macbookpro\nbuild: 200\nkernel_version: 3.15\n"
                         "payload_format_version: 1\n"
-                        "system_name: clear-linux-os\n";
+                        "system_name: clear-linux-os\n"
+                        "board_name: Qemu|Intel\n"
+                        "cpu_model: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz\n"
+                        "bios_version: Qemu\n";
         char *post_body = "test message";
 
         set_up_socket_pair(&client_fd, &server_fd);

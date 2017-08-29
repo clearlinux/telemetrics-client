@@ -416,8 +416,8 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
         char *model_name = NULL;
         const char *attr_name = "model name";
         int status = 0;
-        size_t attr_len = sizeof(attr_name);
-        size_t size = 0;
+        size_t attr_len = strlen(attr_name);
+        size_t model_str_len = 0;
 
         fs = fopen("/proc/cpuinfo", "r");
         if (fs != NULL) {
@@ -427,27 +427,26 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
                             break;
                         }
                 }
-		fclose(fs);
-		if (model_name != NULL) {
-		        puts("HELLO");	
-                	size = strlen(model_name);
-                	if (size > 2) {
-                    		model_name = (char *) model_name + 2 * sizeof(char);
-                        }
-			size = strlen(model_name);
-			(model_name)[size - 1] = '\0';
-                        status = set_header(
+                fclose(fs);
+                if (model_name != NULL) {
+                            model_str_len = strlen(model_name);
+                            if (model_str_len > 2) {
+                                    model_name = (char *) model_name + 2 * sizeof(char);
+                                    model_name[model_str_len - 2] = '\0';
+                            } else {
+                                    model_name = "blank";
+                            }
+                } else {
+                        model_name = "blank";
+                        fprintf(stderr, "NOTICE: Unable to find attribute:%s\n", attr_name);
+                }
+
+                status = set_header(
                                 &(t_ref->record->headers[TM_CPU_MODEL]),
                                 TM_CPU_MODEL_STR, model_name,
-                                &(t_ref->record->header_size));			
-
-		} else {
-			fprintf(stderr, "NOTICE: Unable to find attribute:%s\n", attr_name);
-                        status = set_header(
-                                &(t_ref->record->headers[TM_CPU_MODEL]),
-                                TM_CPU_MODEL_STR, "blank",
                                 &(t_ref->record->header_size));
-		}
+
+
         } else {
 #ifdef DEBUG
                 fprint(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
