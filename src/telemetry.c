@@ -422,36 +422,35 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
         fs = fopen("/proc/cpuinfo", "r");
         if (fs != NULL) {
                 while (fgets(buf, SMALL_LINE_BUF, fs)) {
-                        if(strncmp(attr_name, buf, attr_len) == 0){
-                            model_name = strchr(buf, ':');
-                            break;
+                        if (strncmp(attr_name, buf, attr_len) == 0) {
+                                model_name = strchr(buf, ':');
+                                break;
                         }
                 }
                 fclose(fs);
                 if (model_name != NULL) {
-                            model_str_len = strlen(model_name);
-                            if (model_str_len > 2) {
-                                    model_name = (char *) model_name + 2 * sizeof(char);
-                                    model_name[model_str_len - 2] = '\0';
-                            } else {
-                                    model_name = "blank";
-                            }
+                        model_str_len = strlen(model_name);
+                        if (model_str_len > 2) {
+                                model_name = (char *)model_name + 2 * sizeof(char);
+                                model_name[model_str_len - 2] = '\0';
+                        } else {
+                                model_name = "blank";
+                        }
                 } else {
                         model_name = "blank";
                         fprintf(stderr, "NOTICE: Unable to find attribute:%s\n", attr_name);
                 }
 
                 status = set_header(
-                                &(t_ref->record->headers[TM_CPU_MODEL]),
-                                TM_CPU_MODEL_STR, model_name,
-                                &(t_ref->record->header_size));
-
+                        &(t_ref->record->headers[TM_CPU_MODEL]),
+                        TM_CPU_MODEL_STR, model_name,
+                        &(t_ref->record->header_size));
 
         } else {
 #ifdef DEBUG
                 fprint(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
 #endif
-               status = -1;
+                status = -1;
         }
 
         return status;
@@ -605,7 +604,6 @@ cleanup:
         if (bv != NULL) {
                 free(bv);
         }
-
 
         return status;
 }

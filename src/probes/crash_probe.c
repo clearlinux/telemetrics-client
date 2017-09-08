@@ -71,7 +71,6 @@ static char unknown_class[30] = "org.clearlinux/crash/unknown";
 static char temp_core[] = "/tmp/corefile-XXXXXX";
 static bool keep_core = false;
 
-
 static const Dwfl_Callbacks cb =
 {
         .find_elf = dwfl_build_id_find_elf,

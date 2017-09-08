@@ -39,7 +39,6 @@
 #define TM_CPU_MODEL 12
 #define TM_BIOS_VERSION 13
 
-
 #define TM_RECORD_VERSION_STR "record_format_version"
 #define TM_CLASSIFICATION_STR "classification"
 #define TM_SEVERITY_STR "severity"
