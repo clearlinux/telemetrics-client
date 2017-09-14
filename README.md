@@ -15,6 +15,10 @@ component includes:
   (not included in this source tree), or spools the records on disk in case
   it's unable to successfully deliver them.
 
+A telemetrics server implementation that works with this component is available
+from
+[clearlinux/telemetrics-backend](https://github.com/clearlinux/telemetrics-backend).
+
 
 Build dependencies
 ---------------------
