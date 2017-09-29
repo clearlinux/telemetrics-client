@@ -448,7 +448,7 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
 
         } else {
 #ifdef DEBUG
-                fprint(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
+                fprintf(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
 #endif
                 status = -1;
         }
