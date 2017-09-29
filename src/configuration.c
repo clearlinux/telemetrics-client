@@ -91,8 +91,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
         keyfile = nc_ini_file_parse(config_file);
         if (!keyfile) {
 #ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to read config file: %s\n",
-                        error->message);
+                fprintf(stderr, "ERR: Failed to read config file\n");
 #endif
                 return false;
         } else {
