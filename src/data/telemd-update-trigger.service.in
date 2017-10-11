@@ -1,0 +1,7 @@
+[Unit]
+Description=Restart Telemetrics Daemon On Update
+BindsTo=update-triggers.target
+
+[Service]
+Type=oneshot
+ExecStart=@systemctldir@/systemctl try-restart telemd.service

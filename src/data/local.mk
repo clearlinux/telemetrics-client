@@ -4,7 +4,8 @@ pathfix = @sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
 	-e 's|@localstatedir[@]|$(localstatedir)|g' \
 	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-	-e 's|@SOCKETDIR[@]|$(SOCKETDIR)|g'
+	-e 's|@SOCKETDIR[@]|$(SOCKETDIR)|g' \
+	-e 's|@systemctldir[@]|$(SYSTEMD_SYSTEMCTLDIR)|g'
 
 EXTRA_DIST += \
 	%D%/40-core-ulimit.conf \
@@ -21,6 +22,7 @@ EXTRA_DIST += \
 	%D%/telemd.path.in \
 	%D%/telemd.service.in \
 	%D%/telemd.socket.in \
+	%D%/telemd-update-trigger.service.in \
 	%D%/telemetrics-dirs.conf.in \
 	%D%/telemetrics.conf.in
 
@@ -53,6 +55,7 @@ systemdunit_DATA = \
 	%D%/pstore-clean.service \
 	%D%/telemd.service \
 	%D%/telemd.socket \
+	%D%/telemd-update-trigger.service \
 	%D%/telemd.path
 
 %D%/hprobe.service: %D%/hprobe.service.in
@@ -82,6 +85,9 @@ systemdunit_DATA = \
 %D%/telemd.path: %D%/telemd.path.in
 	$(pathfix) < $< > $@
 
+%D%/telemd-update-trigger.service: %D%/telemd-update-trigger.service.in
+	$(pathfix) < $< > $@
+
 sysctldir = @SYSTEMD_SYSCTLDIR@
 sysctl_DATA = %D%/40-crash-probe.conf
 
@@ -95,6 +101,7 @@ clean-local:
 	-rm -f  %D%/telemd.service \
 		%D%/telemd.socket \
 		%D%/telemd.path \
+		%D%/telemd-update-trigger.service \
 		%D%/telemetrics.conf \
 		%D%/telemetrics-dirs.conf \
 		%D%/libtelemetry.pc \

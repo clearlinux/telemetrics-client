@@ -98,6 +98,11 @@ AC_ARG_WITH([systemdsysctldir], AS_HELP_STRING([--with-systemdsysctldir=DIR],
 test -z "${sysctlpath}" && sysctlpath=/usr/lib/sysctl.d
 AC_SUBST(SYSTEMD_SYSCTLDIR, [${sysctlpath}])
 
+AC_ARG_WITH([systemdsystemctldir], AS_HELP_STRING([--with-systemdsystemctldir=DIR],
+            [path to systemd systemctl dir @<:@default=/usr/bin@:>@]), [systemctlpath=${withval}])
+test -z "${systemctlpath}" && systemctlpath=/usr/bin
+AC_SUBST(SYSTEMD_SYSTEMCTLDIR, [${systemctlpath}])
+
 # systemd.pc gives the /etc conf dir, so we can't use PKG_CONFIG for this one
 AC_ARG_WITH([systemdsystemconfdir], AS_HELP_STRING([--with-systemdsystemconfdir=DIR],
 	    [path to systemd system conf dir @<:@default=/usr/lib/systemd/system.conf.d@:>@]), [confpath=${withval}],
