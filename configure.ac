@@ -93,8 +93,8 @@ test -z "${tmpfilespath}" && tmpfilespath=/usr/lib/tmpfiles.d
 AC_SUBST(SYSTEMD_TMPFILESDIR, [${tmpfilespath}])
 
 AC_ARG_WITH([systemdsysctldir], AS_HELP_STRING([--with-systemdsysctldir=DIR],
-            [path to systemd sysctl dir @<:@default=/usr/lib/sysctl.d@:>@]), [sysctlpath=${withval}],
-            [sysctlpath="$($PKG_CONFIG --variable=sysctldir systemd)"])
+	    [path to systemd sysctl dir @<:@default=/usr/lib/sysctl.d@:>@]), [sysctlpath=${withval}],
+	    [sysctlpath="$($PKG_CONFIG --variable=sysctldir systemd)"])
 test -z "${sysctlpath}" && sysctlpath=/usr/lib/sysctl.d
 AC_SUBST(SYSTEMD_SYSCTLDIR, [${sysctlpath}])
 
