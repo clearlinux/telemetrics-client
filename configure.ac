@@ -93,17 +93,15 @@ test -z "${tmpfilespath}" && tmpfilespath=/usr/lib/tmpfiles.d
 AC_SUBST(SYSTEMD_TMPFILESDIR, [${tmpfilespath}])
 
 AC_ARG_WITH([systemdsysctldir], AS_HELP_STRING([--with-systemdsysctldir=DIR],
-	    [path to systemd sysctl dir @<:@default=/usr/lib/sysctl.d@:>@]), [sysctlpath=${withval}])
+            [path to systemd sysctl dir @<:@default=/usr/lib/sysctl.d@:>@]), [sysctlpath=${withval}],
+            [sysctlpath="$($PKG_CONFIG --variable=sysctldir systemd)"])
 test -z "${sysctlpath}" && sysctlpath=/usr/lib/sysctl.d
 AC_SUBST(SYSTEMD_SYSCTLDIR, [${sysctlpath}])
 
-
 AC_ARG_WITH([systemdsystemctldir], AS_HELP_STRING([--with-systemdsystemctldir=DIR],
-            [path to systemd systemctl dir @<:@default=/usr/bin@:>@]), [systemctlpath=${withval}],
-            [systemctlpath="$($PKG_CONFIG --variable=systemctldir systemd)"])
+            [path to systemd systemctl dir @<:@default=/usr/bin@:>@]), [systemctlpath=${withval}])
 test -z "${systemctlpath}" && systemctlpath=/usr/bin
 AC_SUBST(SYSTEMD_SYSTEMCTLDIR, [${systemctlpath}])
-
 
 # systemd.pc gives the /etc conf dir, so we can't use PKG_CONFIG for this one
 AC_ARG_WITH([systemdsystemconfdir], AS_HELP_STRING([--with-systemdsystemconfdir=DIR],
