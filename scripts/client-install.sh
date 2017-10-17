@@ -5,8 +5,9 @@ ubuntu(){
 	sudo apt install dh-autoreconf libcurl4-gnutls-dev libglib2.0-dev libelf-dev libdw-dev gcc check
 
 	# compile telemetrics-client
-	sh ./autogen.sh
-	./configure
+    pushd ../
+	sh autogen.sh
+	configure
 	make
 	sudo make install
 	# -------------------------
@@ -24,6 +25,7 @@ ubuntu(){
  	sudo make install
 	fi
 	# -------------------------
+    popd
 
 	sudo mkdir -p /etc/telemetrics/
 	sudo cp /usr/local/share/defaults/telemetrics/telemetrics.conf /etc/telemetrics/telemetrics.conf
@@ -44,8 +46,9 @@ fedora(){
 	sudo yum install dh-autoreconf check* libcurl* glib* elfutils* libdw* gcc
 
 	# compile telemetrics-client
-	sh ./autogen.sh
-	./configure
+	pushd ../
+    sh autogen.sh
+	configure
 	make
 	sudo make install
 	# -------------------------
@@ -63,7 +66,7 @@ fedora(){
  	sudo make install
 	fi
 	# -------------------------
-
+    popd
 
 	sudo mkdir -p /etc/telemetrics/
 	sudo cp /usr/local/share/defaults/telemetrics/telemetrics.conf /etc/telemetrics/telemetrics.conf
@@ -83,8 +86,9 @@ opensuse(){
 	sudo OCICLI http://software.opensuse.org/ymp/devel:tools:building/openSUSE_Leap_42.2/automake.ymp # This install automake 1.14
 
 	# compile telemetrics-client
-	sh ./autogen.sh
-	./configure
+	pushd ../
+    sh autogen.sh
+	configure
 	make
 	sudo make install
 	# -------------------------
@@ -98,7 +102,7 @@ opensuse(){
 	make
 	sudo make install
 	# -------------------------
-
+    popd
 
 	sudo mkdir -p /etc/telemetrics/
 	sudo cp /usr/local/share/defaults/telemetrics/telemetrics.conf /etc/telemetrics/telemetrics.conf
