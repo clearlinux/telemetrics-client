@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <malloc.h>
+#include <sys/uio.h>
 
 #include "telemdaemon.h"
 #include "common.h"
