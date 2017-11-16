@@ -61,6 +61,11 @@ telem_start() {
   for_each_service "start" ${SPECIAL_UNITS[@]}
 }
 
+telem_is_active() {
+  # check only activation units
+  systemctl is-active telemd.socket
+}
+
 telem_opt_out() {
   [ -f $OPT_OUT_FILE ] && exit_ok "Already opted out. Nothing to do."
   mkdir -p $TELEM_DIR || exit_err "Failed to create ${TELEM_DIR}."
@@ -82,11 +87,12 @@ telem_restart() {
 usage() {
   printf "$SCRIPT - Control actions for telemetry services\n"
   printf "\n"
-  printf "%15s   %-65s\n" "stop" "Stops all running telemetry services"
-  printf "%15s   %-65s\n" "start" "Starts all telemetry services"
-  printf "%15s   %-65s\n" "restart" "Restarts all telemetry services"
-  printf "%15s   %-65s\n" "opt-in" "Opts in to telemetry, and starts telemetry services"
-  printf "%15s   %-65s\n" "opt-out" "Opts out of telemetry, and stops telemetry services"
+  printf "  stop      %s\n" "Stops all running telemetry services"
+  printf "  start     %s\n" "Starts all telemetry services"
+  printf "  restart   %s\n" "Restarts all telemetry services"
+  printf "  is-active %s\n" "Checks if telemd is active"
+  printf "  opt-in    %s\n" "Opts in to telemetry, and starts telemetry services"
+  printf "  opt-out   %s\n" "Opts out of telemetry, and stops telemetry services"
   printf "\n"
   exit 2
 }
@@ -112,6 +118,8 @@ case $SUBCOMMAND in
     telem_start ;;
   restart)
     telem_restart ;;
+  is-active)
+    telem_is_active ;;
   *)
     notice "Unknown command passed to $SCRIPT"
     usage ;;
