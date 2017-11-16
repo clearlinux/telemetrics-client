@@ -18,10 +18,19 @@ declare -a SERVICES=(
 SCRIPT="$0"
 TELEM_DIR=/etc/telemetrics
 OPT_OUT_FILE=${TELEM_DIR}/opt-out
+TELEM_WRK_DIRS_CONF=/usr/lib/tmpfiles.d/telemetrics-dirs.conf
 
 create_work_dirs() {
   # Creates dirs if missing, adjust ownership if exists
   systemd-tmpfiles --create telemetrics-dirs.conf
+}
+
+telem_remove_work_dirs() {
+  # Remove dirs
+  while read LINE;
+  do
+      echo $LINE | awk '{print $2}' | xargs rm -rf;
+  done < $TELEM_WRK_DIRS_CONF
 }
 
 exit_ok() {
@@ -71,6 +80,7 @@ telem_opt_out() {
   mkdir -p $TELEM_DIR || exit_err "Failed to create ${TELEM_DIR}."
   touch $OPT_OUT_FILE || exit_err "Failed to create ${OPT_OUT_FILE}."
   telem_stop
+  telem_remove_work_dirs
 }
 
 telem_opt_in() {
