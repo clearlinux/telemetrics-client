@@ -19,6 +19,11 @@ SCRIPT="$0"
 TELEM_DIR=/etc/telemetrics
 OPT_OUT_FILE=${TELEM_DIR}/opt-out
 
+create_work_dirs() {
+  # Creates dirs if missing, adjust ownership if exists
+  systemd-tmpfiles --create telemetrics-dirs.conf
+}
+
 exit_ok() {
   echo "$1" > /dev/stderr
   exit 0
@@ -50,6 +55,8 @@ telem_stop() {
 
 telem_start() {
   [ -f $OPT_OUT_FILE ] && exit_err "Opt out is enabled. Cannot start services."
+  # trigger systemd-tmpfiles work dirs creation
+  create_work_dirs
   # the units in SERVICES are activated as needed, so no need to start them
   for_each_service "start" ${SPECIAL_UNITS[@]}
 }
