@@ -22,15 +22,12 @@ TELEM_WRK_DIRS_CONF=/usr/lib/tmpfiles.d/telemetrics-dirs.conf
 
 create_work_dirs() {
   # Creates dirs if missing, adjust ownership if exists
-  systemd-tmpfiles --create telemetrics-dirs.conf
+  systemd-tmpfiles --create ${TELEM_WRK_DIRS_CONF}
 }
 
 telem_remove_work_dirs() {
   # Remove dirs
-  while read LINE;
-  do
-      echo $LINE | awk '{print $2}' | xargs rm -rf;
-  done < $TELEM_WRK_DIRS_CONF
+  awk '/^d/{print $2}' ${TELEM_WRK_DIRS_CONF} | xargs rm -rf;
 }
 
 exit_ok() {
@@ -95,14 +92,16 @@ telem_restart() {
 }
 
 usage() {
-  printf "$SCRIPT - Control actions for telemetry services\n"
+  format='  %-10s %s\n'
   printf "\n"
-  printf "  stop      %s\n" "Stops all running telemetry services"
-  printf "  start     %s\n" "Starts all telemetry services"
-  printf "  restart   %s\n" "Restarts all telemetry services"
-  printf "  is-active %s\n" "Checks if telemd is active"
-  printf "  opt-in    %s\n" "Opts in to telemetry, and starts telemetry services"
-  printf "  opt-out   %s\n" "Opts out of telemetry, and stops telemetry services"
+  printf "%s - Control actions for telemetry services\n" "$SCRIPT"
+  printf "\n"
+  printf "$format" "stop" "Stops all running telemetry services"
+  printf "$format" "start" "Starts all telemetry services"
+  printf "$format" "restart" "Restarts all telemetry services"
+  printf "$format" "is-active" "Checks if telemd is active"
+  printf "$format" "opt-in" "Opts in to telemetry, and starts telemetry services"
+  printf "$format" "opt-out" "Opts out of telemetry, and stops telemetry services"
   printf "\n"
   exit 2
 }
