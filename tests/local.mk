@@ -61,7 +61,7 @@ endif
 	src/probes/klog_scanner.c \
 	src/probes/klog_scanner.h \
 	src/probes/oops_parser.c \
-	src/probes/oops_parser.h 
+	src/probes/oops_parser.h
 
 EXTRA_DIST += \
 	%D%/oops_test_files/2or3_digit_loglevel.txt \
@@ -115,6 +115,7 @@ endif
 	@CHECK_CFLAGS@
 %C%_check_libtelemetry_LDADD = \
 	@CHECK_LIBS@ \
+	-lnuma \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la
 
