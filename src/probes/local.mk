@@ -5,13 +5,21 @@ bin_PROGRAMS += \
 	%D%/klogscanner \
 	%D%/pstoreprobe \
 	%D%/oopsprobe \
-	%D%/pstoreclean
+	%D%/pstoreclean \
+	%D%/bertprobe
 
 %C%_hprobe_SOURCES = %D%/hello.c
 %C%_hprobe_LDADD = $(top_builddir)/src/libtelemetry.la
 %C%_hprobe_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
+
+%C%_bertprobe_SOURCES = %D%/bert_probe.c \
+	src/nica/b64enc.c
+%C%_bertprobe_LDADD = $(top_builddir)/src/libtelemetry.la
+%C%_bertprobe_LDFLAGS = \
+        $(AM_LDFLAGS) \
+        -pie
 
 %C%_telem_record_gen_SOURCES = %D%/telem_record_gen.c
 %C%_telem_record_gen_CFLAGS = \

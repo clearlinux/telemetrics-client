@@ -13,6 +13,7 @@ EXTRA_DIST += \
 	%D%/example.conf \
 	%D%/hprobe.service.in \
 	%D%/hprobe.timer \
+	%D%/bert-probe.service.in \
 	%D%/journal-probe.service.in \
 	%D%/oops-probe.service.in \
 	%D%/pstore-probe.service.in \
@@ -48,6 +49,7 @@ systemdunitdir = @SYSTEMD_UNITDIR@
 systemdunit_DATA = \
 	%D%/hprobe.service \
 	%D%/hprobe.timer \
+	%D%/bert-probe.service \
 	%D%/journal-probe.service \
 	%D%/oops-probe.service \
 	%D%/pstore-probe.service \
@@ -59,6 +61,9 @@ systemdunit_DATA = \
 	%D%/telemd.path
 
 %D%/hprobe.service: %D%/hprobe.service.in
+	$(pathfix) < $< > $@
+
+%D%/bert-probe.service: %D%/bert-probe.service.in
 	$(pathfix) < $< > $@
 
 %D%/journal-probe.service: %D%/journal-probe.service.in
@@ -112,4 +117,5 @@ clean-local:
 		%D%/klogscanner.service \
 		%D%/pstore-clean.service \
 		%D%/hprobe.service \
+		%D%/bert-probe.service \
 		%D%/.dirstamp
