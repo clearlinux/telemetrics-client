@@ -1,0 +1,12 @@
+[Unit]
+Description=Telemetrics BERT Probe
+Requires=telemd.socket
+After=telemd.socket
+ConditionPathExists=!/etc/telemetrics/opt-out
+
+[Service]
+ExecStart=@bindir@/bertprobe
+User=telemetry
+
+[Install]
+WantedBy=multi-user.target
