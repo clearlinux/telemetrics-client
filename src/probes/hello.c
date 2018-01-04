@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         int ret = 0;
 
         struct option opts[] = {
-                { "cfile", 1, NULL, 'f' },
+                { "config_file", 1, NULL, 'f' },
                 { "heartbeat", 0, NULL, 'H' },
                 { "help", 0, NULL, 'h' },
                 { "version", 0, NULL, 'V' },
