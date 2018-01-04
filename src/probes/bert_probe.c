@@ -27,7 +27,7 @@
 #include "config.h"
 
 static const char bert_record_file[] = "/sys/firmware/acpi/tables/data/BERT";
-static const char telem_record_class[] = "org.clearlinux/debug/bert";
+static const char telem_record_class[] = "org.clearlinux/bert/debug";
 static uint32_t severity = 2;
 static uint32_t payload_version = 1;
 
@@ -35,7 +35,7 @@ static uint32_t payload_version = 1;
 void print_usage(char *prog)
 {
         printf("%s: Usage\n", prog);
-        printf("  -f,  --config_file    Configuration file. This overides the other parameters\n");
+        printf("  -f,  --config_file    Specify a configuration file other than default\n");
         printf("  -h,  --help           Display this help message\n");
         printf("  -V,  --version        Print the program version\n");
 }
@@ -44,23 +44,23 @@ static int allocate_payload_buffer(char **payload)
 {
         int ret = 0;
 
-        *payload = (char *) malloc(MAX_PAYLOAD_SIZE);
+        *payload = (char *)malloc(MAX_PAYLOAD_SIZE);
 
         if (*payload == NULL) {
-                goto out1;
+                goto out;
         }
 
         *payload = memset(*payload, 0, MAX_PAYLOAD_SIZE);
         ret = 1;
 
-out1:
+out:
         return ret;
 }
 
 int main(int argc, char **argv)
 {
         struct telem_ref *tm_handle = NULL;
-        char *classification = (char *) telem_record_class;
+        char *classification = (char *)telem_record_class;
         char *payload = NULL;
 
         // Following vars are for arg parsing.
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
         int ret = 0;
 
         struct option opts[] = {
-                { "cfile", 1, NULL, 'f' },
+                { "config_file", 1, NULL, 'f' },
                 { "help", 0, NULL, 'h' },
                 { "version", 0, NULL, 'V' },
                 { NULL, 0, NULL, 0 }
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         while ((c = getopt_long(argc, argv, "f:hHV", opts, &opt_index)) != -1) {
                 switch (c) {
                         case 'f':
-                                if (asprintf(&cfile, "%s", (char *) optarg) < 0) {
+                                if (asprintf(&cfile, "%s", (char *)optarg) < 0) {
                                         exit(EXIT_FAILURE);
                                 }
 
@@ -131,8 +131,6 @@ int main(int argc, char **argv)
                 printf("Failed to send record to daemon: %s\n", strerror(-ret));
                 goto fail;
         }
-
-        printf("Successfully sent record to daemon.\n");
 
 fail:
         free(cfile);
