@@ -29,9 +29,11 @@
 #include <limits.h>
 #include <inttypes.h>
 #include <ctype.h>
+#include <numa.h>
 
 #include "common.h"
 #include "configuration.h"
+#include "util.h"
 #include "telemetry.h"
 
 /**
@@ -771,6 +773,64 @@ static int set_payload_format_header(struct telem_ref *t_ref, uint32_t payload_v
         return status;
 }
 
+/**
+ * Sets the PPIN header, it contains a set of PPIN for each NUMA node in the
+ * format: <numa_node0>:<CPU_PPIN0>;<numa_node1>:<CPU_PPIN1>;...
+ * This capability is only available in Skylake-like arch by msrtools:
+ * (https://01.org/msr-tools). If msr-tools is missing or system is not
+ * capable of reading PPIN, then an empty string will be used.
+ *
+ * @param t_ref Telemetry Record reference obtained from tm_create_record.
+ *
+ * @return 0 if successful, or a negative errno-style value if not.
+ *
+ */
+static int set_ppin_header(struct telem_ref *t_ref)
+{
+        char *buf = NULL;
+        int rc = 0;
+        int status = 0;
+        unsigned long long int ppin = 0;
+        int nodes=0, cpuno=0, i, j;
+        struct bitmask *cpus;
+
+        if (ppin_capable() == 1){
+            nodes = numa_max_node();
+            for(i=0; i<=nodes; i++){
+                cpus = numa_allocate_cpumask();
+                rc = numa_node_to_cpus(i, cpus);
+                if (rc >= 0) {
+                    for (j = 0; j < cpus->size; j++)
+                        if (numa_bitmask_isbitset(cpus, (unsigned int)j)){
+                            cpuno = j;
+                            break;
+                        }
+                    ppin = rdmsr_on_cpu(79, cpuno);
+                    if (ppin) {
+                        rc += asprintf(&buf, "%s%llx", buf, ppin);
+                        if (i<nodes){
+                            rc += asprintf(&buf, "%s|", buf);
+                        }
+                    }
+                }
+            }
+        }
+        if (rc == 0) {
+            rc = asprintf(&buf, "blank");
+        }
+        if (rc < 0) {
+                status = rc;
+        } else {
+                status = set_header(
+                        &(t_ref->record->headers[TM_PPIN]),
+                        TM_PPIN_STR, buf,
+                        &(t_ref->record->header_size));
+                free(buf);
+        }
+
+        return status;
+}
+
 void tm_set_config_file(char *c_file)
 {
         set_config_file(c_file);
@@ -885,6 +945,12 @@ int allocate_header(struct telem_ref *t_ref, uint32_t severity,
         i++;
 
         if ((ret = set_bios_version_header(t_ref)) < 0) {
+                goto free_and_fail;
+        }
+
+        i++;
+
+        if ((ret = set_ppin_header(t_ref)) < 0) {
                 goto free_and_fail;
         }
 

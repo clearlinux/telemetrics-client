@@ -54,6 +54,7 @@ AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([sys/types.h])
 AC_CHECK_HEADERS([syslog.h])
 AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([numa.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

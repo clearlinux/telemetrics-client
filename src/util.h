@@ -27,4 +27,10 @@ bool get_header(const char *haystack, const char *needle, char **line, size_t le
 /* Get the size of the directory */
 long get_directory_size(const char *sdir);
 
+/* Read MSR registry on a CPU and return the 64 bits value*/
+unsigned long long int rdmsr_on_cpu(int reg, int cpu);
+
+/* Check if current platform support reading registry 0x4f*/
+int ppin_capable(void);
+
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

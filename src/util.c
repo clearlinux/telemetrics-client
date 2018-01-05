@@ -25,6 +25,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "util.h"
 
@@ -105,6 +107,60 @@ long get_directory_size(const char *dir_path)
         closedir(dir);
 
         return total_size;
+}
+
+
+
+unsigned long long int rdmsr_on_cpu(int reg, int cpu)
+{
+	unsigned long long int data = 0;
+	int fd;
+	char msr_file_name[64];
+
+	sprintf(msr_file_name, "/dev/cpu/%d/msr", cpu);
+	fd = open(msr_file_name, O_RDONLY);
+	if (fd < 0) {
+		if (errno == ENXIO) {
+#ifdef DEBUG
+			fprintf(stderr, "rdmsr: No CPU %d\n", cpu);
+#endif
+		} else if (errno == EIO) {
+#ifdef DEBUG
+			fprintf(stderr, "rdmsr: CPU %d doesn't support MSRs\n",
+				cpu);
+#endif
+		} else {
+#ifdef DEBUG
+			perror("rdmsr: open");
+#endif
+		}
+	}
+
+	if (pread(fd, &data, sizeof data, reg) != sizeof data) {
+		if (errno == EIO) {
+#ifdef DEBUG
+			fprintf(stderr, "rdmsr: CPU %d cannot read "
+				"MSR 0x%08x\n",
+				cpu, reg);
+#endif
+		} else {
+#ifdef DEBUG
+			perror("rdmsr: pread");
+#endif
+		}
+		data = 0;
+	}
+	close(fd);
+	return data;
+}
+
+int ppin_capable(void)
+{
+	unsigned long long int data;
+	data = rdmsr_on_cpu(206, 0);
+	data >>= 23;
+	data &= (1ULL << 1) - 1;
+	return (int)data;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

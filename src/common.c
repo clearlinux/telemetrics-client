@@ -36,7 +36,8 @@ static const char *header_names[] = {
         TM_SYSTEM_NAME_STR,
         TM_BOARD_NAME_STR,
         TM_CPU_MODEL_STR,
-        TM_BIOS_VERSION_STR
+        TM_BIOS_VERSION_STR,
+        TM_PPIN_STR
 };
 
 const char *get_header_name(int ind)

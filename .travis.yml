@@ -18,11 +18,12 @@ addons:
         packages:
             - libcurl4-gnutls-dev
             - valgrind
-            - autoconf 
+            - autoconf
             - automake
             - check
             - libelf-dev
             - libdw-dev
+            - libnuma-dev
 
 install:
         - wget http://downloads.sourceforge.net/project/check/check/0.10.0/check-0.10.0.tar.gz

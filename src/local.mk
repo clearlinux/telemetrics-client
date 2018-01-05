@@ -80,6 +80,7 @@ EXTRA_DIST += \
 
 %C%_libtelemetry_la_LIBADD = \
 	%D%/libtelem-shared.la \
-	-ldl
+	-ldl \
+	-lnuma
 
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab
