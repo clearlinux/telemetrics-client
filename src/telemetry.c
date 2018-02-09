@@ -15,6 +15,7 @@
  */
 
 #define _GNU_SOURCE
+
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -637,6 +638,67 @@ static int set_bios_version_header(struct telem_ref *t_ref)
         return status;
 }
 
+
+/**
+ * Generates an alphanumeric id of length 32
+ *
+ * @param buff pointer to memory buffer, buffer should have
+ *        at least 33 bytes of memory
+ *
+ * @return 0 if successful, or -1 if there's a problem
+ *
+ */
+static int gen_event_id(char *buff)
+{
+        int frandom = -1;
+        int result = -1;
+        uint64_t random_id[2] = {0};
+
+        frandom = open("/dev/urandom", O_RDONLY);
+        if (frandom < 0) {
+                return -1;
+        }
+
+        if (read(frandom, &random_id, sizeof(random_id)) == sizeof(random_id)) {
+                if (sprintf(buff, "%.16" PRIx64 "%.16" PRIx64, random_id[0], random_id[1]) == 32) {
+                        result = 0;
+                }
+        }
+
+        close(frandom);
+
+        return result;
+}
+
+
+/**
+ * Sets the event_id header, this id is an identifier that multiple
+ * records can share. This means that one event can lead to multiple
+ * records.
+ *
+ * @param t_ref Telemetry Record reference obtained from tm_create_record.
+ *
+ * @return 0 if successful, -1 on failure
+ *
+ */
+static int set_event_id_header(struct telem_ref *t_ref)
+{
+        int rc = 0;
+        char buff[33];
+
+        rc = gen_event_id(buff);
+
+        if (rc == 0) {
+                 rc = set_header(
+                        &(t_ref->record->headers[TM_EVENT_ID]),
+                        TM_EVENT_ID_STR, buff,
+                        &(t_ref->record->header_size));
+        }
+
+        return rc;
+}
+
+
 /**
  * Sets the hosttype header, which is a tuple of three values looked for
  * in the dmi filesystem.  System Vendor (sys_vendor), Product Name
@@ -888,6 +950,12 @@ int allocate_header(struct telem_ref *t_ref, uint32_t severity,
                 goto free_and_fail;
         }
 
+        i++;
+
+        if ((ret = set_event_id_header(t_ref)) < 0) {
+                goto free_and_fail;
+        }
+
         i++; /* Not necessary, but including for future expansion */
 
         return ret;
@@ -1015,6 +1083,61 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
 
         return ret;
 }
+
+
+/**
+ * Checks for id to have length = 32 characters
+ * and hexadecimal characters only.
+ *
+ * @param id A pointer to string to be checked
+ *
+ * @return 0 on success, 1 on failure
+ *
+ */
+static int validate_event_id(char *id)
+{
+       int rc = 0;
+       const char alphab[] = EVENT_ID_ALPHAB;
+
+       // make sure is not null
+       if (!id) {
+               return 1;
+       }
+
+       // 32 - 32 = 0
+       if ((rc = (int)(strlen(id) - EVENT_ID_LEN)) != 0) {
+               return 1;
+       }
+
+       // verify alphabet
+       // strspn checks for characters in alphab
+       if (strspn(id, alphab) != EVENT_ID_LEN) {
+               return 1;
+       }
+
+       return rc;
+}
+
+
+int tm_set_event_id(struct telem_ref *t_ref, char *event_id)
+{
+        int rc = -1;
+
+        if (!validate_event_id(event_id)) {
+                 if (t_ref && t_ref->record && t_ref->record->headers) {
+                         // free default id before overriding
+                         free(t_ref->record->headers[TM_EVENT_ID]);
+                         // set new event_id
+                         if (asprintf(&(t_ref->record->headers[TM_EVENT_ID]),
+                                 "%s: %s\n", TM_EVENT_ID_STR, event_id) > 0) {
+                                 rc = 0;
+                         }
+                 }
+        }
+
+        return rc;
+}
+
 
 /**
  * Write nbytes from buf to fd. Used to send records to telemd.

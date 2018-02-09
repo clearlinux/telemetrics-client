@@ -157,6 +157,62 @@ START_TEST(record_create_severity_overflow)
 }
 END_TEST
 
+START_TEST(record_set_event_id)
+{
+        int ret;
+        char *event_id = "aaaaaa00000033333344444466666622";
+        char *result;
+        ret = tm_create_record(&ref, 1, "t/t/t", 2000);
+        ck_assert_msg(ret != -ECONNREFUSED,
+                      "Opt-out enabled. Opt in to run this test");
+        if (asprintf(&result, "%s: %s\n", TM_EVENT_ID_STR, event_id) < 0) {
+                return;
+        }
+        ck_assert_str_ne(ref->record->headers[TM_EVENT_ID], result);
+        ret = tm_set_event_id(ref, event_id);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], result);
+        free(result);
+        create_teardown();
+}
+END_TEST
+
+START_TEST(record_set_event_id_invalid)
+{
+        int ret;
+        char *event_id = "aaaaaa000000333333444444666666ZZ";
+        char *event_id_1 = NULL;
+        char *event_id_2 = "aaaa";
+        char *event_id_3 = "0000000000000000000000000000000000000000000";
+        char *original;
+        ret = tm_create_record(&ref, 1, "t/t/t", 2000);
+        ck_assert_msg(ret != -ECONNREFUSED,
+                      "Opt-out enabled. Opt in to run this test");
+        original = strdupa(ref->record->headers[TM_EVENT_ID]);
+        if (!original) {
+                return;
+        }
+
+        ret = tm_set_event_id(ref, event_id);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
+
+        ret = tm_set_event_id(ref, event_id_1);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
+
+        ret = tm_set_event_id(ref, event_id_2);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
+
+        ret = tm_set_event_id(ref, event_id_3);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
+
+        create_teardown();
+}
+END_TEST
+
 Suite *lib_suite(void)
 {
         Suite *s = suite_create("libtelemetry");
@@ -178,6 +234,11 @@ Suite *lib_suite(void)
         t = tcase_create("clamped severity range");
         tcase_add_test(t, record_create_severity_underflow);
         tcase_add_test(t, record_create_severity_overflow);
+        suite_add_tcase(s, t);
+
+        t = tcase_create("event id");
+        tcase_add_test(t, record_set_event_id);
+        tcase_add_test(t, record_set_event_id_invalid);
         suite_add_tcase(s, t);
 
         return s;

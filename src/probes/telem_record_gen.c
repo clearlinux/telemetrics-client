@@ -38,6 +38,7 @@ static char *opt_class = NULL;
 static char *opt_payload = NULL;
 static uint32_t payload_version = 1;
 static char *opt_payload_file = NULL;
+static char *opt_event_id = NULL;
 
 static const struct option prog_opts[] = {
         { "help", no_argument, 0, 'h' },
@@ -48,6 +49,7 @@ static const struct option prog_opts[] = {
         { "payload", required_argument, 0, 'p' },
         { "payload-file", required_argument, 0, 'P' },
         { "record-version", required_argument, 0, 'R' },
+        { "event-id", required_argument, 0, 'e' },
         { 0, 0, 0, 0 }
 };
 
@@ -67,6 +69,7 @@ static void print_help(void)
         printf("  -p, --payload         Record body (max size = 8k)\n");
         printf("  -P, --payload-file    File to read payload from\n");
         printf("  -R, --record-version  Version number for format of payload (default 1)\n");
+        printf("  -e,  --event-id        Event id to use in the record\n");
         printf("\n");
 }
 
@@ -91,7 +94,7 @@ int parse_options(int argc, char **argv)
         long unsigned int tmp = 0;
 
         int opt;
-        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:", prog_opts, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:e:", prog_opts, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 print_help();
@@ -140,6 +143,12 @@ int parse_options(int argc, char **argv)
 
                                 payload_version = (uint32_t)tmp;
                                 break;
+                        case 'e':
+                                opt_event_id = strdup(optarg);
+                                if (opt_event_id == NULL) {
+                                        goto fail;
+                                }
+                                break;
                 }
         }
 
@@ -152,6 +161,7 @@ int validate_opts(void)
 {
         size_t len;
         int ret = 0;
+        const char alphab[] = EVENT_ID_ALPHAB;
 
         /* classification */
         if (opt_class == NULL) {
@@ -185,6 +195,20 @@ int validate_opts(void)
         if ((severity) < 1 || (severity > 4)) {
                 fprintf(stderr, "Error: Valid range for severity is 1-4\n");
                 return ret;
+        }
+
+        /* Event id  */
+        if (opt_event_id) {
+                size_t result = 0;
+                if ((result = strlen(opt_event_id)) != EVENT_ID_LEN) {
+                        fprintf(stderr, "Error: event_id length %zu it should have %d characters\n", result, EVENT_ID_LEN);
+                        return ret;
+                }
+                if((result = strspn(opt_event_id, alphab)) != EVENT_ID_LEN) {
+                        fprintf(stderr, "Error: event_id contains invalid character '%c' at position %zu, valid characters are %s\n",
+                                opt_event_id[result], result, alphab);
+                        return ret;
+                }
         }
 
         return 1;
@@ -308,6 +332,10 @@ int send_record(char *payload)
                 goto out1;
         }
 
+        if (opt_event_id && tm_set_event_id(t_ref, opt_event_id) < 0) {
+                goto out2;
+        }
+
         if (tm_set_payload(t_ref, payload) < 0) {
                 goto out2;
         }
@@ -348,6 +376,7 @@ fail:
         free(config_file);
         free(opt_class);
         free(opt_payload);
+        free(opt_event_id);
 
         return ret;
 }

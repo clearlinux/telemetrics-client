@@ -86,6 +86,19 @@ int tm_create_record(struct telem_ref **t_ref, uint32_t severity,
                      char *classification, uint32_t payload_version);
 
 /**
+ * Sets the event_id to a user defined id
+ *
+ * @param t_ref A pointer to a telem_ref struct that was previously initialized
+ *        this struct will have an event_id already initialized and it will be
+ *        overriden by a user provided event_id
+ * @param event_id A pointer to a string that contains the 32 character length
+ *        event_id
+ *
+ * @return 0 on success, or a negative errno-style value on error
+ */
+int tm_set_event_id(struct telem_ref *t_ref, char *event_id);
+
+/**
  * Set the payload field of a telemetrics record
  *
  * @param t_ref The handle returned by tm_create_record()
