@@ -38,6 +38,7 @@
 #define TM_BOARD_NAME 11
 #define TM_CPU_MODEL 12
 #define TM_BIOS_VERSION 13
+#define TM_EVENT_ID 14
 
 #define TM_RECORD_VERSION_STR "record_format_version"
 #define TM_CLASSIFICATION_STR "classification"
@@ -53,14 +54,17 @@
 #define TM_BOARD_NAME_STR "board_name"
 #define TM_CPU_MODEL_STR "cpu_model"
 #define TM_BIOS_VERSION_STR "bios_version"
+#define TM_EVENT_ID_STR "event_id"
 
-#define NUM_HEADERS 14
+#define NUM_HEADERS 15
 
+#define EVENT_ID_ALPHAB "0123456789abcdef"
+#define EVENT_ID_LEN 32
 /* For internal library usage. Bump the version whenever we change the record
  * structure (e.g. adding or removing a header field). Note that the value
  * should be an unsigned int.
  */
-static const uint32_t RECORD_FORMAT_VERSION = 3;
+static const uint32_t RECORD_FORMAT_VERSION = 4;
 
 #define TM_SITE_VERSION_FILE "/etc/os-release"
 #define TM_DIST_VERSION_FILE "/usr/lib/os-release"

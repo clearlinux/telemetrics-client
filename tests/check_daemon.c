@@ -298,7 +298,8 @@ START_TEST(check_process_record_with_correct_size_and_data)
                         "system_name: clear-linux-os\n"
                         "board_name: Qemu|Intel\n"
                         "cpu_model: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz\n"
-                        "bios_version: Qemu\n";
+                        "bios_version: Qemu\n"
+                        "event_id: 3a2d799826edc6266d72824d2aac6763\n";
         char *post_body = "test message";
 
         set_up_socket_pair(&client_fd, &server_fd);

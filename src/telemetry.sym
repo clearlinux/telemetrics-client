@@ -16,3 +16,8 @@ TM_3_0_0 {
     tm_set_payload;
     tm_send_record;
 } TM_2_0_0;
+
+TM_4_0_0 {
+  global:
+    tm_set_event_id;
+} TM_3_0_0;
