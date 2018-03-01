@@ -22,6 +22,7 @@
 #include <sys/queue.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include "journal/journal.h"
 
 #define TM_MACHINE_ID_EXPIRY (3 /*d*/ * 24 /*h*/ * 60 /*m*/ * 60 /*s*/)
 
@@ -56,7 +57,8 @@ typedef struct TelemDaemon {
         client_list_head client_head;
         /* Time of last failed post */
         time_t bypass_http_post_ts;
-
+        /* Telemetry Journal*/
+        TelemJournal *record_journal;
         /* Rate limit record and byte arrays */
         size_t record_burst_array[TM_RATE_LIMIT_SLOTS];
         size_t byte_burst_array[TM_RATE_LIMIT_SLOTS];

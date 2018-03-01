@@ -60,6 +60,11 @@
 
 #define EVENT_ID_ALPHAB "0123456789abcdef"
 #define EVENT_ID_LEN 32
+
+/* Journal */
+#define JOURNAL_PATH "/var/log/telemetry/journal"
+#define JOURNAL_TMP  "/var/log/telemetry/.journal"
+
 /* For internal library usage. Bump the version whenever we change the record
  * structure (e.g. adding or removing a header field). Note that the value
  * should be an unsigned int.
