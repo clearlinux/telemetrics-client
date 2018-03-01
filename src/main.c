@@ -78,6 +78,7 @@ int main(int argc, char **argv)
         int c;
         char *config_file = NULL;
         int opt_index = 0;
+        nfds_t initial_nfds = 0;
         sigset_t mask;
         //bool interrupted = false;
 
@@ -244,9 +245,15 @@ int main(int argc, char **argv)
 
         time_t last_refresh_time = time(NULL);
 
+        /* Save initial count for non connection fds */
+        initial_nfds = daemon.nfds;
+
         /* Loop to accept clients */
         while (1) {
                 malloc_trim(0);
+                if (initial_nfds == daemon.nfds) {
+                        prune_journal(daemon.record_journal);
+                }
                 ret = poll(daemon.pollfds, daemon.nfds, spool_process_time * 1000);
                 if (ret == -1) {
                         telem_perror("Failed to poll daemon file descriptors");

@@ -91,6 +91,10 @@ telem_restart() {
   telem_start
 }
 
+telem_journal_cli() {
+  telem_journal $@
+}
+
 usage() {
   format='  %-10s %s\n'
   printf "\n"
@@ -102,12 +106,16 @@ usage() {
   printf "$format" "is-active" "Checks if telemd is active"
   printf "$format" "opt-in" "Opts in to telemetry, and starts telemetry services"
   printf "$format" "opt-out" "Opts out of telemetry, and stops telemetry services"
+  printf "$format" "journal" "Prints telemd journal contents. Use -h argument with"
+  printf "$format" ""        "command for more options"
   printf "\n"
   exit 2
 }
 
 if [ $# -ne 1 ]; then
-  usage
+  if [ "$1" != "journal" ]; then
+     usage
+  fi
 fi
 
 if [ $EUID -ne 0 ]; then
@@ -129,6 +137,8 @@ case $SUBCOMMAND in
     telem_restart ;;
   is-active)
     telem_is_active ;;
+  journal)
+    telem_journal_cli ;;
   *)
     notice "Unknown command passed to $SCRIPT"
     usage ;;
