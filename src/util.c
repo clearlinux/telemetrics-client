@@ -16,16 +16,22 @@
 
 #define _GNU_SOURCE
 
+#define RANDOM_ID_LEN 32
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <inttypes.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
 
+#include "common.h"
 #include "util.h"
 
 bool get_header(const char *haystack, const char *needle, char **line, size_t len)
@@ -35,6 +41,24 @@ bool get_header(const char *haystack, const char *needle, char **line, size_t le
                 return true;
         }
         return false;
+}
+
+bool get_header_value(const char *header, char **value)
+{
+        char *sep = NULL;
+
+        *value = NULL;
+
+        if((sep = strchr(header, ':')) != NULL) {
+                sep++;
+                // skip space after colon if there's one
+                if(*sep == ' ') {
+                        sep++;
+                }
+                *value = strdup(sep);
+        }
+
+        return (bool)(value != NULL);
 }
 
 void *reallocate(void **addr, size_t *allocated, size_t requested)
@@ -105,6 +129,34 @@ long get_directory_size(const char *dir_path)
         closedir(dir);
 
         return total_size;
+}
+
+/**
+ * Generates a 32 characters random id
+ *
+ * @param buffer pointer to allocate and copy data
+ *
+ */
+int get_random_id(char **buff)
+{
+        int result = -1;
+        int frandom = -1;
+        uint64_t random_id[2] = {0};
+
+        frandom = open("/dev/urandom", O_RDONLY);
+        if (frandom < 0) {
+                return -1;
+        }
+
+        if (read(frandom, &random_id, sizeof(random_id)) == sizeof(random_id)) {
+                  if (asprintf(buff, "%.16" PRIx64 "%.16" PRIx64, random_id[0], random_id[1]) == RANDOM_ID_LEN) {
+                            result = 0;
+                  }
+        }
+
+        close(frandom);
+
+        return result;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

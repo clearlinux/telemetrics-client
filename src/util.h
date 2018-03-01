@@ -24,7 +24,13 @@ void *reallocate(void **addr, size_t *allocated, size_t requested);
 /* Check if haystacks begins with needle and return a copy of haystack */
 bool get_header(const char *haystack, const char *needle, char **line, size_t len);
 
+/* Get the value of a header */
+bool get_header_value(const char *header, char **value);
+
 /* Get the size of the directory */
 long get_directory_size(const char *sdir);
+
+/* Initialize buff and copy generated id */
+int get_random_id(char **buff);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
