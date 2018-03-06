@@ -15,6 +15,7 @@ check_PROGRAMS = \
 	%D%/check_daemon \
 	%D%/check_probes \
 	%D%/check_ncb64  \
+	%D%/check_journal \
 	%D%/check_libtelemetry
 
 dist_check_SCRIPTS = \
@@ -34,7 +35,9 @@ dist_check_SCRIPTS = \
 %C%_check_daemon_SOURCES = \
 	%D%/check_daemon.c \
 	src/telemdaemon.c \
-	src/telemdaemon.h
+	src/telemdaemon.h \
+	src/journal/journal.c \
+	src/journal/journal.h
 
 %C%_check_daemon_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -125,6 +128,20 @@ EXTRA_DIST += \
 	%D%/nc_b64enc_test_files/foob \
 	%D%/nc_b64enc_test_files/foobar \
 	%D%/nc_b64enc_test_files/long_text
+
+%C%_check_journal_SOURCES = \
+	%D%/check_journal.c \
+	src/journal/journal.h \
+	src/journal/journal.c \
+	src/util.h \
+	src/util.c
+
+%C%_check_journal_CFLAGS = \
+	$(AM_CFLAGS) \
+	@CHECK_CFLAGS@
+
+%C%_check_journal_LDADD = \
+	@CHECK_LIBS@
 
 %C%_check_libtelemetry_SOURCES = \
 	%D%/check_libtelemetry.c \
