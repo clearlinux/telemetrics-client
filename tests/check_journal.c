@@ -115,11 +115,14 @@ void insert_n_records(int n, struct TelemJournal *j)
 
 START_TEST(check_journal_file_prune)
 {
-       struct TelemJournal *j = open_journal(journal_file);
+       int rc = 0;
+       char *journal_file_prune = TESTOOPSDIR "/journal.prune";
+       struct TelemJournal *j = open_journal(journal_file_prune);
 
        insert_n_records(j->record_count_limit * 2, j);
        ck_assert_int_gt(j->record_count, j->record_count_limit);
-       prune_journal(j);
+       rc = prune_journal(j);
+       ck_assert_int_eq(rc, 0);
        // Record count should always be below the limit + hysteresis
        ck_assert_int_lt(j->record_count, j->record_count_limit + DEVIATION);
 

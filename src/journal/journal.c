@@ -565,28 +565,28 @@ int prune_journal(struct TelemJournal *telem_journal)
 #ifdef DEBUG
             fprintf(stderr, "Error: skipping %d journal lines\n", count);
 #endif
-            return rc;
+            return 2;
         }
         // create new file with rest of file
         if ( copy_to_tmp(telem_journal->fptr) != 0) {
 #ifdef DEBUG
             fprintf(stderr, "Error: copying partial journal to temp journal file\n");
 #endif
-            return rc;
+            return 3;
         }
         // close file handler
         if ( fclose(telem_journal->fptr) != 0) {
 #ifdef DEBUG
             fprintf(stderr, "Error: clossing journal file handler\n");
 #endif
-            return rc;
+            return 4;
         }
         // overwrite file
         if ( rename(JOURNAL_TMP, JOURNAL_PATH) != 0) {
 #ifdef DEBUG
             fprintf(stderr, "Error: while overriding journal file\n");
 #endif
-            return rc;
+            return 5;
         }
         // reopen file handler
         telem_journal->fptr = fopen(JOURNAL_PATH, "a+");
@@ -594,7 +594,7 @@ int prune_journal(struct TelemJournal *telem_journal)
 #ifdef DEBUG
             fprintf(stderr, "Error: re-opening journal file\n");
 #endif
-            return rc;
+            return 6;
         }
         // update record count
         telem_journal->record_count = (count >= telem_journal->record_count_limit) ?
