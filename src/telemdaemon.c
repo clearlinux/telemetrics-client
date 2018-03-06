@@ -44,6 +44,7 @@ void initialize_daemon(TelemDaemon *daemon)
         daemon->client_head = head;
         daemon->bypass_http_post_ts = 0;
         daemon->is_spool_valid = false;
+        daemon->record_journal = open_journal(NULL);
         initialize_rate_limit(daemon);
         daemon->current_spool_size = 0;
 }
@@ -280,6 +281,9 @@ void process_record(TelemDaemon *daemon, client *cl)
         bool byte_check_passed = true;
         bool record_burst_enabled = true;
         bool byte_burst_enabled = true;
+        /* values for journal */
+        char *classification_value;
+        char *event_id_value;
 
         /* Gets the current minute of time */
         time_t temp = time(NULL);
@@ -311,6 +315,14 @@ void process_record(TelemDaemon *daemon, client *cl)
         }
         /* TODO : check if the body is within the limits. */
         body = msg + header_size;
+
+        /* Save record in journal */
+        if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
+            get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
+                new_journal_entry(daemon->record_journal, classification_value, temp, event_id_value);
+        }
+        free(classification_value);
+        free(event_id_value);
 
         if (inside_direct_spool_window(daemon, time(NULL))) {
                 telem_log(LOG_INFO, "process_record: delivering directly to spool\n");
