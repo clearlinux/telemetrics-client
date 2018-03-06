@@ -24,9 +24,9 @@
 
 #include "journal.h"
 
-void print_usage(char *prog)
+void print_usage(void)
 {
-        printf("%s: Usage\n", prog);
+        printf(" Usage\n");
         printf("  -r,  --record_id       Print record to stdout\n");
         printf("  -e,  --event_id        List records with specific event_id\n");
         printf("  -c,  --classification  List records with specific classification\n");
@@ -82,7 +82,7 @@ int main(int argc, char **argv){
                                verbose_output = 1;
                                break;
                        case 'h':
-                               print_usage(argv[0]);
+                               print_usage();
                                exit(EXIT_SUCCESS);
                }
         }
