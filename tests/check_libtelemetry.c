@@ -24,6 +24,7 @@
 #include "telemetry.h"
 
 static struct telem_ref *ref = NULL;
+static char *original_event_id = NULL;
 
 void create_setup(void)
 {
@@ -157,14 +158,28 @@ START_TEST(record_create_severity_overflow)
 }
 END_TEST
 
+void event_id_setup(void)
+{
+         int ret;
+
+         if (ref) {
+                 return;
+         }
+
+         ret = tm_create_record(&ref, 1, "t/t/t", 2000);
+         original_event_id = strdup(ref->record->headers[TM_EVENT_ID]);
+         if (!original_event_id) {
+                 return;
+         }
+         ck_assert_msg(ret != -ECONNREFUSED,
+                       "Opt-out enabled. Opt in to run this test");
+}
+
 START_TEST(record_set_event_id)
 {
         int ret;
         char *event_id = "aaaaaa00000033333344444466666622";
         char *result;
-        ret = tm_create_record(&ref, 1, "t/t/t", 2000);
-        ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
         if (asprintf(&result, "%s: %s\n", TM_EVENT_ID_STR, event_id) < 0) {
                 return;
         }
@@ -173,45 +188,56 @@ START_TEST(record_set_event_id)
         ck_assert_int_eq(ret, 0);
         ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], result);
         free(result);
-        create_teardown();
 }
 END_TEST
 
-START_TEST(record_set_event_id_invalid)
+START_TEST(record_set_event_id_invalid_chars)
 {
         int ret;
         char *event_id = "aaaaaa000000333333444444666666ZZ";
-        char *event_id_1 = NULL;
-        char *event_id_2 = "aaaa";
-        char *event_id_3 = "0000000000000000000000000000000000000000000";
-        char *original;
-        ret = tm_create_record(&ref, 1, "t/t/t", 2000);
-        ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
-        original = strdupa(ref->record->headers[TM_EVENT_ID]);
-        if (!original) {
-                return;
-        }
-
         ret = tm_set_event_id(ref, event_id);
         ck_assert_int_eq(ret, -1);
-        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
-
-        ret = tm_set_event_id(ref, event_id_1);
-        ck_assert_int_eq(ret, -1);
-        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
-
-        ret = tm_set_event_id(ref, event_id_2);
-        ck_assert_int_eq(ret, -1);
-        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
-
-        ret = tm_set_event_id(ref, event_id_3);
-        ck_assert_int_eq(ret, -1);
-        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original);
-
-        create_teardown();
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original_event_id);
 }
 END_TEST
+
+START_TEST(record_set_event_id_null)
+{
+        int ret;
+        char *event_id = NULL;
+        ret = tm_set_event_id(ref, event_id);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original_event_id);
+}
+END_TEST
+
+START_TEST(record_set_event_id_short)
+{
+        int ret;
+        char *event_id = "aaaa";
+        ret = tm_set_event_id(ref, event_id);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original_event_id);
+}
+END_TEST
+
+START_TEST(record_set_event_id_long)
+{
+        int ret;
+        char *event_id = "0000000000000000000000000000000000000000000";
+        ret = tm_set_event_id(ref, event_id);
+        ck_assert_int_eq(ret, -1);
+        ck_assert_str_eq(ref->record->headers[TM_EVENT_ID], original_event_id);
+}
+END_TEST
+
+void event_id_teardown(void)
+{
+        if (ref) {
+                free(ref);
+        }
+        free(original_event_id);
+}
 
 Suite *lib_suite(void)
 {
@@ -237,8 +263,12 @@ Suite *lib_suite(void)
         suite_add_tcase(s, t);
 
         t = tcase_create("event id");
+        tcase_add_unchecked_fixture(t, event_id_setup, event_id_teardown);
         tcase_add_test(t, record_set_event_id);
-        tcase_add_test(t, record_set_event_id_invalid);
+        tcase_add_test(t, record_set_event_id_invalid_chars);
+        tcase_add_test(t, record_set_event_id_null);
+        tcase_add_test(t, record_set_event_id_short);
+        tcase_add_test(t, record_set_event_id_long);
         suite_add_tcase(s, t);
 
         return s;
