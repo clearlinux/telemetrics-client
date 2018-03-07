@@ -44,7 +44,7 @@ void initialize_daemon(TelemDaemon *daemon)
         daemon->client_head = head;
         daemon->bypass_http_post_ts = 0;
         daemon->is_spool_valid = false;
-        daemon->record_journal = open_journal(NULL);
+        daemon->record_journal = open_journal(JOURNAL_PATH);
         initialize_rate_limit(daemon);
         daemon->current_spool_size = 0;
 }
@@ -319,7 +319,9 @@ void process_record(TelemDaemon *daemon, client *cl)
         /* Save record in journal */
         if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
             get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
-                new_journal_entry(daemon->record_journal, classification_value, temp, event_id_value);
+                if (new_journal_entry(daemon->record_journal, classification_value, temp, event_id_value) != 0) {
+                        telem_log(LOG_INFO, "new_journal_entry in process_record: failed saving record entry\n");
+                }
         }
         free(classification_value);
         free(event_id_value);
@@ -692,7 +694,7 @@ bool get_machine_id(char *machine_id)
         return true;
 }
 
-int machine_id_write(uint64_t upper, uint64_t lower)
+int machine_id_write(char *new_id)
 {
         FILE *fp;
         int ret = 0;
@@ -704,7 +706,7 @@ int machine_id_write(uint64_t upper, uint64_t lower)
                 goto file_error;
         }
 
-        ret = fprintf(fp, "%.16" PRIx64 "%.16" PRIx64, upper, lower);
+        ret = fprintf(fp, "%s", new_id);
         if (ret < 0) {
                 telem_perror("Unable to write to machine id file");
                 goto file_error;
@@ -721,49 +723,17 @@ file_error:
 
 int generate_machine_id(void)
 {
-        int frandom = -1;
-        struct stat stat_buf;
-        int ret = 0;
-        struct iovec random_id[2];
-        uint64_t random_id_upper;
-        uint64_t random_id_lower;
-        int result = -1;
+        int result = 0;
+        char *new_id = NULL;
 
-        ret = stat("/dev/urandom", &stat_buf);
-        if (ret == -1) {
-                telem_log(LOG_ERR, "Unable to stat urandom device\n");
+        if ((result = get_random_id(&new_id)) != 0) {
                 goto rand_err;
         }
 
-        if (!S_ISCHR(stat_buf.st_mode)) {
-                telem_log(LOG_ERR, "/dev/urandom is not a character device file\n");
-                goto rand_err;
-        }
-
-        /* TODO : check for major and minor numbers to be extra sure ??
-           ((stat_buffer.st_rdev == makedev(1, 8)) || (stat_buffer.st_rdev == makedev(1, 9))*/
-
-        frandom = open("/dev/urandom", O_RDONLY);
-        if (frandom < 0) {
-                telem_perror("Error opening /dev/urandom");
-                goto rand_err;
-        }
-
-        random_id[0].iov_base = &random_id_upper;
-        random_id[0].iov_len = 8;
-        random_id[1].iov_base = &random_id_lower;
-        random_id[1].iov_len = 8;
-
-        if (readv(frandom, random_id, 2) < 0) {
-                telem_perror("Error while reading /dev/urandom");
-                goto rand_err;
-        }
-
-        result = machine_id_write(random_id_upper, random_id_lower);
+        result = machine_id_write(new_id);
 rand_err:
-        if (frandom >= 0) {
-                close(frandom);
-        }
+        free(new_id);
+
         return result;
 }
 

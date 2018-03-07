@@ -92,7 +92,7 @@ telem_restart() {
 }
 
 telem_journal_cli() {
-  telem_journal $@
+  telem_journal "$@"
 }
 
 usage() {
@@ -112,10 +112,8 @@ usage() {
   exit 2
 }
 
-if [ $# -ne 1 ]; then
-  if [ "$1" != "journal" ]; then
+if [ "$1" != "journal" ] && [ $# -ne 1 ]; then
      usage
-  fi
 fi
 
 if [ $EUID -ne 0 ]; then
@@ -138,7 +136,7 @@ case $SUBCOMMAND in
   is-active)
     telem_is_active ;;
   journal)
-    telem_journal_cli ;;
+    telem_journal_cli "$@" ;;
   *)
     notice "Unknown command passed to $SCRIPT"
     usage ;;

@@ -31,6 +31,7 @@
 #include <inttypes.h>
 #include <ctype.h>
 
+#include "util.h"
 #include "common.h"
 #include "configuration.h"
 #include "telemetry.h"
@@ -138,38 +139,14 @@ static int set_severity_header(struct telem_ref *t_ref, uint32_t severity)
  */
 static int set_classification_header(struct telem_ref *t_ref, char *classification)
 {
-        size_t i, j;
-        int slashes = 0;
-        int x = 0;
 
-        j = strlen(classification);
-
-        if (j > MAX_CLASS_LENGTH) {
-                return -EINVAL;
-        }
-
-        for (i = 0, x = 0; i <= (j - 1); i++, x++) {
-                if (classification[i] == '/') {
-                        slashes++;
-                        x = 0;
-                } else {
-                        if (x > MAX_SUBCAT_LENGTH) {
-                                return -EINVAL;
-                        }
-                }
-        }
-
-        if (slashes != 2) {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Classification string should have two /s.\n");
-#endif
+        if (validate_classification(classification) == 1) {
                 return -EINVAL;
         }
 
         return set_header(&(t_ref->record->headers[TM_CLASSIFICATION]),
                           TM_CLASSIFICATION_STR, classification,
                           &(t_ref->record->header_size));
-
 }
 
 /**
@@ -638,7 +615,6 @@ static int set_bios_version_header(struct telem_ref *t_ref)
         return status;
 }
 
-
 /**
  * Generates an alphanumeric id of length 32
  *
@@ -652,7 +628,7 @@ static int gen_event_id(char *buff)
 {
         int frandom = -1;
         int result = -1;
-        uint64_t random_id[2] = {0};
+        uint64_t random_id[2] = { 0 };
 
         frandom = open("/dev/urandom", O_RDONLY);
         if (frandom < 0) {
@@ -669,7 +645,6 @@ static int gen_event_id(char *buff)
 
         return result;
 }
-
 
 /**
  * Sets the event_id header, this id is an identifier that multiple
@@ -689,7 +664,7 @@ static int set_event_id_header(struct telem_ref *t_ref)
         rc = gen_event_id(buff);
 
         if (rc == 0) {
-                 rc = set_header(
+                rc = set_header(
                         &(t_ref->record->headers[TM_EVENT_ID]),
                         TM_EVENT_ID_STR, buff,
                         &(t_ref->record->header_size));
@@ -697,7 +672,6 @@ static int set_event_id_header(struct telem_ref *t_ref)
 
         return rc;
 }
-
 
 /**
  * Sets the hosttype header, which is a tuple of three values looked for
@@ -1084,7 +1058,6 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
         return ret;
 }
 
-
 /**
  * Checks for id to have length = 32 characters
  * and hexadecimal characters only.
@@ -1096,48 +1069,46 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
  */
 static int validate_event_id(char *id)
 {
-       int rc = 0;
-       const char alphab[] = EVENT_ID_ALPHAB;
+        int rc = 0;
+        const char alphab[] = EVENT_ID_ALPHAB;
 
-       // make sure is not null
-       if (!id) {
-               return 1;
-       }
+        // make sure is not null
+        if (!id) {
+                return 1;
+        }
 
-       // 32 - 32 = 0
-       if ((rc = (int)(strlen(id) - EVENT_ID_LEN)) != 0) {
-               return 1;
-       }
+        // 32 - 32 = 0
+        if ((rc = (int)(strlen(id) - EVENT_ID_LEN)) != 0) {
+                return 1;
+        }
 
-       // verify alphabet
-       // strspn checks for characters in alphab
-       if (strspn(id, alphab) != EVENT_ID_LEN) {
-               return 1;
-       }
+        // verify alphabet
+        // strspn checks for characters in alphab
+        if (strspn(id, alphab) != EVENT_ID_LEN) {
+                return 1;
+        }
 
-       return rc;
+        return rc;
 }
-
 
 int tm_set_event_id(struct telem_ref *t_ref, char *event_id)
 {
         int rc = -1;
 
         if (!validate_event_id(event_id)) {
-                 if (t_ref && t_ref->record && t_ref->record->headers) {
-                         // free default id before overriding
-                         free(t_ref->record->headers[TM_EVENT_ID]);
-                         // set new event_id
-                         if (asprintf(&(t_ref->record->headers[TM_EVENT_ID]),
-                                 "%s: %s\n", TM_EVENT_ID_STR, event_id) > 0) {
-                                 rc = 0;
-                         }
-                 }
+                if (t_ref && t_ref->record && t_ref->record->headers) {
+                        // free default id before overriding
+                        free(t_ref->record->headers[TM_EVENT_ID]);
+                        // set new event_id
+                        if (asprintf(&(t_ref->record->headers[TM_EVENT_ID]),
+                                     "%s: %s\n", TM_EVENT_ID_STR, event_id) > 0) {
+                                rc = 0;
+                        }
+                }
         }
 
         return rc;
 }
-
 
 /**
  * Write nbytes from buf to fd. Used to send records to telemd.

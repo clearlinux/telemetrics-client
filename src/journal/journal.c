@@ -17,7 +17,7 @@
 #define _GNU_SOURCE
 
 #define ID_LEN 32
-#define BOOTID_LEN 36
+#define BOOTID_LEN 37 // Includes the \n character at the end
 #define BOOTID_FILE "/proc/sys/kernel/random/boot_id"
 
 #include <stdio.h>
@@ -29,13 +29,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "util.h"
 #include "common.h"
 #include "journal.h"
 
-
-/**
+/*
  * Packs journal entry values into one line string separated
  * by '\036' RS.
  *
@@ -50,7 +50,11 @@ static int serialize_journal_entry(struct JournalEntry *entry, char **buff)
 {
         int rc = 0;
 
-        if (asprintf(buff, "%s\036%lld\036%s\036%s\036%s", entry->record_id, (long long int) entry->timestamp,
+        if (entry == NULL) {
+                return -1;
+        }
+
+        if (asprintf(buff, "%s\036%lld\036%s\036%s\036%s", entry->record_id, (long long int)entry->timestamp,
                      entry->classification, entry->event_id, entry->boot_id) < 0) {
 #ifdef DEBUG
                 fprintf(stderr, "Error: unable to serialize data in buff\n");
@@ -78,23 +82,6 @@ static void free_journal_entry(struct JournalEntry *entry)
 }
 
 /**
- * Sets last character of a string to '\0' if the character
- * is '\n'.
- *
- * @param l a pointer to string.
- *
- */
-static void strip_new_line(char *l)
-{
-        size_t len;
-
-        len = strlen(l);
-        if (*(l+len-1) == '\n') {
-                *(l+len-1) = '\0';
-        }
-}
-
-/**
  * Unpacks a record that was stored in file and initializes a
  * JournalEntry struct with parsed values.
  *
@@ -108,39 +95,53 @@ static int deserialize_journal_entry(char *line, struct JournalEntry **entry)
 {
         int rc = -1;
         size_t len = 0;
+        size_t llen = 0;
         size_t offset = 0;
         struct JournalEntry *e = NULL;
+
+        if (line == NULL) {
+                return -1;
+        }
 
         e = malloc(sizeof(struct JournalEntry));
         if (!e) {
                 return -1;
         }
 
+        llen = strlen(line);
+
         for (int i = 0; i < 5; i++) {
                 char *out = NULL;
-                len = strcspn(line+offset, "\036");
-                out = strndup((line+offset), len);
+                if (offset > llen) {
+                        rc = -1;
+                        break;
+                }
+                len = strcspn(line + offset, "\036\n");
+                out = strndup((line + offset), len);
                 offset += len + 1;
                 if (out) {
                         switch (i) {
                                 case 0:
-                                     e->record_id = out;
-                                     break;
+                                        e->record_id = out;
+                                        break;
                                 case 1:
-                                     e->timestamp = atoll(out);
-                                     free(out);
-                                     break;
+                                        e->timestamp = atoll(out);
+                                        free(out);
+                                        break;
                                 case 2:
-                                     e->classification = out;
-                                     break;
+                                        e->classification = out;
+                                        break;
                                 case 3:
-                                     e->event_id = out;
-                                     break;
+                                        e->event_id = out;
+                                        break;
                                 case 4:
-                                     strip_new_line(out);
-                                     e->boot_id = out;
-                                     rc = 0;
-                                     break;
+                                        e->boot_id = out;
+                                        rc = 0;
+                                        break;
+                                default:
+                                        assert(i < 0 && i > 4);
+                                        free(out);
+                                        rc = 1;
                         }
                 } else {
                         rc = -1;
@@ -175,7 +176,7 @@ static int get_record_count(struct TelemJournal *telem_journal)
 
         rewind(telem_journal->fptr);
         // read until the end line by line
-        while((read = getline(&line, &len, telem_journal->fptr)) != -1) {
+        while ((read = getline(&line, &len, telem_journal->fptr)) != -1) {
                 count++;
         }
         free(line);
@@ -196,6 +197,10 @@ static int save_entry(FILE *fptr, struct JournalEntry *entry)
         int rc = -1;
         char *serialized_data = NULL;
 
+        if (fptr == NULL || entry == NULL) {
+                return rc;
+        }
+
         if ((rc = serialize_journal_entry(entry, &serialized_data)) == 0) {
 #ifdef DEBUG
                 printf("Saving: %s\n", serialized_data);
@@ -211,28 +216,24 @@ static int save_entry(FILE *fptr, struct JournalEntry *entry)
 /**
  * Reads the boot unique identifier from BOOTID_FILE
  *
- * @param buff pointer to be initialized and set with value
- *             read from boot_id file.
+ * @param buff pointer to a BOOTID_LEN allocated
  *
- * @return 0 on sucess, -1 on failure
+ * @return 0 on success, -1 on failure
  */
-static int read_boot_id(char **buff)
+static int read_boot_id(char buff[])
 {
         int rc = -1;
         FILE *fs = NULL;
 
-        *buff = (char*)malloc((size_t)BOOTID_LEN + 1);
-        if (!buff) {
-                return rc;
-        }
-
         fs = fopen(BOOTID_FILE, "r");
         if (!fs) {
+#ifdef DEBUG
+                fprintf(stderr, "Unable to open %s for reading: %d\n", BOOTID_FILE, errno);
+#endif
                 return rc;
         }
 
-        if (fgets(*buff, BOOTID_LEN + 1, fs)){
-                *(char *)(*buff+BOOTID_LEN)='\0';
+        if (fgets(buff, BOOTID_LEN, fs)) {
                 rc = 0;
         }
         fclose(fs);
@@ -246,8 +247,10 @@ static int read_boot_id(char **buff)
  * @param n Number of lines to skip.
  * @param fptr A file pointer.
  *
- * @returns 0 on sucess, 1 if end was reached before
- *          line n
+ * @returns 0 on success, on failure -1 if n > existing
+ *            lines in file or errno if failure happens
+ *            during file operation.
+ *
  */
 static int skip_n_lines(int n, FILE *fptr)
 {
@@ -255,10 +258,21 @@ static int skip_n_lines(int n, FILE *fptr)
         size_t len = 0;
         char *line = NULL;
 
-        fseek(fptr, 0, 0);
-        for(int i = 0; i < n; i++) {
+        if (fptr == NULL) {
+#ifdef DEBUG
+                fprintf(stderr, "fptr argument to skip_n_lines is invalid\n");
+#endif
+                // File descriptor in bad state
+                return EBADFD;
+        }
+
+        if (fseek(fptr, 0, 0) != 0) {
+                return errno;
+        }
+
+        for (int i = 0; i < n; i++) {
                 if (getline(&line, &len, fptr) == -1) {
-                        rc = 1;
+                        rc = -1;
                         break;
                 }
         }
@@ -272,35 +286,48 @@ static int skip_n_lines(int n, FILE *fptr)
  *
  * @param fptr A file pointer from source file.
  *
- * @returns 0 on success, 1 on failure
+ * @returns 0 on success, errno on failure
  */
-static int copy_to_tmp(FILE *fptr)
+static int copy_to_tmp(FILE *fptr, char *tmp_path)
 {
+        int rc = 0;
         size_t len;
         char *line = NULL;
         FILE *fptr_tmp = NULL;
 
-        fptr_tmp = fopen(JOURNAL_TMP, "w");
+        if (fptr == NULL) {
+                return -1;
+        }
+
+        fptr_tmp = fopen(tmp_path, "w");
         if (!fptr_tmp) {
-                return 1;
+                return errno;
         }
 
         // Copy lines to new file
         while (getline(&line, &len, fptr) > -1) {
-                fprintf(fptr_tmp, "%s", line);
+                if (fprintf(fptr_tmp, "%s", line) < 0) {
+                        rc = errno;
+                        break;
+                }
         }
 
-        fclose(fptr_tmp);
+        if (fclose(fptr_tmp) != 0) {
+                rc = errno;
+#ifdef DEBUG
+                perror("Error: ");
+#endif
+        }
         free(line);
 
-        return 0;
+        return rc;
 }
 
 /* Exported function */
 TelemJournal *open_journal(const char *journal_file)
 {
         FILE *fptr = NULL;
-        char *boot_id = NULL;
+        char boot_id[BOOTID_LEN] = { '\0' };
         struct TelemJournal *telem_journal;
 
         // Use default location if journal_file parameter is NULL
@@ -309,24 +336,29 @@ TelemJournal *open_journal(const char *journal_file)
 
         if (fptr == NULL) {
 #ifdef DEBUG
-                printf("Unable to open journal on disk\n");
+                perror("Error while opening journal file: ");
 #endif
                 return NULL;
         }
 
-        if (read_boot_id(&boot_id) != 0) {
+        if (read_boot_id(boot_id) != 0) {
 #ifdef DEBUG
-                printf("Failure reading boot_id\n");
+                perror("Error while reading boot_id: ");
 #endif
                 return NULL;
         }
 
         telem_journal = malloc(sizeof(struct TelemJournal));
+        if (!telem_journal) {
+                fprintf(stderr, "Unable to allocate more memory\n");
+                return NULL;
+        }
 
         telem_journal->fptr = fptr;
         telem_journal->journal_file = \
                 (journal_file == NULL) ? strdup(JOURNAL_PATH) : strdup(journal_file);
-        telem_journal->boot_id = boot_id;
+        /* boot_id includes \n at the end, strip RC during duplication */
+        telem_journal->boot_id = strndup(boot_id, BOOTID_LEN - 1);
         telem_journal->record_count = get_record_count(telem_journal);
         telem_journal->record_count_limit = RECORD_LIMIT;
 
@@ -340,7 +372,7 @@ TelemJournal *open_journal(const char *journal_file)
 /* Exported function */
 void close_journal(TelemJournal *telem_journal)
 {
-	if (telem_journal) {
+        if (telem_journal) {
                 free(telem_journal->boot_id);
                 free(telem_journal->journal_file);
                 fclose(telem_journal->fptr);
@@ -348,13 +380,27 @@ void close_journal(TelemJournal *telem_journal)
         }
 }
 
+/**
+ * Checks if class is a prefix i.e. t/\* or t/t/\*
+ *
+ * @param class A pointer to string with classification
+ *              value to check.
+ * @return 1 if class is a prefix, 0 otherwise
+ */
+static int is_class_prefix(char *class)
+{
+        size_t class_len = strlen(class);
+        return (strcmp((char *)(class + class_len - 2), "/*") == 0) ? 1 : 0;
+}
+
 /* Exported function */
 int print_journal(TelemJournal *telem_journal, char *classification,
-                   char *record_id, char *event_id, char *boot_id)
+                  char *record_id, char *event_id, char *boot_id)
 {
         int n = 0;
+        int rc = 0;
         int count = 0;
-        char str_time[80] = {0};
+        char str_time[80] = { '\0' };
         char *line = NULL;
         size_t len = 0;
         FILE *journal_fileptr = NULL;
@@ -373,24 +419,37 @@ int print_journal(TelemJournal *telem_journal, char *classification,
         // Advance file pointer to line n
         n = telem_journal->record_count - telem_journal->record_count_limit;
         if (n > 0) {
-                skip_n_lines(n, journal_fileptr);
+                rc = skip_n_lines(n, journal_fileptr);
+                if (rc == -1) {
+                        return rc;
+                } else if (rc != 0) {
+                        fprintf(stderr, "An error occurred while advancing journal file: %s\n", strerror(rc));
+                }
         }
 
         while (getline(&line, &len, journal_fileptr) != -1) {
                 deserialize_journal_entry(line, &entry);
                 if (entry) {
                         /* filter entry out if one is provided */
-                        if (record_id != NULL && strncmp(entry->record_id, record_id, ID_LEN) != 0) {
+                        if (record_id != NULL && strcmp(entry->record_id, record_id) != 0) {
                                 continue;
                         }
-                        if (classification != NULL && strncmp(entry->classification, classification, strlen(entry->classification)) != 0) {
+                        if (boot_id != NULL && strcmp(entry->boot_id, boot_id) != 0) {
                                 continue;
                         }
-                        if (boot_id != NULL && strncmp(entry->boot_id, boot_id, BOOTID_LEN) != 0) {
+                        if (event_id != NULL && strcmp(entry->event_id, event_id) != 0) {
                                 continue;
                         }
-                        if (event_id != NULL && strncmp(entry->event_id, event_id, strlen(entry->event_id)) != 0) {
-                                continue;
+                        // In the case of class checking prefixes is an option
+                        if (classification != NULL) {
+                                // Check prefixes when classification ends in /*, otherwise use strcomp
+                                if (is_class_prefix(classification)) {
+                                        if (strncmp(entry->classification, classification, strlen(classification) - 1) != 0) {
+                                                continue;
+                                        }
+                                } else if (strcmp(entry->classification, classification) != 0) {
+                                        continue;
+                                }
                         }
                         /* end filters section */
                         ts = *localtime(&entry->timestamp);
@@ -410,53 +469,8 @@ int print_journal(TelemJournal *telem_journal, char *classification,
 }
 
 /**
- * Validate classification
- * TODO: move to util or common and use it in telemetry.c
- *
- * @param classification A pointer with the value to validate.
- *
- * @returns 0 on success, 1 on failure
- */
-static int validate_classification(char *classification)
-{
-        size_t i, j;
-        int slashes = 0;
-        int x = 0;
-
-        if (classification == NULL) {
-                return 1;
-        }
-
-        j = strlen(classification);
-
-        if (j > MAX_CLASS_LENGTH) {
-                return 1;
-        }
-
-        for (i = 0, x = 0; i <= (j - 1); i++, x++) {
-                if (classification[i] == '/') {
-                        slashes++;
-                        x = 0;
-                } else {
-                        if (x > MAX_SUBCAT_LENGTH) {
-                                return 1;
-                        }
-                }
-        }
-
-        if (slashes != 2) {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Classification string should have two /s.\n");
-#endif
-                return 1;
-        }
-
-        return 0;
-}
-
-
-/**
- * Validation for event id.
+ * Validation for event id. Thic check makes sure
+ * that an event_id is a 32 hexadecimal chars long.
  *
  * @param event_id A pointer to id value.
  *
@@ -485,128 +499,150 @@ static int validate_event_id(char *event_id)
 int new_journal_entry(TelemJournal *telem_journal, char *classification,
                       time_t timestamp, char *event_id)
 {
-       int rc = 1;
-       char *boot_id = NULL;
-       char *record_id = NULL;
-       struct JournalEntry *entry = NULL;
+        int rc = 1;
+        char boot_id[BOOTID_LEN] = { '\0' };
+        char *record_id = NULL;
+        struct JournalEntry *entry = NULL;
 
-       if (telem_journal == NULL) {
+        if (telem_journal == NULL) {
 #ifdef DEBUG
-               fprintf(stderr, "Error: telem_journal was not initialized\n");
+                fprintf(stderr, "Error: telem_journal was not initialized\n");
 #endif
-               return rc;
-       }
+                return rc;
+        }
 
-       if (validate_classification(classification) != 0) {
-               return rc;
-       }
+        if (validate_classification(classification) != 0) {
+                return rc;
+        }
 
-       if (validate_event_id(event_id) != 0) {
-               return rc;
-       }
+        if (validate_event_id(event_id) != 0) {
+                return rc;
+        }
 
-       entry = malloc(sizeof(struct JournalEntry));
-       entry->classification = NULL;
-       entry->record_id = NULL;
-       entry->event_id = NULL;
-       entry->boot_id = NULL;
+        entry = malloc(sizeof(struct JournalEntry));
+        if (!entry) {
+                fprintf(stderr, "Error: unable to allocate more memory\n");
+                return rc;
+        }
+        entry->classification = NULL;
+        entry->record_id = NULL;
+        entry->event_id = NULL;
+        entry->boot_id = NULL;
 
-       if (get_random_id(&record_id) != 0) {
+        if (get_random_id(&record_id) != 0) {
 #ifdef DEBUG
-               fprintf(stderr, "Error: unable to generate random id\n");
+                fprintf(stderr, "Error: unable to generate random id\n");
 #endif
-               goto quit;
-       }
+                goto quit;
+        }
 
-       if (read_boot_id(&boot_id) != 0) {
+        if (read_boot_id(boot_id) != 0) {
 #ifdef DEBUG
-               fprintf(stderr, "Error: unable to read boot_id\n");
+                fprintf(stderr, "Error: unable to read boot_id\n");
 #endif
-               goto quit;
-       }
+                goto quit;
+        }
 
-       if ((entry->classification = strdup(classification)) == NULL) {
-               goto quit;
-       }
-       if ((entry->event_id = strdup(event_id)) == NULL) {
-               goto quit;
-       }
+        if ((entry->classification = strdup(classification)) == NULL) {
+                goto quit;
+        }
+        if ((entry->event_id = strdup(event_id)) == NULL) {
+                goto quit;
+        }
 
-       entry->record_id = record_id;
-       entry->boot_id = boot_id;
-       entry->timestamp = timestamp;
+        entry->record_id = record_id;
+        /* boot_id includes \n at the end, strip RC during duplication */
+        entry->boot_id = strndup(boot_id, BOOTID_LEN - 1);
+        entry->timestamp = timestamp;
 
-       if ((rc = save_entry(telem_journal->fptr, entry)) == 0) {
-               telem_journal->record_count = telem_journal->record_count + 1;
+        if ((rc = save_entry(telem_journal->fptr, entry)) == 0) {
+                telem_journal->record_count = telem_journal->record_count + 1;
 #ifdef DEBUG
-               fprintf(stdout, "%d records in journal\n", telem_journal->record_count);
+                fprintf(stdout, "%d records in journal\n", telem_journal->record_count);
 #endif
-       }
+        }
 
 quit:
-       free_journal_entry(entry);
+        free_journal_entry(entry);
 
-       return rc;
+        return rc;
 }
 
 /* Exported function */
-int prune_journal(struct TelemJournal *telem_journal)
+int prune_journal(struct TelemJournal *telem_journal, char *tmp_dir)
 {
 
-    int rc = 1;
-    int count = 0;
-    int deviation = DEVIATION;
+        int rc = 1;
+        int count = 0;
+        int deviation = DEVIATION;
+        char *tmp_file_path = NULL;
 
-    if ( telem_journal->record_count > (deviation + telem_journal->record_count_limit)) {
-        count = telem_journal->record_count - telem_journal->record_count_limit;
+        if (telem_journal == NULL) {
+                return rc;
+        }
 
-        // jump to line# count
-        if ( skip_n_lines(count, telem_journal->fptr) != 0) {
+        if (telem_journal->record_count > (deviation + telem_journal->record_count_limit)) {
+                count = telem_journal->record_count - telem_journal->record_count_limit;
+
+                // jump to line# count
+                if ((rc = skip_n_lines(count, telem_journal->fptr)) != 0) {
 #ifdef DEBUG
-            fprintf(stderr, "Error: skipping %d journal lines\n", count);
+                        fprintf(stderr, "Error: skipping %d journal lines\n", count);
 #endif
-            return rc;
+                        // if rc == -1 (n > #lines in file, change to errno style)
+                        return (rc == -1) ? EADDRNOTAVAIL : rc;
+                }
+                // Use default if not tmp_dir is specified
+                if (tmp_dir == NULL) {
+                        if ((asprintf(&tmp_file_path, "%s/.journal", JOURNAL_TMPDIR) == -1)) {
+                                return ENOMEM;
+                        }
+                } else {
+                        if ((asprintf(&tmp_file_path, "%s/.journal", tmp_dir) == -1)) {
+                                return ENOMEM;
+                        }
+                }
+                // create new file with rest of file
+                if ((rc = copy_to_tmp(telem_journal->fptr, tmp_file_path)) != 0) {
+#ifdef DEBUG
+                        fprintf(stderr, "Error: copying partial journal to temp journal file\n");
+#endif
+                        goto quit;
+                }
+                // close file handler
+                if ((rc = fclose(telem_journal->fptr)) != 0) {
+#ifdef DEBUG
+                        fprintf(stderr, "Error: closing journal file handler\n");
+#endif
+                        goto quit;
+                }
+                // overwrite file
+                if ((rc = rename(tmp_file_path, telem_journal->journal_file)) != 0) {
+#ifdef DEBUG
+                        fprintf(stderr, "Error: while overwriting journal file\n");
+#endif
+                        goto quit;
+                }
+                // reopen file handler
+                telem_journal->fptr = fopen(telem_journal->journal_file, "a+");
+                if (!telem_journal->fptr) {
+#ifdef DEBUG
+                        fprintf(stderr, "Error: re-opening journal file\n");
+#endif
+                        return rc;
+                }
+                // update record count
+                telem_journal->record_count = telem_journal->record_count - count;
+#ifdef DEBUG
+                fprintf(stdout, "record_count: %d\n", telem_journal->record_count);
+#endif
         }
-        // create new file with rest of file
-        if ( copy_to_tmp(telem_journal->fptr) != 0) {
-#ifdef DEBUG
-            fprintf(stderr, "Error: copying partial journal to temp journal file\n");
-#endif
-            return rc;
-        }
-        // close file handler
-        if ( fclose(telem_journal->fptr) != 0) {
-#ifdef DEBUG
-            fprintf(stderr, "Error: clossing journal file handler\n");
-#endif
-            return rc;
-        }
-        // overwrite file
-        if ( rename(JOURNAL_TMP, JOURNAL_PATH) != 0) {
-#ifdef DEBUG
-            fprintf(stderr, "Error: while overriding journal file\n");
-#endif
-            return rc;
-        }
-        // reopen file handler
-        telem_journal->fptr = fopen(JOURNAL_PATH, "a+");
-        if ( !telem_journal->fptr ) {
-#ifdef DEBUG
-            fprintf(stderr, "Error: re-opening journal file\n");
-#endif
-            return rc;
-        }
-        // update record count
-        telem_journal->record_count = (count >= telem_journal->record_count_limit) ?
-                                      telem_journal->record_count_limit :
-                                      telem_journal->record_count - count;
-#ifdef DEBUG
-        fprintf(stdout, "record_count: %d\n", telem_journal->record_count);
-#endif
         rc = 0;
-    }
 
-    return rc;
+quit:
+        free(tmp_file_path);
+
+        return rc;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

@@ -102,11 +102,11 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
  *
  * @param telem_journal A pointer to telemetry journal struct
  *        returned by open_journal call.
+ * @param tmp_dir A pointer to a string with the path to use for
+ *                temp file during pruning process.
  *
- * @return 0 on success, 1 on failure
+ * @return 0 on success, errno on failure
  */
-int prune_journal(TelemJournal *telem_journal);
-
-
+int prune_journal(TelemJournal *telem_journal, char *tmp_dir);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

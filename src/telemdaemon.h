@@ -269,7 +269,7 @@ bool post_record_http(char *header_values[], char *body, bool spool);
  * @param body The payload of the record
  *
  */
-void spool_record(TelemDaemon *daemon, char *headers[], char *body);
+void spool_record(TelemDaemon * daemon, char *headers[], char *body);
 
 /**
  * Get random machine id stored in file

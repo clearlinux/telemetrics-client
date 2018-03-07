@@ -204,7 +204,7 @@ int validate_opts(void)
                         fprintf(stderr, "Error: event_id length %zu it should have %d characters\n", result, EVENT_ID_LEN);
                         return ret;
                 }
-                if((result = strspn(opt_event_id, alphab)) != EVENT_ID_LEN) {
+                if ((result = strspn(opt_event_id, alphab)) != EVENT_ID_LEN) {
                         fprintf(stderr, "Error: event_id contains invalid character '%c' at position %zu, valid characters are %s\n",
                                 opt_event_id[result], result, alphab);
                         return ret;

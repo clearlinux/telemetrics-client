@@ -15,10 +15,15 @@
  */
 
 #include <check.h>
+#include <errno.h>
+#include <stdio.h>
+#include "common.h"
 #include "journal/journal.h"
 
 static struct TelemJournal *journal = NULL;
 static char *journal_file = TESTOOPSDIR "/journal.txt";
+static char *eid = "00007766547776eb7fc478eb0eb43e43";
+static int K = 20;
 
 START_TEST(check_open_journal)
 {
@@ -50,93 +55,90 @@ void new_entry_setup(void)
 
 START_TEST(check_new_entry)
 {
-       int ret;
-       ret = new_journal_entry(journal, "t/t/t", 1520054957,
-                               "3bc17766547776eb7fc478eb0eb43e43");
-       ck_assert_int_eq(ret, 0);
-       close_journal(journal);
+        int ret;
+        ret = new_journal_entry(journal, "t/t/t", 1520054957,
+                                "3bc17766547776eb7fc478eb0eb43e43");
+        ck_assert_int_eq(ret, 0);
+        close_journal(journal);
 }
 END_TEST
 
 START_TEST(check_new_entry_bad_class)
 {
-       int ret = 0;
-       /* has an invalid class */
-       ret = new_journal_entry(journal, "t/t", 1520054957,
-                               "3bc17766547776eb7fc478eb0eb43e43");
-       ck_assert_int_eq(ret, 1);
+        int ret = 0;
+        /* has an invalid class */
+        ret = new_journal_entry(journal, "t/t", 1520054957,
+                                "3bc17766547776eb7fc478eb0eb43e43");
+        ck_assert_int_eq(ret, 1);
 }
 END_TEST
 
 START_TEST(check_new_entry_bad_id)
 {
-       int ret = 0;
-       /* event_id is invalid */
-       ret = new_journal_entry(journal, "t/t/t", 1520054957,
-                               "Xbc17766547776eb7fc478eb0eb43e43");
-       ck_assert_int_eq(ret, 1);
+        int ret = 0;
+        /* event_id is invalid */
+        ret = new_journal_entry(journal, "t/t/t", 1520054957,
+                                "Xbc17766547776eb7fc478eb0eb43e43");
+        ck_assert_int_eq(ret, 1);
 }
 END_TEST
 
 START_TEST(check_new_entry_null_class)
 {
-       int ret = 0;
-       /* param is NULL */
-       ret = new_journal_entry(journal, NULL, 1520054957,
-                               "3bc17766547776eb7fc478eb0eb43e43");
-       ck_assert_int_eq(ret, 1);
+        int ret = 0;
+        /* param is NULL */
+        ret = new_journal_entry(journal, NULL, 1520054957,
+                                "3bc17766547776eb7fc478eb0eb43e43");
+        ck_assert_int_eq(ret, 1);
 }
 END_TEST
 
 START_TEST(check_new_entry_null_id)
 {
-       int ret = 0;
-       /* null id */
-       ret = new_journal_entry(journal, "t/t/t", 1520054957, NULL);
-       ck_assert_int_eq(ret, 1);
+        int ret = 0;
+        /* null id */
+        ret = new_journal_entry(journal, "t/t/t", 1520054957, NULL);
+        ck_assert_int_eq(ret, 1);
 }
 END_TEST
 
 void new_entry_teardown(void)
 {
-       if (journal) {
-               close_journal(journal);
-               journal = NULL;
-       }
+        if (journal) {
+                close_journal(journal);
+                journal = NULL;
+        }
 }
 
 void insert_n_records(int n, struct TelemJournal *j)
 {
         for (int i = 0; i < n; i++) {
                 new_journal_entry(j, "t/t/t", 1520054957 + i,
-                                "3bc17766547776eb7fc478eb0eb43e43");
+                                  "3bc17766547776eb7fc478eb0eb43e43");
         }
 }
 
 /*
-
-failing in travis-ci
-
+   failing in travis-ci
+ */
 START_TEST(check_journal_file_prune)
 {
-       int rc = 0;
-       struct TelemJournal *j = open_journal(journal_file);
+        int rc = 0;
+        struct TelemJournal *j = open_journal(journal_file);
 
-       insert_n_records(j->record_count_limit * 2, j);
-       ck_assert_int_gt(j->record_count, j->record_count_limit);
-       rc = prune_journal(j);
-       ck_assert_int_eq(rc, 0);
-       // Record count should always be below the limit + hysteresis
-       ck_assert_int_lt(j->record_count, j->record_count_limit + DEVIATION);
-
-
-       close_journal(j);
+        insert_n_records(j->record_count_limit * 2, j);
+        ck_assert_int_gt(j->record_count, j->record_count_limit);
+        rc = prune_journal(j, TESTOOPSDIR);
+        ck_assert(rc == 0);
+        // Record count should always be below the limit + hysteresis
+        ck_assert_int_lt(j->record_count, j->record_count_limit + DEVIATION);
+        close_journal(j);
 }
 END_TEST
-*/
 
 void journal_entry_setup(void)
 {
+        int result = 0;
         const char *journal_print = TESTOOPSDIR "/journal.print.txt";
 
         if (journal) {
@@ -144,34 +146,42 @@ void journal_entry_setup(void)
         }
 
         journal = open_journal(journal_print);
+
+        insert_n_records(K, journal);
+        /* Insert recors with specific values */
+        result = new_journal_entry(journal, "a/b/c", 1520054957, eid);
+        ck_assert(result == 0);
+        result = new_journal_entry(journal, "a/b/d", 1520054957, eid);
+        ck_assert(result == 0);
+
 }
 
 START_TEST(check_journal_print)
 {
-       int count = 0;
-       const int k = 20;
-
-       insert_n_records(k, journal);
-       count = print_journal(journal, NULL, NULL, NULL, NULL);
-       ck_assert(count == k);
+        int count = 0;
+        count = print_journal(journal, NULL, NULL, NULL, NULL);
+        ck_assert_int_eq(count, K + 2);
 }
 END_TEST
 
-START_TEST(check_journal_filter)
+START_TEST(check_journal_filter_by_class)
 {
-       int result = 0;
-       char *eid = "00007766547776eb7fc478eb0eb43e43";
+        int result = print_journal(journal, "a/b/c", NULL, NULL, NULL);
+        ck_assert_int_eq(result, 1);
+}
+END_TEST
 
-       result = new_journal_entry(journal, "a/b/c", 1520054957, eid);
-       ck_assert(result == 0);
-       result = new_journal_entry(journal, "a/b/d", 1520054957, eid);
-       ck_assert(result == 0);
+START_TEST(check_journal_filter_by_class_prefix)
+{
+        int result = print_journal(journal, "a/b/*", NULL, NULL, NULL);
+        ck_assert_int_eq(result, 2);
+}
+END_TEST
 
-       result = print_journal(journal, "a/b/c", NULL, NULL, NULL);
-       ck_assert(result == 1);
-
-       result = print_journal(journal, NULL, NULL, eid, NULL);
-       ck_assert(result == 2);
+START_TEST(check_journal_filter_by_event_id)
+{
+        int result = print_journal(journal, NULL, NULL, eid, NULL);
+        ck_assert(result == 2);
 }
 END_TEST
 
@@ -200,15 +210,17 @@ Suite *config_suite(void)
         tcase_add_test(t, check_new_entry_null_id);
         suite_add_tcase(s, t);
 
-/*        t = tcase_create("prunning journal");
+        t = tcase_create("prunning journal");
         tcase_add_test(t, check_journal_file_prune);
-        suite_add_tcase(s, t);*/
+        suite_add_tcase(s, t);
 
         t = tcase_create("print journal");
         tcase_add_unchecked_fixture(t, journal_entry_setup,
                                     journal_entry_teardown);
         tcase_add_test(t, check_journal_print);
-        tcase_add_test(t, check_journal_filter);
+        tcase_add_test(t, check_journal_filter_by_class);
+        tcase_add_test(t, check_journal_filter_by_class_prefix);
+        tcase_add_test(t, check_journal_filter_by_event_id);
         suite_add_tcase(s, t);
 
         return s;
