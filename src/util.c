@@ -49,10 +49,14 @@ bool get_header_value(const char *header, char **value)
 
         *value = NULL;
 
-        if((sep = strchr(header, ':')) != NULL) {
+        if (header == NULL) {
+                return false;
+        }
+
+        if ((sep = strchr(header, ':')) != NULL) {
                 sep++;
                 // skip space after colon if there's one
-                if(*sep == ' ') {
+                if (*sep == ' ') {
                         sep++;
                 }
                 *value = strdup(sep);
@@ -141,7 +145,7 @@ int get_random_id(char **buff)
 {
         int result = -1;
         int frandom = -1;
-        uint64_t random_id[2] = {0};
+        uint64_t random_id[2] = { '\0' };
 
         frandom = open("/dev/urandom", O_RDONLY);
         if (frandom < 0) {
@@ -149,14 +153,62 @@ int get_random_id(char **buff)
         }
 
         if (read(frandom, &random_id, sizeof(random_id)) == sizeof(random_id)) {
-                  if (asprintf(buff, "%.16" PRIx64 "%.16" PRIx64, random_id[0], random_id[1]) == RANDOM_ID_LEN) {
-                            result = 0;
-                  }
+                if (asprintf(buff, "%.16" PRIx64 "%.16" PRIx64, random_id[0], random_id[1]) == RANDOM_ID_LEN) {
+                        result = 0;
+                }
         }
 
         close(frandom);
 
         return result;
+}
+
+/**
+ * Validate classification value. A valid classification
+ * is a string with 2 slashes, with max length of
+ * MAX_CLASS_LENGTH and strings betweeb slashes should
+ * have a max length of MAX_SUBCAT_LENGTH.
+ *
+ * @param classification A pointer to classification value
+ *        to be validated.
+ *
+ * @return 0 on sucess and 1 on failure
+ */
+int validate_classification(char *classification)
+{
+        size_t i, j;
+        int slashes = 0;
+        int x = 0;
+
+        if (classification == NULL) {
+                return 1;
+        }
+
+        j = strlen(classification);
+
+        if (j > MAX_CLASS_LENGTH) {
+                return 1;
+        }
+
+        for (i = 0, x = 0; i <= (j - 1); i++, x++) {
+                if (classification[i] == '/') {
+                        slashes++;
+                        x = 0;
+                } else {
+                        if (x > MAX_SUBCAT_LENGTH) {
+                                return 1;
+                        }
+                }
+        }
+
+        if (slashes != 2) {
+#ifdef DEBUG
+                fprintf(stderr, "ERR: Classification string should have two /s.\n");
+#endif
+                return 1;
+        }
+
+        return 0;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

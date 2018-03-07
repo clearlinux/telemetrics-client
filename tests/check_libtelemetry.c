@@ -160,19 +160,19 @@ END_TEST
 
 void event_id_setup(void)
 {
-         int ret;
+        int ret;
 
-         if (ref) {
-                 return;
-         }
+        if (ref) {
+                return;
+        }
 
-         ret = tm_create_record(&ref, 1, "t/t/t", 2000);
-         original_event_id = strdup(ref->record->headers[TM_EVENT_ID]);
-         if (!original_event_id) {
-                 return;
-         }
-         ck_assert_msg(ret != -ECONNREFUSED,
-                       "Opt-out enabled. Opt in to run this test");
+        ret = tm_create_record(&ref, 1, "t/t/t", 2000);
+        original_event_id = strdup(ref->record->headers[TM_EVENT_ID]);
+        if (!original_event_id) {
+                return;
+        }
+        ck_assert_msg(ret != -ECONNREFUSED,
+                      "Opt-out enabled. Opt in to run this test");
 }
 
 START_TEST(record_set_event_id)

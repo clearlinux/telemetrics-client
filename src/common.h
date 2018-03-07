@@ -63,7 +63,7 @@
 
 /* Journal */
 #define JOURNAL_PATH "/var/log/telemetry/journal"
-#define JOURNAL_TMP  "/var/log/telemetry/.journal"
+#define JOURNAL_TMPDIR  "/var/log/telemetry/"
 
 /* For internal library usage. Bump the version whenever we change the record
  * structure (e.g. adding or removing a header field). Note that the value

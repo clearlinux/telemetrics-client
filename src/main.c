@@ -252,7 +252,10 @@ int main(int argc, char **argv)
         while (1) {
                 malloc_trim(0);
                 if (initial_nfds == daemon.nfds) {
-                        prune_journal(daemon.record_journal);
+                        ret = prune_journal(daemon.record_journal, JOURNAL_TMPDIR);
+                        if (ret != 0) {
+                                telem_log(LOG_WARNING, "Unable to prune journal\n");
+                        }
                 }
                 ret = poll(daemon.pollfds, daemon.nfds, spool_process_time * 1000);
                 if (ret == -1) {
@@ -369,6 +372,8 @@ int main(int argc, char **argv)
         }
 
 clean_exit:
+        close_journal(daemon.record_journal);
+
         /* Free memory before exiting */
         while ((cl = LIST_FIRST(&(daemon.client_head))) != NULL) {
                 remove_client(&(daemon.client_head), cl);

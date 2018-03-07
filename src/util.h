@@ -33,4 +33,7 @@ long get_directory_size(const char *sdir);
 /* Initialize buff and copy generated id */
 int get_random_id(char **buff);
 
+/* Validates classification value */
+int validate_classification(char *classification);
+
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

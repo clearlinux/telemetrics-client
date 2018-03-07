@@ -1,4 +1,4 @@
-/**
+/*
  * This program is part of the Clear Linux Project
  *
  * Copyright 2018 Intel Corporation
@@ -12,8 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
- *
- * */
+ */
 
 #define _GNU_SOURCE
 
@@ -22,6 +21,7 @@
 #include <string.h>
 #include <getopt.h>
 
+#include "common.h"
 #include "journal.h"
 
 void print_usage(void)
@@ -35,10 +35,10 @@ void print_usage(void)
         printf("  -h,  --help            Display this help message\n");
 }
 
+int main(int argc, char **argv)
+{
 
-int main(int argc, char **argv){
-
-        int rc = 0;
+        int rc = EXIT_SUCCESS;
         int count = 0;
         int verbose_output = 0;
         char *boot_id = NULL;
@@ -51,46 +51,46 @@ int main(int argc, char **argv){
         int c;
         int opt_index = 0;
         struct option opts[] = {
-               { "record_id", 1, NULL, 'r' },
-               { "event_id", 1, NULL, 'e' },
-               { "classification", 1, NULL, 'c' },
-               { "boot_id", 1, NULL, 'b' },
-               { "verbose", 0, NULL, 'V' },
-               { "help", 0, NULL, 'h' },
-               { NULL, 0, NULL, 0}
+                { "record_id", 1, NULL, 'r' },
+                { "event_id", 1, NULL, 'e' },
+                { "classification", 1, NULL, 'c' },
+                { "boot_id", 1, NULL, 'b' },
+                { "verbose", 0, NULL, 'V' },
+                { "help", 0, NULL, 'h' },
+                { NULL, 0, NULL, 0 }
         };
 
-        while((c = getopt_long(argc, argv, "r:e:c:Vh", opts, &opt_index)) != -1) {
-               switch(c) {
-                       case 'r':
-                               record_id = strdup((char*)optarg);
-                               printf("record_id: %s\n", record_id);
-                               break;
-                       case 'e':
-                               event_id = strdup((char*)optarg);
-                               printf("event_id: %s\n", event_id);
-                               break;
-                       case 'c':
-                               classification = strdup((char*)optarg);
-                               printf("classification: %s\n", classification);
-                               break;
-                       case 'b':
-                               boot_id = strdup((char*)optarg);
-                               printf("boot_id: %s\n", boot_id);
-                               break;
-                       case 'V':
-                               verbose_output = 1;
-                               break;
-                       case 'h':
-                               print_usage();
-                               exit(EXIT_SUCCESS);
-               }
+        while ((c = getopt_long(argc, argv, "r:e:c:b:Vh", opts, &opt_index)) != -1) {
+                switch (c) {
+                        case 'r':
+                                record_id = optarg;
+                                break;
+                        case 'e':
+                                event_id = optarg;
+                                break;
+                        case 'c':
+                                classification = optarg;
+                                break;
+                        case 'b':
+                                boot_id = optarg;
+                                break;
+                        case 'V':
+                                verbose_output = 1;
+                                break;
+                        case 'h':
+                                print_usage();
+                                exit(EXIT_SUCCESS);
+                        case '?':
+                                /** default */
+                                print_usage();
+                                exit(EXIT_FAILURE);
+                }
         }
 
-        if ((telem_journal = open_journal(NULL))){
+        if ((telem_journal = open_journal(JOURNAL_PATH))) {
                 if (verbose_output) {
                         fprintf(stdout, "%-30s %-27s %-32s %-32s %-36s\n", "Classification", "Time stamp",
-                                        "Record ID", "Event ID", "Boot ID");
+                                "Record ID", "Event ID", "Boot ID");
                 }
                 count = print_journal(telem_journal, classification, record_id, event_id, boot_id);
                 if (verbose_output) {
@@ -99,6 +99,7 @@ int main(int argc, char **argv){
                 close_journal(telem_journal);
         } else {
                 fprintf(stderr, "Unable to open journal\n");
+                rc = EXIT_FAILURE;
         }
 
         free(classification);
