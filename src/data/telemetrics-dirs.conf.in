@@ -1,5 +1,6 @@
 d @localstatedir@/lib/telemetry 0755 telemetry telemetry -
 d @localstatedir@/spool/telemetry 0750 telemetry telemetry -
+d @localstatedir@/log/telemetry 0750 telemetry telemetry -
 d @localstatedir@/cache/telemetry 0750 telemetry telemetry -
 d @localstatedir@/cache/telemetry/oops 0750 telemetry telemetry -
 d @localstatedir@/cache/telemetry/pstore 0750 telemetry telemetry -
