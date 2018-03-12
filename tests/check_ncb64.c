@@ -14,13 +14,11 @@
  * details.
  */
 
-
 #define OUT_MAX_LEN 100
 
 #include <stdio.h>
 #include <check.h>
 #include "nica/b64enc.h"
-
 
 START_TEST(check_nc_b64_no_overflow)
 {
@@ -31,7 +29,6 @@ START_TEST(check_nc_b64_no_overflow)
         ck_assert_msg(!nc_b64enc_filename(filename, &out[0], n), "Should quit since buffer smaller than content");
 }
 END_TEST
-
 
 START_TEST(check_nc_b64_enc_n_file_empty)
 {
@@ -44,7 +41,6 @@ START_TEST(check_nc_b64_enc_n_file_empty)
         ck_assert_str_eq(out, result);
 }
 END_TEST
-
 
 START_TEST(check_nc_b64_enc_n_file_fo)
 {
@@ -87,43 +83,43 @@ START_TEST(check_nc_b64_enc_n_file_long_text)
         size_t out_len = 8000;
         char out[out_len];
         const char *expected_out = \
-"TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIG5vbnVtbXkgdml0YWUsIGluIHZpdmFtdXMgc3Vz\n"
-"cGVuZGlzc2UgYWMuIFNlbXBlciBzZWQgcGhhcmV0cmEgc2NlbGVyaXNxdWUuIEVnZXQgZWxlaWZl\n"
-"bmQgYW1ldCB2ZWwgbnVuYyB2b2x1dHBhdCBjdXJzdXMsIGF1Y3RvciBwbGF0ZWEgcHJldGl1bSwg\n"
-"bWF0dGlzIHJpc3VzIGZhY2lsaXNpcyBmYXVjaWJ1cywgc3VzcGVuZGlzc2UgZGlhbSwgbGVjdHVz\n"
-"IG1ldHVzIG51bGxhLiBOdW5jIGp1c3RvIGZhY2lsaXNpIG5hbSBmZWxpcyB2ZWwgbGFvcmVldCwg\n"
-"bmliaCBsZW8gbWFzc2Egc3VzcGVuZGlzc2UgYWNjdW1zYW4gY29udmFsbGlzLCBzZWQgcXVpcyBw\n"
-"ZWxsZW50ZXNxdWUgZWdlc3RhcywgbG9yZW0gYW50ZSBtb3JiaSBtYXR0aXMgdml0YWUuIFByYWVz\n"
-"ZW50IGluIHJ1dHJ1bSBlZ2V0IGFjLCB2aXZhbXVzIHBlZGUgc3VzcGVuZGlzc2UgbGVjdHVzIG51\n"
-"bGxhbSwgZXQgcGVkZSBldSBvZGlvIHBlZGUsIGV0aWFtIGxlbyBlZ2VzdGFzIGluLCBub251bW15\n"
-"IHNlbXBlci4gQSBhY2N1bXNhbiBkdWksIHZlc3RpYnVsdW0gcmlkaWN1bHVzIGV0IGluLCBqdXN0\n"
-"byBldCBwbGFjZXJhdCBkdWlzIHV0IHZpdmFtdXMgbGliZXJvLiBWZXN0aWJ1bHVtIGVnZXQgdXQg\n"
-"bW9sbGlzLCBudW5jIGEgc29sbGljaXR1ZGluLCBmcmluZ2lsbGEgZXJvcyBwb3N1ZXJlIG1vbGxp\n"
-"cyBhYyBuYXRvcXVlIHBlZGUsIHJpc3VzIG51bGxhIHJ1dHJ1bSB0dXJwaXMgYSB2aXRhZSBpZC4g\n"
-"SW5jZXB0b3MgdGluY2lkdW50IHF1aWRlbSBhcmN1IHR1cnBpcyBudW5jIHNvbGxpY2l0dWRpbi4g\n"
-"UGhhc2VsbHVzIG1ldHVzIGVyYXQgcGxhY2VyYXQsIGluIGVyYXQgbG9yZW0gbWF1cmlzIG51bGxh\n"
-"LCBhdCBsaWJlcm8gZXJhdCBzdXNwZW5kaXNzZSBzYXBpZW4gbW9udGVzIHJob25jdXMsIG1hZ25h\n"
-"IHF1YW0uIEp1c3RvIHByYWVzZW50IGxhY3VzIG1hc3NhLCByZXByZWhlbmRlcml0IG51bmMsIHJp\n"
-"c3VzIGRpZ25pc3NpbSBmZWxpcyBub24sIGRpZ25pc3NpbSBvZGlvIHRlbGx1cyBhbGlxdWFtLCBl\n"
-"bmltIHNvZGFsZXMgdGVtcG9yIHF1aXNxdWUgc29kYWxlcyBtYWduaXMgcG9ydHRpdG9yLiBMaWd1\n"
-"bGEgc2VkIHJpc3VzLCBldSBlc3QgcXVpc3F1ZSwgY2xhc3Mgbm9uIGF1dGUgZXUsIHBsYXRlYSBz\n"
-"Y2VsZXJpc3F1ZSBpZCBpbnRlZ2VyIGRpZ25pc3NpbW9zIGludGVnZXIgc3VzY2lwaXQuClZlaGlj\n"
-"dWxhIGVpdXMgbmVjLCBjb252YWxsaXMgbWFlY2VuYXMgbGVjdHVzIHB1cnVzIHF1aXNxdWUgYWxp\n"
-"cXVhbSwgZXQgZXQsIGxhY2luaWEgZGlzIGRpZ25pc3NpbSBsb3JlbS4gVm9sdXB0YXRlbSB1dCwg\n"
-"dml2ZXJyYSBhZW5lYW4gcGhhc2VsbHVzIGZlbGlzLCBmZXJtZW50dW0gbGlndWxhIGVnZXQgdWxs\n"
-"YW1jb3JwZXIgYW1ldCwgbWF1cmlzIGxlbyBsdWN0dXMuIEV0IGV0aWFtIHNlbXBlciBwaGFyZXRy\n"
-"YSBuaWJoIG1pIG1hdXJpcy4gSGVuZHJlcml0IHNlZCBhbGlxdWFtLCBlZ2V0IGlkIHRlbGx1cyBt\n"
-"YWduYSwgc2VkIGxhb3JlZXQgdWx0cmljZXMgZW5pbSwgbW9sbGlzIHN1c3BlbmRpc3NlIGluLiBF\n"
-"dSBudWxsYW0gbG9yZW0gc2l0IGV0aWFtLCBvcmNpIGluIGxpYmVyby4gTnVuYyBpcHN1bSBtYXVy\n"
-"aXMgZXQgc2VtIGhhYy4gRGljdHVtIGZhdWNpYnVzIGRpcyB2aXRhZSBpbiB2b2x1dHBhdCBtb3Ji\n"
-"aSwgYSBkaWN0dW0sIHF1aXNxdWUgbWF1cmlzLCBhdWN0b3IgbmVjIHZlbCBwZWxsZW50ZXNxdWUg\n"
-"dWxsYW1jb3JwZXIgZXRpYW0uIEN1bSBsaWJlcm8gd2lzaSBhY2N1bXNhbiBhbGlxdWFtIGNvbnNl\n"
-"Y3RldHVlciB0ZWxsdXMsIHBoYXNlbGx1cyBjdXJhZSwgYXQgaWxsdW0gYW50ZSBwcmV0aXVtIG5p\n"
-"YmggbW9yYmkuIFNlZCBibGFuZGl0IHB1bHZpbmFyIHB1bHZpbmFyLiBEaWN0dW0gZXN0IG51bmMg\n"
-"ZWxlaWZlbmQsIHZlbGl0IHZlbGl0IHRlbXBvciBhY2N1bXNhbiBsb2JvcnRpcyBsYW9yZWV0IGNv\n"
-"bmd1ZS4gU2l0IGFtZXQsIHNlZCBuaWJoIHBvcnJvIG5lcXVlIGF1Y3RvciBoeW1lbmFlb3MgcG9z\n"
-"dWVyZSwgb2RpbyBudWxsYSBibGFuZGl0IGNvbmd1ZSBlbGl0LiBJZCBmYXVjaWJ1cyBldCB0ZW1w\n"
-"dXMgbWFsZXN1YWRhIHBsYXRlYS4=";
+                "TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIG5vbnVtbXkgdml0YWUsIGluIHZpdmFtdXMgc3Vz\n"
+                "cGVuZGlzc2UgYWMuIFNlbXBlciBzZWQgcGhhcmV0cmEgc2NlbGVyaXNxdWUuIEVnZXQgZWxlaWZl\n"
+                "bmQgYW1ldCB2ZWwgbnVuYyB2b2x1dHBhdCBjdXJzdXMsIGF1Y3RvciBwbGF0ZWEgcHJldGl1bSwg\n"
+                "bWF0dGlzIHJpc3VzIGZhY2lsaXNpcyBmYXVjaWJ1cywgc3VzcGVuZGlzc2UgZGlhbSwgbGVjdHVz\n"
+                "IG1ldHVzIG51bGxhLiBOdW5jIGp1c3RvIGZhY2lsaXNpIG5hbSBmZWxpcyB2ZWwgbGFvcmVldCwg\n"
+                "bmliaCBsZW8gbWFzc2Egc3VzcGVuZGlzc2UgYWNjdW1zYW4gY29udmFsbGlzLCBzZWQgcXVpcyBw\n"
+                "ZWxsZW50ZXNxdWUgZWdlc3RhcywgbG9yZW0gYW50ZSBtb3JiaSBtYXR0aXMgdml0YWUuIFByYWVz\n"
+                "ZW50IGluIHJ1dHJ1bSBlZ2V0IGFjLCB2aXZhbXVzIHBlZGUgc3VzcGVuZGlzc2UgbGVjdHVzIG51\n"
+                "bGxhbSwgZXQgcGVkZSBldSBvZGlvIHBlZGUsIGV0aWFtIGxlbyBlZ2VzdGFzIGluLCBub251bW15\n"
+                "IHNlbXBlci4gQSBhY2N1bXNhbiBkdWksIHZlc3RpYnVsdW0gcmlkaWN1bHVzIGV0IGluLCBqdXN0\n"
+                "byBldCBwbGFjZXJhdCBkdWlzIHV0IHZpdmFtdXMgbGliZXJvLiBWZXN0aWJ1bHVtIGVnZXQgdXQg\n"
+                "bW9sbGlzLCBudW5jIGEgc29sbGljaXR1ZGluLCBmcmluZ2lsbGEgZXJvcyBwb3N1ZXJlIG1vbGxp\n"
+                "cyBhYyBuYXRvcXVlIHBlZGUsIHJpc3VzIG51bGxhIHJ1dHJ1bSB0dXJwaXMgYSB2aXRhZSBpZC4g\n"
+                "SW5jZXB0b3MgdGluY2lkdW50IHF1aWRlbSBhcmN1IHR1cnBpcyBudW5jIHNvbGxpY2l0dWRpbi4g\n"
+                "UGhhc2VsbHVzIG1ldHVzIGVyYXQgcGxhY2VyYXQsIGluIGVyYXQgbG9yZW0gbWF1cmlzIG51bGxh\n"
+                "LCBhdCBsaWJlcm8gZXJhdCBzdXNwZW5kaXNzZSBzYXBpZW4gbW9udGVzIHJob25jdXMsIG1hZ25h\n"
+                "IHF1YW0uIEp1c3RvIHByYWVzZW50IGxhY3VzIG1hc3NhLCByZXByZWhlbmRlcml0IG51bmMsIHJp\n"
+                "c3VzIGRpZ25pc3NpbSBmZWxpcyBub24sIGRpZ25pc3NpbSBvZGlvIHRlbGx1cyBhbGlxdWFtLCBl\n"
+                "bmltIHNvZGFsZXMgdGVtcG9yIHF1aXNxdWUgc29kYWxlcyBtYWduaXMgcG9ydHRpdG9yLiBMaWd1\n"
+                "bGEgc2VkIHJpc3VzLCBldSBlc3QgcXVpc3F1ZSwgY2xhc3Mgbm9uIGF1dGUgZXUsIHBsYXRlYSBz\n"
+                "Y2VsZXJpc3F1ZSBpZCBpbnRlZ2VyIGRpZ25pc3NpbW9zIGludGVnZXIgc3VzY2lwaXQuClZlaGlj\n"
+                "dWxhIGVpdXMgbmVjLCBjb252YWxsaXMgbWFlY2VuYXMgbGVjdHVzIHB1cnVzIHF1aXNxdWUgYWxp\n"
+                "cXVhbSwgZXQgZXQsIGxhY2luaWEgZGlzIGRpZ25pc3NpbSBsb3JlbS4gVm9sdXB0YXRlbSB1dCwg\n"
+                "dml2ZXJyYSBhZW5lYW4gcGhhc2VsbHVzIGZlbGlzLCBmZXJtZW50dW0gbGlndWxhIGVnZXQgdWxs\n"
+                "YW1jb3JwZXIgYW1ldCwgbWF1cmlzIGxlbyBsdWN0dXMuIEV0IGV0aWFtIHNlbXBlciBwaGFyZXRy\n"
+                "YSBuaWJoIG1pIG1hdXJpcy4gSGVuZHJlcml0IHNlZCBhbGlxdWFtLCBlZ2V0IGlkIHRlbGx1cyBt\n"
+                "YWduYSwgc2VkIGxhb3JlZXQgdWx0cmljZXMgZW5pbSwgbW9sbGlzIHN1c3BlbmRpc3NlIGluLiBF\n"
+                "dSBudWxsYW0gbG9yZW0gc2l0IGV0aWFtLCBvcmNpIGluIGxpYmVyby4gTnVuYyBpcHN1bSBtYXVy\n"
+                "aXMgZXQgc2VtIGhhYy4gRGljdHVtIGZhdWNpYnVzIGRpcyB2aXRhZSBpbiB2b2x1dHBhdCBtb3Ji\n"
+                "aSwgYSBkaWN0dW0sIHF1aXNxdWUgbWF1cmlzLCBhdWN0b3IgbmVjIHZlbCBwZWxsZW50ZXNxdWUg\n"
+                "dWxsYW1jb3JwZXIgZXRpYW0uIEN1bSBsaWJlcm8gd2lzaSBhY2N1bXNhbiBhbGlxdWFtIGNvbnNl\n"
+                "Y3RldHVlciB0ZWxsdXMsIHBoYXNlbGx1cyBjdXJhZSwgYXQgaWxsdW0gYW50ZSBwcmV0aXVtIG5p\n"
+                "YmggbW9yYmkuIFNlZCBibGFuZGl0IHB1bHZpbmFyIHB1bHZpbmFyLiBEaWN0dW0gZXN0IG51bmMg\n"
+                "ZWxlaWZlbmQsIHZlbGl0IHZlbGl0IHRlbXBvciBhY2N1bXNhbiBsb2JvcnRpcyBsYW9yZWV0IGNv\n"
+                "bmd1ZS4gU2l0IGFtZXQsIHNlZCBuaWJoIHBvcnJvIG5lcXVlIGF1Y3RvciBoeW1lbmFlb3MgcG9z\n"
+                "dWVyZSwgb2RpbyBudWxsYSBibGFuZGl0IGNvbmd1ZSBlbGl0LiBJZCBmYXVjaWJ1cyBldCB0ZW1w\n"
+                "dXMgbWFsZXN1YWRhIHBsYXRlYS4=";
         const char *filename = TOPSRCDIR "/tests/nc_b64enc_test_files/long_text";
 
         ck_assert_msg(nc_b64enc_filename(filename, &out[0], out_len), "Error opening file");
@@ -194,5 +190,4 @@ int main(void)
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
-
 

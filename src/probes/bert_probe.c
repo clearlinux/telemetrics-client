@@ -31,7 +31,6 @@ static const char telem_record_class[] = "org.clearlinux/bert/debug";
 static uint32_t severity = 2;
 static uint32_t payload_version = 1;
 
-
 void print_usage(char *prog)
 {
         printf("%s: Usage\n", prog);
@@ -109,7 +108,7 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        if(!(ret = nc_b64enc_filename(bert_record_file, payload, MAX_PAYLOAD_SIZE))) {
+        if (!(ret = nc_b64enc_filename(bert_record_file, payload, MAX_PAYLOAD_SIZE))) {
                 printf("Failed to read payload from: %s\n", bert_record_file);
                 goto fail;
         }
