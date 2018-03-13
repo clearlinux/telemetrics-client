@@ -616,37 +616,6 @@ static int set_bios_version_header(struct telem_ref *t_ref)
 }
 
 /**
- * Generates an alphanumeric id of length 32
- *
- * @param buff pointer to memory buffer, buffer should have
- *        at least 33 bytes of memory
- *
- * @return 0 if successful, or -1 if there's a problem
- *
- */
-static int gen_event_id(char *buff)
-{
-        int frandom = -1;
-        int result = -1;
-        uint64_t random_id[2] = { 0 };
-
-        frandom = open("/dev/urandom", O_RDONLY);
-        if (frandom < 0) {
-                return -1;
-        }
-
-        if (read(frandom, &random_id, sizeof(random_id)) == sizeof(random_id)) {
-                if (sprintf(buff, "%.16" PRIx64 "%.16" PRIx64, random_id[0], random_id[1]) == 32) {
-                        result = 0;
-                }
-        }
-
-        close(frandom);
-
-        return result;
-}
-
-/**
  * Sets the event_id header, this id is an identifier that multiple
  * records can share. This means that one event can lead to multiple
  * records.
@@ -659,9 +628,9 @@ static int gen_event_id(char *buff)
 static int set_event_id_header(struct telem_ref *t_ref)
 {
         int rc = 0;
-        char buff[33];
+        char *buff = NULL;
 
-        rc = gen_event_id(buff);
+        rc = get_random_id(&buff);
 
         if (rc == 0) {
                 rc = set_header(
@@ -669,6 +638,7 @@ static int set_event_id_header(struct telem_ref *t_ref)
                         TM_EVENT_ID_STR, buff,
                         &(t_ref->record->header_size));
         }
+        free(buff);
 
         return rc;
 }
