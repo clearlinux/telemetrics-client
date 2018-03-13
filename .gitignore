@@ -38,6 +38,7 @@ autoscan.log
 configure.scan
 tprobe
 hprobe
+bertprobe
 crashprobe
 journalprobe
 telem-record-gen
@@ -45,6 +46,7 @@ klogscanner
 oopsprobe
 pstoreclean
 pstoreprobe
+telem_journal
 make.out
 types_c.taghl
 src/recomp.sh
