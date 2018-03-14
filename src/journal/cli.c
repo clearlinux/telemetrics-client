@@ -102,10 +102,5 @@ int main(int argc, char **argv)
                 rc = EXIT_FAILURE;
         }
 
-        free(classification);
-        free(record_id);
-        free(event_id);
-        free(boot_id);
-
         return rc;
 }
