@@ -432,13 +432,13 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                 if (entry) {
                         /* filter entry out if one is provided */
                         if (record_id != NULL && strcmp(entry->record_id, record_id) != 0) {
-                                continue;
+                                goto skip_print;
                         }
                         if (boot_id != NULL && strcmp(entry->boot_id, boot_id) != 0) {
-                                continue;
+                                goto skip_print;
                         }
                         if (event_id != NULL && strcmp(entry->event_id, event_id) != 0) {
-                                continue;
+                                goto skip_print;
                         }
                         // In the case of class checking prefixes is an option
                         if (classification != NULL) {
@@ -460,6 +460,7 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                         fprintf(stdout, "%-30s %s %s %s %s\n", entry->classification, str_time, entry->record_id, entry->event_id, entry->boot_id);
                         count++;
                 }
+skip_print:
                 free_journal_entry(entry);
         }
         free(line);
