@@ -159,28 +159,28 @@ void journal_entry_setup(void)
 START_TEST(check_journal_print)
 {
         int count = 0;
-        count = print_journal(journal, NULL, NULL, NULL, NULL);
+        count = print_journal(journal, NULL, NULL, NULL, NULL, 0);
         ck_assert_int_eq(count, K + 2);
 }
 END_TEST
 
 START_TEST(check_journal_filter_by_class)
 {
-        int result = print_journal(journal, "a/b/c", NULL, NULL, NULL);
+        int result = print_journal(journal, "a/b/c", NULL, NULL, NULL, 0);
         ck_assert_int_eq(result, 1);
 }
 END_TEST
 
 START_TEST(check_journal_filter_by_class_prefix)
 {
-        int result = print_journal(journal, "a/b/*", NULL, NULL, NULL);
+        int result = print_journal(journal, "a/b/*", NULL, NULL, NULL, 0);
         ck_assert_int_eq(result, 2);
 }
 END_TEST
 
 START_TEST(check_journal_filter_by_event_id)
 {
-        int result = print_journal(journal, NULL, NULL, eid, NULL);
+        int result = print_journal(journal, NULL, NULL, eid, NULL, 0);
         ck_assert(result == 2);
 }
 END_TEST

@@ -55,3 +55,13 @@ rate_limit_strategy=spool
 # has not any client nor spool data, then it exits.
 # this is to ensure that latest code runs.
 daemon_recycling_enabled=true
+
+# record server delivery enabled - when enabled records will be delivered
+# to server otherwise records will be ignored. This configuration can be used
+# with 'record_retention_enable' configuration value to keep records local only.
+record_server_delivery_enabled=true
+
+# record retention enabled - when enabled a copy of reported telemetry records
+# will be kept locally. This configuration combined with 'record_server_delivery_enabled'
+# value can be used to keep records local only.
+record_retention_enabled=false

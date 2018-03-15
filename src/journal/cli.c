@@ -27,12 +27,13 @@
 void print_usage(void)
 {
         printf(" Usage\n");
-        printf("  -r,  --record_id       Print record to stdout\n");
-        printf("  -e,  --event_id        List records with specific event_id\n");
-        printf("  -c,  --classification  List records with specific classification\n");
-        printf("  -b,  --boot_id         List records with specific boot_id\n");
-        printf("  -V,  --verbose         Verbose output\n");
-        printf("  -h,  --help            Display this help message\n");
+        printf("  -r,  --record_id        Print record with specific record_id\n");
+        printf("  -e,  --event_id         Print records with specific event_id\n");
+        printf("  -c,  --classification   Print records with specific classification\n");
+        printf("  -b,  --boot_id          Print records with specific boot_id\n");
+        printf("  -i,  --include_record   Include record content\n");
+        printf("  -V,  --verbose          Verbose output\n");
+        printf("  -h,  --help             Display this help message\n");
 }
 
 int main(int argc, char **argv)
@@ -41,6 +42,7 @@ int main(int argc, char **argv)
         int rc = EXIT_SUCCESS;
         int count = 0;
         int verbose_output = 0;
+        int record = 0;
         char *boot_id = NULL;
         char *record_id = NULL;
         char *event_id = NULL;
@@ -56,11 +58,12 @@ int main(int argc, char **argv)
                 { "classification", 1, NULL, 'c' },
                 { "boot_id", 1, NULL, 'b' },
                 { "verbose", 0, NULL, 'V' },
+                { "include_record", 0, NULL, 'i' },
                 { "help", 0, NULL, 'h' },
                 { NULL, 0, NULL, 0 }
         };
 
-        while ((c = getopt_long(argc, argv, "r:e:c:b:Vh", opts, &opt_index)) != -1) {
+        while ((c = getopt_long(argc, argv, "r:e:c:b:Vih", opts, &opt_index)) != -1) {
                 switch (c) {
                         case 'r':
                                 record_id = optarg;
@@ -77,6 +80,9 @@ int main(int argc, char **argv)
                         case 'V':
                                 verbose_output = 1;
                                 break;
+                        case 'i':
+                                record = 1;
+                                break;
                         case 'h':
                                 print_usage();
                                 exit(EXIT_SUCCESS);
@@ -92,7 +98,7 @@ int main(int argc, char **argv)
                         fprintf(stdout, "%-30s %-27s %-32s %-32s %-36s\n", "Classification", "Time stamp",
                                 "Record ID", "Event ID", "Boot ID");
                 }
-                count = print_journal(telem_journal, classification, record_id, event_id, boot_id);
+                count = print_journal(telem_journal, classification, record_id, event_id, boot_id, record);
                 if (verbose_output) {
                         fprintf(stdout, "Total records: %d\n", count);
                 }

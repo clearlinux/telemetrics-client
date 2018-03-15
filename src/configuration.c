@@ -47,8 +47,8 @@ const char *config_key_int[] = { NULL, "record_expiry", "spool_max_size",
                                  "byte_window_length", "record_burst_limit",
                                  "byte_burst_limit", NULL };
 
-const char *config_key_bool[] = { NULL, "rate_limit_enabled",
-                                  "daemon_recycling_enabled", NULL };
+const char *config_key_bool[] = { NULL, "rate_limit_enabled", "daemon_recycling_enabled",
+                                  "record_retention_enabled", "record_server_delivery_enabled", NULL };
 
 static struct configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
 
@@ -132,8 +132,22 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                         config->boolValues[i] = true;
                                 }
                         } else {
-                                fprintf(stderr, "ERR: missing key with boolean value: %s\n", config_key_bool[i]);
-                                return false;
+                                /* New configuration keys, CONF_RECORD_RETENTION_ENABLED and CONF_RECORD_SERVER_DELIVERY_ENABLED
+                                 * default values, otherwise update will require changes in custom configurations */
+                                if (i == CONF_RECORD_RETENTION_ENABLED) {
+#ifdef DEBUG
+                                        fprintf(stderr, "WARN: missing boolean optional key: %s\n", config_key_bool[i]);
+#endif
+                                        config->boolValues[i] = RECORD_RETENTION_ENABLED_DEFAULT;
+                                } else if (i == CONF_RECORD_SERVER_DELIVERY_ENABLED) {
+#ifdef DEBUG
+                                        fprintf(stderr, "WARN: missing boolean optional key: %s\n", config_key_bool[i]);
+#endif
+                                        config->boolValues[i] = RECORD_SERVER_DELIVERY_ENABLED_DEFAULT;
+                                } else {
+                                        fprintf(stderr, "ERR: missing key with boolean value: %s\n", config_key_bool[i]);
+                                        return false;
+                                }
                         }
                 }
         }
@@ -355,5 +369,17 @@ bool daemon_recycling_enabled_config(void)
 {
         initialize_config();
         return config.boolValues[CONF_DAEMON_RECYCLING_ENABLED];
+}
+
+bool record_retention_enabled_config(void)
+{
+        initialize_config();
+        return config.boolValues[CONF_RECORD_RETENTION_ENABLED];
+}
+
+bool record_server_delivery_enabled_config(void)
+{
+        initialize_config();
+        return config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED];
 }
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

@@ -55,6 +55,34 @@ START_TEST(check_read_valid_config)
 }
 END_TEST
 
+START_TEST(check_read_valid_config_defaults)
+{
+        char *config_file = TOPSRCDIR "/src/data/example.conf";
+        configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
+
+        int ret = read_config_from_file(config_file, &config);
+        ck_assert(ret == true);
+
+        // RECORD_RETENTION_ENABLED_DEFAULT = false
+        ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == RECORD_RETENTION_ENABLED_DEFAULT);
+        // RECORD_SERVER_DELIVERY_ENABLED_DEFAULT = true
+        ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == RECORD_SERVER_DELIVERY_ENABLED_DEFAULT);
+}
+END_TEST
+
+START_TEST(check_read_valid_config_record_retention_delivery)
+{
+        char *config_file = TOPSRCDIR "/src/data/example.1.conf";
+        configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
+
+        int ret = read_config_from_file(config_file, &config);
+        ck_assert(ret == true);
+
+        ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == true);
+        ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == false);
+}
+END_TEST
+
 START_TEST(check_config_initialised)
 {
         char *config_file = ABSTOPSRCDIR "/src/data/example.conf";
@@ -89,6 +117,8 @@ Suite *config_suite(void)
         TCase *t = tcase_create("config");
         tcase_add_test(t, check_read_config_for_invalid_file);
         tcase_add_test(t, check_read_valid_config);
+        tcase_add_test(t, check_read_valid_config_defaults);
+        tcase_add_test(t, check_read_valid_config_record_retention_delivery);
         tcase_add_test(t, check_config_initialised);
 
         // add more TCases here

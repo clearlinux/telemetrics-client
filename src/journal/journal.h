@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /* Journal entry type */
 typedef struct JournalEntry {
@@ -37,8 +38,10 @@ typedef struct TelemJournal {
         FILE *fptr;
         char *journal_file;
         char *boot_id;
+        char *latest_record_id;
         int record_count;
         int record_count_limit;
+        int (*prune_entry_callback)(char *);
 } TelemJournal;
 
 /**
@@ -75,12 +78,14 @@ void close_journal(TelemJournal *telem_journal);
  * @param record_id A pointer to string used as record_id filter.
  * @param event_id A pointer to string used as event_id filter.
  * @param boot_id A pointer to string used as boor_id filter.
+ * @param include_record A flag to control record content print.
  *
  * @return the number of lines printed to stdout on success, -1
  *         on failure.
  */
 int print_journal(TelemJournal *telem_journal, char *classification,
-                  char *record_id, char *event_id, char *boot_id);
+                  char *record_id, char *event_id, char *boot_id,
+                  bool include_record);
 
 /**
  * Creates a new entry in journal.

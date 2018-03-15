@@ -7,7 +7,9 @@ bin_PROGRAMS = %D%/telemd
 	%D%/spool.c \
 	%D%/spool.h \
 	%D%/journal/journal.c \
-	%D%/journal/journal.h
+	%D%/journal/journal.h \
+	%D%/retention.c \
+	%D%/retention.h
 
 %C%_telemd_LDADD = $(CURL_LIBS) \
 	%D%/libtelem-shared.la

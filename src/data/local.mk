@@ -11,6 +11,7 @@ EXTRA_DIST += \
 	%D%/40-core-ulimit.conf \
 	%D%/40-crash-probe.conf.in \
 	%D%/example.conf \
+	%D%/example.1.conf \
 	%D%/hprobe.service.in \
 	%D%/hprobe.timer \
 	%D%/bert-probe.service.in \

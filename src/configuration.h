@@ -19,6 +19,8 @@
 #include <stdint.h>
 
 #define TM_MAX_WINDOW_LENGTH (1 /*h*/ * 60 /*m*/)
+#define RECORD_RETENTION_ENABLED_DEFAULT false
+#define RECORD_SERVER_DELIVERY_ENABLED_DEFAULT true
 
 enum config_str_keys {
         CONF_STR_MIN = 0,
@@ -47,6 +49,8 @@ enum config_bool_keys {
         CONF_BOOL_MIN = 0,
         CONF_RATE_LIMIT_ENABLED,
         CONF_DAEMON_RECYCLING_ENABLED,
+        CONF_RECORD_RETENTION_ENABLED,
+        CONF_RECORD_SERVER_DELIVERY_ENABLED,
         CONF_BOOL_MAX
 };
 
@@ -116,5 +120,11 @@ const char *get_tidheader_config(void);
 
 /* Gets whether recycling is enabled */
 bool daemon_recycling_enabled_config(void);
+
+/* Gets whether local retention of records is enabled */
+bool record_retention_enabled_config(void);
+
+/* Gets whether records should be sent to server_addr */
+bool record_server_delivery_enabled_config(void);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
