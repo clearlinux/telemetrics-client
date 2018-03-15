@@ -34,6 +34,7 @@
 #include "util.h"
 #include "log.h"
 #include "configuration.h"
+#include "retention.h"
 
 void initialize_daemon(TelemDaemon *daemon)
 {
@@ -46,6 +47,7 @@ void initialize_daemon(TelemDaemon *daemon)
         daemon->is_spool_valid = false;
         daemon->record_journal = open_journal(JOURNAL_PATH);
         initialize_rate_limit(daemon);
+        initialize_record_delivery(daemon);
         daemon->current_spool_size = 0;
 }
 
@@ -61,6 +63,12 @@ void initialize_rate_limit(TelemDaemon *daemon)
         daemon->byte_burst_limit = byte_burst_limit_config();
         daemon->byte_window_length = byte_window_length_config();
         daemon->rate_limit_strategy = rate_limit_strategy_config();
+}
+
+void initialize_record_delivery(TelemDaemon *daemon)
+{
+        daemon->record_retention_enabled = record_retention_enabled_config();
+        daemon->record_server_delivery_enabled = record_server_delivery_enabled_config();
 }
 
 client *add_client(client_list_head *client_head, int fd)
@@ -264,6 +272,21 @@ void machine_id_replace(char **machine_header, char *machine_id_override)
         free(old_header);
 }
 
+void save_entry_to_journal(TelemDaemon *daemon, time_t t_stamp, char *headers[])
+{
+        char *classification_value;
+        char *event_id_value;
+
+        if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
+            get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
+                if (new_journal_entry(daemon->record_journal, classification_value, t_stamp, event_id_value) != 0) {
+                        telem_log(LOG_INFO, "new_journal_entry in process_record: failed saving record entry\n");
+                }   
+        }   
+        free(classification_value);
+        free(event_id_value);
+}
+
 void process_record(TelemDaemon *daemon, client *cl)
 {
         int i = 0;
@@ -281,10 +304,6 @@ void process_record(TelemDaemon *daemon, client *cl)
         bool byte_check_passed = true;
         bool record_burst_enabled = true;
         bool byte_burst_enabled = true;
-        /* values for journal */
-        char *classification_value;
-        char *event_id_value;
-
         /* Gets the current minute of time */
         time_t temp = time(NULL);
         struct tm *tm_s = localtime(&temp);
@@ -317,14 +336,20 @@ void process_record(TelemDaemon *daemon, client *cl)
         body = msg + header_size;
 
         /* Save record in journal */
-        if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
-            get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
-                if (new_journal_entry(daemon->record_journal, classification_value, temp, event_id_value) != 0) {
-                        telem_log(LOG_INFO, "new_journal_entry in process_record: failed saving record entry\n");
-                }
+        save_entry_to_journal(daemon, temp, headers);
+
+        /* Save local copy */
+        if (daemon->record_retention_enabled) {
+                save_local_copy(daemon, body);
         }
-        free(classification_value);
-        free(event_id_value);
+
+        /* Bail out if server delivery is not enabled */
+        if (!daemon->record_server_delivery_enabled) {
+#ifdef DEBUG
+                fprintf(stdout, "process_record: record server delivery disabled\n");
+#endif
+                goto end;
+        }
 
         if (inside_direct_spool_window(daemon, time(NULL))) {
                 telem_log(LOG_INFO, "process_record: delivering directly to spool\n");
@@ -357,12 +382,12 @@ void process_record(TelemDaemon *daemon, client *cl)
                         daemon->rate_limit_enabled = false;
                 }
         }
+
         /* Sends record if rate limiting is disabled, or all checks passed */
         if (!daemon->rate_limit_enabled || (record_check_passed && byte_check_passed)) {
                 /* Send the record as https post */
                 record_sent = post_record_ptr(headers, body, true);
         }
-
         // Get rate-limit strategy
         do_spool = spool_strategy_selected(daemon);
 
@@ -558,6 +583,39 @@ bool post_record_http(char *headers[], char *body, bool spool)
         return res ? false : true;
 }
 
+void save_local_copy(TelemDaemon *daemon, char *body)
+{
+        int ret = 0;
+        char *tmpbuf = NULL;
+        FILE *tmpfile = NULL;
+
+        if (daemon == NULL || daemon->record_journal == NULL || 
+            daemon->record_journal->latest_record_id == NULL) {
+                return;
+        }
+
+        ret = asprintf(&tmpbuf, "%s/%s", RECORD_RETENTION_DIR,
+                       daemon->record_journal->latest_record_id);
+        if (ret == -1) {
+                telem_log(LOG_ERR, "Failed to allocate memory for record full path, aborting\n");
+                return;
+        }
+
+        tmpfile = fopen(tmpbuf, "w");
+        if (!tmpfile) {
+                telem_perror("Error opening local record copy temp file");
+                goto save_err;
+        }
+
+        // Save body
+        fprintf(tmpfile, "%s\n", body);
+        fclose(tmpfile);
+
+save_err:
+        free(tmpbuf);
+        return;
+}
+
 void spool_record(TelemDaemon *daemon, char *headers[], char *body)
 {
         int ret = 0;
@@ -599,7 +657,6 @@ void spool_record(TelemDaemon *daemon, char *headers[], char *body)
                 goto spool_err;
         }
 
-        //fp = fopen(spool_dir_path, const char *mode);
         tmpfile = fdopen(tmpfd, "a");
         if (!tmpfile) {
                 telem_perror("Error opening temp file");

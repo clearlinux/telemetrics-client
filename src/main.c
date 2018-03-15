@@ -49,6 +49,7 @@
 #include "log.h"
 #include "telemdaemon.h"
 #include "configuration.h"
+#include "retention.h"
 #include "spool.h"
 
 /*
@@ -121,6 +122,11 @@ int main(int argc, char **argv)
                 }
         }
         initialize_daemon(&daemon);
+
+        /* Register record retention delete action as a callback to prune entry */
+        if (daemon.record_journal) {
+                daemon.record_journal->prune_entry_callback = &delete_record_by_id;
+        }
 
         sigemptyset(&mask);
 

@@ -69,10 +69,12 @@ typedef struct TelemDaemon {
         int64_t byte_burst_limit;
         int byte_window_length;
         const char *rate_limit_strategy;
-
+        /* Spool configuration */
         bool is_spool_valid;
         long current_spool_size;
-
+        /* Record local copy and delivery  */
+        bool record_retention_enabled;
+        bool record_server_delivery_enabled;
         char *machine_id_override;
 } TelemDaemon;
 
@@ -89,6 +91,14 @@ void initialize_daemon(TelemDaemon *daemon);
  * @param daemon A pointer to the daemon structure
  */
 void initialize_rate_limit(TelemDaemon *daemon);
+
+/**
+ * Initialize record delivery to remote and locally
+ * in the daemon
+ *
+ * @param daemon A pointer to the daemon structure
+ */
+void initialize_record_delivery(TelemDaemon *daemon);
 
 /**
  * Add poll fd struct to the array of pollfds.
@@ -270,6 +280,14 @@ bool post_record_http(char *header_values[], char *body, bool spool);
  *
  */
 void spool_record(TelemDaemon * daemon, char *headers[], char *body);
+
+/**
+ * Save a copy of the record payload locally
+ *
+ * @param body The payload of the record
+ *
+ */
+void save_local_copy(TelemDaemon *daemon, char *body);
 
 /**
  * Get random machine id stored in file

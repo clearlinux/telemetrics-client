@@ -19,6 +19,7 @@
 #define ID_LEN 32
 #define BOOTID_LEN 37 // Includes the \n character at the end
 #define BOOTID_FILE "/proc/sys/kernel/random/boot_id"
+#define MID_BUFF 1024
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "log.h"
 #include "util.h"
 #include "common.h"
 #include "journal.h"
@@ -246,17 +248,20 @@ static int read_boot_id(char buff[])
  *
  * @param n Number of lines to skip.
  * @param fptr A file pointer.
+ * @param found_record A pointer to a function to be called
+ *                     every time a valid record is found, if
+ *                     pointer is not set to null.
  *
  * @returns 0 on success, on failure -1 if n > existing
  *            lines in file or errno if failure happens
  *            during file operation.
- *
  */
-static int skip_n_lines(int n, FILE *fptr)
+static int skip_n_lines(int n, FILE *fptr, int (*found_record)(char *))
 {
         int rc = 0;
         size_t len = 0;
         char *line = NULL;
+        struct JournalEntry *entry = NULL;
 
         if (fptr == NULL) {
 #ifdef DEBUG
@@ -274,6 +279,14 @@ static int skip_n_lines(int n, FILE *fptr)
                 if (getline(&line, &len, fptr) == -1) {
                         rc = -1;
                         break;
+                }
+                if (found_record != NULL) {
+                        deserialize_journal_entry(line, &entry);
+                        if (entry) {
+                                found_record(entry->record_id);
+                                free_journal_entry(entry);
+                                entry = NULL;
+                        }
                 }
         }
         free(line);
@@ -361,6 +374,8 @@ TelemJournal *open_journal(const char *journal_file)
         telem_journal->boot_id = strndup(boot_id, BOOTID_LEN - 1);
         telem_journal->record_count = get_record_count(telem_journal);
         telem_journal->record_count_limit = RECORD_LIMIT;
+        telem_journal->latest_record_id = NULL;
+        telem_journal->prune_entry_callback = NULL;
 
 #ifdef DEBUG
         printf("Records in db: %d\n", telem_journal->record_count);
@@ -375,6 +390,7 @@ void close_journal(TelemJournal *telem_journal)
         if (telem_journal) {
                 free(telem_journal->boot_id);
                 free(telem_journal->journal_file);
+                free(telem_journal->latest_record_id);
                 fclose(telem_journal->fptr);
                 free(telem_journal);
         }
@@ -393,9 +409,44 @@ static int is_class_prefix(char *class)
         return (strcmp((char *)(class + class_len - 2), "/*") == 0) ? 1 : 0;
 }
 
+/**
+ * Print records content
+ *
+ * @param record_id Unique record identifier
+ *
+ */
+static void print_record(char *record_id)
+{
+        int rc = 0;
+        size_t read = 0;
+        char buff[MID_BUFF] = { '\0' };
+        char *filepath = NULL;
+        FILE *recordfp = NULL;
+
+        rc = asprintf(&filepath, "%s/%s", RECORD_RETENTION_DIR, record_id);
+        if (rc == -1) {
+                // just bail out, there are worse problems
+                return;
+        }
+
+        recordfp = fopen(filepath, "r");
+        if (!recordfp) {
+                telem_perror("Error when opening a record to print");
+                return;
+        }
+
+        while ((read = fread(buff, 1, sizeof(buff), recordfp)) > 0) {
+                fwrite(buff, 1, read, stdout);
+        }
+
+        free(filepath);
+        fclose(recordfp);
+}
+
 /* Exported function */
 int print_journal(TelemJournal *telem_journal, char *classification,
-                  char *record_id, char *event_id, char *boot_id)
+                  char *record_id, char *event_id, char *boot_id,
+                  bool include_record)
 {
         int n = 0;
         int rc = 0;
@@ -419,7 +470,7 @@ int print_journal(TelemJournal *telem_journal, char *classification,
         // Advance file pointer to line n
         n = telem_journal->record_count - telem_journal->record_count_limit;
         if (n > 0) {
-                rc = skip_n_lines(n, journal_fileptr);
+                rc = skip_n_lines(n, journal_fileptr, NULL);
                 if (rc == -1) {
                         return rc;
                 } else if (rc != 0) {
@@ -456,8 +507,12 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                         if (strftime(str_time, sizeof(str_time), "%a %Y-%m-%d %H:%M:%S %Z", &ts) == 0) {
                                 continue;
                         }
-
+                        /* print record metadata */
                         fprintf(stdout, "%-30s %s %s %s %s\n", entry->classification, str_time, entry->record_id, entry->event_id, entry->boot_id);
+                        /* print record content */
+                        if (include_record) {
+                                print_record(entry->record_id);
+                        }
                         count++;
                 }
 skip_print:
@@ -563,6 +618,9 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
 #endif
         }
 
+        free(telem_journal->latest_record_id);
+        telem_journal->latest_record_id = strdup(entry->record_id);
+
 quit:
         free_journal_entry(entry);
 
@@ -586,7 +644,7 @@ int prune_journal(struct TelemJournal *telem_journal, char *tmp_dir)
                 count = telem_journal->record_count - telem_journal->record_count_limit;
 
                 // jump to line# count
-                if ((rc = skip_n_lines(count, telem_journal->fptr)) != 0) {
+                if ((rc = skip_n_lines(count, telem_journal->fptr, telem_journal->prune_entry_callback)) != 0) {
 #ifdef DEBUG
                         fprintf(stderr, "Error: skipping %d journal lines\n", count);
 #endif

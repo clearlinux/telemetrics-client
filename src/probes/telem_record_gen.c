@@ -69,7 +69,7 @@ static void print_help(void)
         printf("  -p, --payload         Record body (max size = 8k)\n");
         printf("  -P, --payload-file    File to read payload from\n");
         printf("  -R, --record-version  Version number for format of payload (default 1)\n");
-        printf("  -e,  --event-id        Event id to use in the record\n");
+        printf("  -e, --event-id        Event id to use in the record\n");
         printf("\n");
 }
 
