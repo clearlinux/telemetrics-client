@@ -166,6 +166,17 @@ The daemon uses the following configuration options from the configuration file:
   threshold has been reached. Currently the options are 'drop' or 'spool', with
   spool being the default. If spool is chosen, records will be spooled and sent
   at a later time.
+* record_retention_enabled: When this key is enabled (true) the daemon saves a
+  copy of the payload on disk from all valid records. To avoid the excessive use
+  of disk space only the latest 100 records are kept. The default value for this
+  configuration key is false.
+* record_server_delivery_enabled: This key controls the delivery of records to
+  ```server```, when enabled (default value) the record will be posted to the
+  address in the configuration file. If this configuration key is disabled (false)
+  records will not be spooled or posted to backend. This configuration key can
+  be used in combination with ```record_retention_enabled``` to keep copies of
+  telemetry records locally only.
+
 
 Machine id
 ---------------------
@@ -194,3 +205,69 @@ You can switch back to the rotating machine id by deleting the override file
 and restarting the daemon.  You can do a quick test to check that your
 machine-id has changed by running "hprobe" and verifying that a record has
 landed on your backend telemetrics server, with the specified machine id.
+
+Event Id
+----------------------
+
+This is a 32 character lowercase hexadecimal string i.e. '5de9de8d5f3c6a7d445d75ba01cc3322'.
+This header is used to group multiple records by an event id. Before this header
+every single record could have been thought of an event, however this is not always
+the case. There are "events" that trigger the creation of multiple records (i.e.
+updates). The ```event_id``` header was added for probes with the capability to
+detect events and group records based on such events. This header was added to
+```telem-record-gen``` and can be specified using the ```-e``` (```--event-id```
+long form) switch.
+
+```{r, engine=bash, count_lines}
+  -e, --event-id        Event id to use in the record
+```
+
+Debugging locally with telemetrics-client
+-----------------------------------------------
+
+The function of the telemetrics-client is to handle the transport of information
+reported by a probe to a backend (see ```server``` key in configuration). This
+information is helpful for developers to debug and fix reported crashes, however
+developers not always have access to the backend in these case users can leverage
+features added for local debugging. The following is a list of steps to enable
+local debug:
+
+* *Enabling record retention*: this step configures telemd to keep
+copies of telemetry records locally. To enable record retention set the value of
+```record_retention_enabled``` from ```false``` to ```true```. Optionally set
+```record_server_delivery_enabled`` to ```false``` to keep records local only.
+Remember to restart the daemon after configuration values are updated
+(```telemctl restart```).
+
+* *Creating a record*: run ```hprobe``` command to create a record for the purposes
+of this step by step guide. Once we have the record or records that you need to
+capture locally you can display the data.
+
+* *Displaying record metadata*: telemd keeps metadata of any valid record,
+to display this data a new option to telemctl was added ```telemctl journal```.
+Assuming that the last record created was the record from previous step `hprobe` we
+can use `tail -n 1` to print the last created record only, i.e.
+
+```
+$ sudo telemctl journal | tail -n 1
+$ org.clearlinux/hello/world     Mon 2018-04-02 17:48:01 UTC a19a0d41ba16788881e274b19b8a1be4 5de9de8d5f3c6a7d445d75ba01cc3322 60c014cd-4693-40f1-b334-548cd932949b
+```
+
+The headers for the metadata (along with other information) can be printed using the
+```-V``` switch with ```telemctl journal``` command, i.e.
+
+```
+$ sudo telemctl journal -V | head -n 1
+$ Classification             Time stamp              Record ID                    Event ID                     Boot ID
+```
+
+* *Displaying record payload*: to print the content of a record payload you can use
+the ```-i``` (```--include_record``` long format) option to ```telemctl journal```
+command. To print the specific record you created you can use the option ```-r```
+(```--record_id``` long format) with the Record Id of the generated record, i.e.
+
+```
+$ sudo telemctl journal --record_id a19a0d41ba16788881e274b19b8a1be4 --include_record
+$ org.clearlinux/hello/world     Mon 2018-04-02 17:48:01 UTC a19a0d41ba16788881e274b19b8a1be4 5de9de8d5f3c6a7d445d75ba01cc3322 60c014cd-4693-40f1-b334-548cd932949b
+$ hello
+```
