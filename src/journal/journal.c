@@ -344,9 +344,11 @@ TelemJournal *open_journal(const char *journal_file)
         struct TelemJournal *telem_journal;
 
         // Use default location if journal_file parameter is NULL
-        fptr = (journal_file == NULL) ? fopen(JOURNAL_PATH, "a+") :
-               fopen(journal_file, "a+");
-
+        if (journal_file == NULL) {
+                fptr = fopen(JOURNAL_PATH, "a+");
+        } else {
+                fptr = fopen(journal_file, "a+");
+        }
         if (fptr == NULL) {
 #ifdef DEBUG
                 perror("Error while opening journal file: ");

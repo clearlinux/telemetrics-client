@@ -20,10 +20,15 @@
 #include "common.h"
 #include "journal/journal.h"
 
+static char *journal_file = "journal.txt";
+static char *journal_print_file = "journal.print.txt";
 static struct TelemJournal *journal = NULL;
-static char *journal_file = TESTOOPSDIR "/journal.txt";
 static char *eid = "00007766547776eb7fc478eb0eb43e43";
 static int K = 20;
+
+void teardown(void) {
+        remove(journal_file);
+}
 
 START_TEST(check_open_journal)
 {
@@ -108,6 +113,7 @@ void new_entry_teardown(void)
                 close_journal(journal);
                 journal = NULL;
         }
+        remove(journal_file);
 }
 
 void insert_n_records(int n, struct TelemJournal *j)
@@ -128,7 +134,7 @@ START_TEST(check_journal_file_prune)
 
         insert_n_records(j->record_count_limit * 2, j);
         ck_assert_int_gt(j->record_count, j->record_count_limit);
-        rc = prune_journal(j, TESTOOPSDIR);
+        rc = prune_journal(j, "./");
         ck_assert(rc == 0);
         // Record count should always be below the limit + hysteresis
         ck_assert_int_lt(j->record_count, j->record_count_limit + DEVIATION);
@@ -139,13 +145,12 @@ END_TEST
 void journal_entry_setup(void)
 {
         int result = 0;
-        const char *journal_print = TESTOOPSDIR "/journal.print.txt";
 
         if (journal) {
                 close_journal(journal);
         }
 
-        journal = open_journal(journal_print);
+        journal = open_journal(journal_print_file);
 
         insert_n_records(K, journal);
         /* Insert recors with specific values */
@@ -188,6 +193,7 @@ END_TEST
 void journal_entry_teardown(void)
 {
         close_journal(journal);
+        remove(journal_print_file);
 }
 
 Suite *config_suite(void)
@@ -197,6 +203,7 @@ Suite *config_suite(void)
 
         // Individual unit tests are added to "test cases"
         TCase *t = tcase_create("journal");
+        tcase_add_unchecked_fixture(t, NULL, teardown);
         tcase_add_test(t, check_open_journal);
         tcase_add_test(t, check_unsuccessful_open_journal);
         suite_add_tcase(s, t);
@@ -211,6 +218,7 @@ Suite *config_suite(void)
         suite_add_tcase(s, t);
 
         t = tcase_create("prunning journal");
+        tcase_add_unchecked_fixture(t, NULL, teardown);
         tcase_add_test(t, check_journal_file_prune);
         suite_add_tcase(s, t);
 
