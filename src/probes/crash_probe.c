@@ -641,16 +641,12 @@ int main(int argc, char **argv)
                 nc_string_append_printf(header, "Signal: %ld\n", signal_num);
         }
 
-        if (process_corefile(&backtrace) < 0) {
-                goto fail;
-        }
-
         /* On Clear Linux OS, missing symbols may appear if automatic debuginfo
          * downloads are still in flight. So if any missing symbols appear on
          * the first run (indicated by the presence of "??? - ["), wait 10
-         * seconds and try again.
+         * seconds and try again. Also retry if errors occur in the first run.
          */
-        if (strstr(backtrace->str, "??? - [")) {
+        if ((process_corefile(&backtrace) < 0) || (strstr(backtrace->str, "??? - ["))) {
                 sleep(10);
 
                 if (prepare_corefile(&e_core, core_fd) < 0) {
