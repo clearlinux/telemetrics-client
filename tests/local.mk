@@ -131,7 +131,6 @@ EXTRA_DIST += \
 
 %C%_check_journal_SOURCES = \
 	%D%/check_journal.c \
-	src/journal/journal.h \
 	src/journal/journal.c \
 	src/util.h \
 	src/util.c
@@ -145,7 +144,10 @@ EXTRA_DIST += \
 
 %C%_check_libtelemetry_SOURCES = \
 	%D%/check_libtelemetry.c \
-	src/telemetry.c
+	src/configuration.h \
+	src/util.h \
+	src/nica/hashmap.h \
+	src/nica/inifile.h
 
 %C%_check_libtelemetry_CFLAGS = \
 	$(AM_CFLAGS) \
