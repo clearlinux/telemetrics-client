@@ -316,7 +316,7 @@ static int set_system_build_header(struct telem_ref *t_ref)
 
 /**
  * Sets the header reporting the machine_id. Note, the machine_id is really
- * managed by the telemetrics daemon (telemd), and populated by the daemon
+ * managed by the telemetrics daemon (telemprobd), and populated by the daemon
  * as it delivers the records. Consequently, the header is simply set to a
  * dummy value of 0xFFFFFFF.
  *
@@ -1081,7 +1081,7 @@ int tm_set_event_id(struct telem_ref *t_ref, char *event_id)
 }
 
 /**
- * Write nbytes from buf to fd. Used to send records to telemd.
+ * Write nbytes from buf to fd. Used to send records to telemprobd.
  *
  * @param fd Socket fd obtained from tm_get_socket.
  * @param buf Data to be written to the socket.

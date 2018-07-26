@@ -190,4 +190,3 @@ int main(void)
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
-

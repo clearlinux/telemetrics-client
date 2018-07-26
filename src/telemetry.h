@@ -31,7 +31,10 @@
  * - a library, libtelemetry, that telemetrics probes use to create telemetrics
  *   records and send them to the daemon for further processing.
  *
- * - a daemon, telemd, that prepares the records to send to a telemetrics server
+ * - telemprobd, a daemon that handles communication with probes and forwards
+ *   records to a second daemon.
+ *
+ * - telempostd, this daemon sends telemetry records to a telemetrics server
  *   (not included in this source tree), or spools the records on disk in case
  *   it's unable to successfully deliver them.
  *

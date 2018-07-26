@@ -1,5 +1,5 @@
 [Unit]
-Description=Telemetry Daemon Spool
+Description=Telemetry Post Daemon staging
 ConditionPathExists=!/etc/telemetrics/opt-out
 
 [Path]

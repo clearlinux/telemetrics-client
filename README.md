@@ -11,7 +11,10 @@ component includes:
 - a library, libtelemetry, that telemetrics probes use to create telemetrics
   records and send them to the daemon for further processing.
 
-- a daemon, telemd, that prepares the records to send to a telemetrics server
+- telemprobd, a daemon that handles communication with probes and forwards records
+  to a second daemon.
+
+- telempostd, this daemon sends telemetry records to a telemetrics server
   (not included in this source tree), or spools the records on disk in case
   it's unable to successfully deliver them.
 
@@ -30,7 +33,7 @@ Build dependencies
 - elfutils, which provides libelf and libdwfl libraries..
 
 - (optional) libsystemd, for syslog-style logging to the systemd journal, and
-  socket/path activation of telemd by systemd.
+  socket/path activation of telemprobd and telempostd by systemd.
 
 
 Build and installation
@@ -60,31 +63,38 @@ and modify the /etc version.
 
 Descriptions of config options are listed below in the Usage section.
 
-Starting the daemon
+Starting the client
 ---------------------
+
+If the client was compiled with systemd support the respective activation units
+should be already in place (after a ```make install``` invocation). In this case
+the client wil start automatically when data is made available to it. i.e. when
+executing an ```/usr/bin/hprobe``` command.
 
 Method 1 (recommended):
 
 ```{r, engine='bash', count_lines}
- systemctl start telemd.socket telemd.path
+ telemctl start
 ```
 
 Note: the above invocation technically readies the service for both socket and
-path activation, so you may not see the daemon start right away.
+path activation, so you may not see an "active" status.
 
 Method 2:
 
 ```{r, engine='bash', count_lines}
-systemctl start telemd.service
+systemctl start telemprobd.service
+systemctl start telempostd.service
 ```
 
 Method 3:
 
 ```{r, engine='bash', count_lines}
-telemd &
+telemprobd &
+telempostd &
 ```
 
-Configure the daemon to autostart at boot
+Configure the client to autostart at boot
 ---------------------
 
 Method 1 (recommended):
@@ -92,22 +102,23 @@ Method 1 (recommended):
 Enable the socket-activated service and path unit:
 
 ```{r, engine='bash', count_lines}
-systemctl enable telemd.socket telemd.path
+systemctl enable telemprobd.socket telempostd.path
 ```
 
 Method 2:
 
-Enable the service itself, which automatically enables the socket and path
+Enable services, which automatically enables the socket and path
 units as well:
 
 ```{r, engine='bash', count_lines}
-systemctl enable telemd.service
+systemctl enable telemprobd.service
+systemctl enable telempostd.service
 ```
 
 Usage
 ---------------------
 
-Once the daemon is running, the telemetrics probes will be ready to use.
+Once the client is running, the telemetrics probes will be ready to use.
 
 Available probes:
 
@@ -117,11 +128,11 @@ that telemetrics-client works. It sends a "hello world" record to the server.
 * crash probe: A handler for core files that sends the corresponding backtraces
 to the server.
 
-The daemon uses the following configuration options from the configuration file:
+The client uses the following configuration options from the configuration file:
 
-* server: This specifies the web server that the daemon sends the telemetry records to
+* server: This specifies the web server that the telempostd sends the telemetry records to
 * socket_path: This specifies the path of the unix domain socket that the
-  daemon listens on for connections from the probes
+  telemprobd listens on for connections from the probes
 * spool_dir: This config option is related to spooling. If the daemon is not
   able to send the telemetry records to the backend server due to reasons such
   as the network availability, then it stores the records in a spool directory.
@@ -131,7 +142,7 @@ The daemon uses the following configuration options from the configuration file:
 ```{r, engine='bash', count_lines}
     mkdir -p /var/spool/telemetry
     chown -R telemetry:telemetry /var/spool/telemetry
-    systemctl restart telemd.service
+    systemctl restart telemprobd.service
 ```
 
 * record_expiry: This is the time in minutes after which the records in the
@@ -231,17 +242,17 @@ you can opt in by creating a static machine id file named
 # echo "unique machine ID" > /etc/telemetrics/opt-in-static-machine-id
 ```
 
-The telemetry daemon reads, at most, the first 32 characters from this file
+The telemetry client reads, at most, the first 32 characters from this file
 uses it for the machine id. You can put a string like 'my-machine-name' in this
-file to easily identify your machine.  Restart telemd for the machine id
+file to easily identify your machine.  Restart telemprobd for the machine id
 changes to take effect by running:
 
 ```{r, engine='bash', count_lines}
-# systemctl restart telemd.service
+# systemctl restart telemprobd.service
 ```
 
 You can switch back to the rotating machine id by deleting the override file
-and restarting the daemon.  You can do a quick test to check that your
+and restarting the client.  You can do a quick test to check that your
 machine-id has changed by running "hprobe" and verifying that a record has
 landed on your backend telemetrics server, with the specified machine id.
 
@@ -271,18 +282,18 @@ developers not always have access to the backend in these case users can leverag
 features added for local debugging. The following is a list of steps to enable
 local debug:
 
-* *Enabling record retention*: this step configures telemd to keep
+* *Enabling record retention*: this step configures telempostd to keep
 copies of telemetry records locally. To enable record retention set the value of
 ```record_retention_enabled``` from ```false``` to ```true```. Optionally set
 ```record_server_delivery_enabled`` to ```false``` to keep records local only.
-Remember to restart the daemon after configuration values are updated
+Remember to restart the client after configuration values are updated
 (```telemctl restart```).
 
 * *Creating a record*: run ```hprobe``` command to create a record for the purposes
 of this step by step guide. Once we have the record or records that you need to
 capture locally you can display the data.
 
-* *Displaying record metadata*: telemd keeps metadata of any valid record,
+* *Displaying record metadata*: telempostd keeps metadata of any valid record,
 to display this data a new option to telemctl was added ```telemctl journal```.
 Assuming that the last record created was the record from previous step `hprobe` we
 can use `tail -n 1` to print the last created record only, i.e.

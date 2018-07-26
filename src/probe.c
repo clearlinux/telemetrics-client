@@ -49,15 +49,12 @@
 #include "log.h"
 #include "telemdaemon.h"
 #include "configuration.h"
-#include "retention.h"
-#include "spool.h"
 
 /*
  *  Using a function pointer for unit testing to isolate the call to actual post function.
  *  The call to post the record to the server is stubbed out in the unit tests
  *  using pointer to a fake function.
  */
-bool (*post_record_ptr)(char *[], char *, bool) = post_record_http;
 
 void print_usage(char *prog)
 {
@@ -79,7 +76,6 @@ int main(int argc, char **argv)
         int c;
         char *config_file = NULL;
         int opt_index = 0;
-        nfds_t initial_nfds = 0;
         sigset_t mask;
         //bool interrupted = false;
 
@@ -122,11 +118,6 @@ int main(int argc, char **argv)
                 }
         }
         initialize_daemon(&daemon);
-
-        /* Register record retention delete action as a callback to prune entry */
-        if (daemon.record_journal) {
-                daemon.record_journal->prune_entry_callback = &delete_record_by_id;
-        }
 
         sigemptyset(&mask);
 
@@ -227,19 +218,9 @@ int main(int argc, char **argv)
 
         telem_log(LOG_INFO, "Listening on socket...\n");
 
-        /* Calculate the spool directory size */
-        if (is_spool_valid()) {
-                daemon.is_spool_valid = true;
-                daemon.current_spool_size = get_spool_dir_size();
-        }
-
-        int spool_process_time = spool_process_time_config();
-
-        spool_records_loop(&(daemon.current_spool_size));
-        time_t last_spool_run_time = time(NULL);
-        time_t last_daemon_start_time = time(NULL);
-
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
+        int spool_process_time = spool_process_time_config();
+        time_t last_daemon_start_time = time(NULL);
 
         ret = update_machine_id();
         if (ret == -1) {
@@ -251,18 +232,9 @@ int main(int argc, char **argv)
 
         time_t last_refresh_time = time(NULL);
 
-        /* Save initial count for non connection fds */
-        initial_nfds = daemon.nfds;
-
         /* Loop to accept clients */
         while (1) {
                 malloc_trim(0);
-                if (initial_nfds == daemon.nfds) {
-                        ret = prune_journal(daemon.record_journal, JOURNAL_TMPDIR);
-                        if (ret != 0) {
-                                telem_log(LOG_WARNING, "Unable to prune journal\n");
-                        }
-                }
                 ret = poll(daemon.pollfds, daemon.nfds, spool_process_time * 1000);
                 if (ret == -1) {
                         telem_perror("Failed to poll daemon file descriptors");
@@ -292,12 +264,6 @@ int main(int argc, char **argv)
                                                 telem_log(LOG_INFO, "Received a SIGHUP signal\n");
                                                 /* reload configuration file */
                                                 reload_config();
-
-                                                if (is_spool_valid()) {
-                                                        daemon.is_spool_valid = true;
-                                                        //calc_spool_dir_size();
-                                                        daemon.current_spool_size = get_spool_dir_size();
-                                                }
                                         }
                                 }
 
@@ -353,21 +319,15 @@ int main(int argc, char **argv)
                         }
                 } else {
                         time_t now = time(NULL);
-                        /* If spool is empty and time to recycle the daemon has elapsed*/
-                        if (daemon_recycling_enabled && (daemon.current_spool_size == 0) &&
+                        /* time to recycle the daemon has elapsed*/
+                        if (daemon_recycling_enabled &&
                             difftime(now, last_daemon_start_time) >= TM_DAEMON_EXIT_TIME) {
                                 /* Exit */
                                 telem_log(LOG_INFO, "Daemon exiting for recycling\n");
                                 goto clean_exit;
                         }
                 }
-
                 time_t now = time(NULL);
-                if (difftime(now, last_spool_run_time) >= spool_process_time) {
-                        spool_records_loop(&(daemon.current_spool_size));
-                        last_spool_run_time = time(NULL);
-                }
-
                 if (difftime(now, last_refresh_time) >= TM_REFRESH_RATE) {
                         int ret = update_machine_id();
                         if (ret == -1) {
@@ -378,14 +338,13 @@ int main(int argc, char **argv)
         }
 
 clean_exit:
-        close_journal(daemon.record_journal);
 
         /* Free memory before exiting */
         while ((cl = LIST_FIRST(&(daemon.client_head))) != NULL) {
                 remove_client(&(daemon.client_head), cl);
         }
         free(daemon.pollfds);
-
+        free(daemon.machine_id_override);
         if (LIST_EMPTY(&(daemon.client_head))) {
                 telem_log(LOG_INFO, "Client list cleared\n");
         }

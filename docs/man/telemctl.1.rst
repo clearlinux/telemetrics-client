@@ -40,6 +40,9 @@ OPTIONS
    Opts out of telemetry, and stops telemetry services. The opt-out file
    ``/etc/telemetrics/opt-out`` is created.
 
+ * ``is-active``:
+   Checks if telemetry client daemons are active (telemprobd and telempostd).
+
 
 RETURN VALUES
 =============

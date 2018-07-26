@@ -1,7 +1,7 @@
 [Unit]
 Description=Telemetrics Pstore Probe
-Requires=telemd.socket
-After=telemd.socket
+Requires=telemprobd.socket
+After=telemprobd.socket
 
 [Service]
 ExecStart=@bindir@/pstoreprobe

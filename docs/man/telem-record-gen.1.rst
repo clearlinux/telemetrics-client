@@ -62,6 +62,10 @@ OPTIONS
  * ``-R``, ``--record-version`` <version>:
    Version number for format of payload (default 1).
 
+ * ``-e``, ``--event-id`` <version>:
+   Event id to use in the record. If not provided a randomly generated id will be assigned to record.
+
+
 
 RETURN VALUES
 =============

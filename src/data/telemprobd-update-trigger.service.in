@@ -4,4 +4,4 @@ BindsTo=update-triggers.target
 
 [Service]
 Type=oneshot
-ExecStart=@systemctldir@/systemctl try-restart telemd.service
+ExecStart=@systemctldir@/systemctl try-restart telemprobd.service

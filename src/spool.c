@@ -27,7 +27,7 @@
 #include <errno.h>
 
 #include "spool.h"
-#include "telemdaemon.h"
+#include "telempostdaemon.h"
 #include "log.h"
 #include "configuration.h"
 #include "util.h"
@@ -221,7 +221,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 }
                 //Get rid of trailing newline
                 strtok(line, "\n");
-                if (get_header(line, header_name, &headers[i], strlen(header_name))) {
+                if (get_header(line, header_name, &headers[i])) {
                         continue;
                 } else {
                         telem_log(LOG_ERR, "transmit_spooled_record: Incorrect"
@@ -254,7 +254,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 goto read_error;
         }
 
-        *post_succeeded = post_record_http(headers, payload, false);
+        *post_succeeded = post_record_http(headers, payload);
         if (*post_succeeded) {
                 unlink(record_path);
         }

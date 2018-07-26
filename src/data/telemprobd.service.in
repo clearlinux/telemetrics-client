@@ -3,10 +3,10 @@ Description=Telemetrics Daemon
 ConditionPathExists=!/etc/telemetrics/opt-out
 
 [Service]
-ExecStart=@bindir@/telemd
+ExecStart=@bindir@/telemprobd
 WorkingDirectory=@localstatedir@/spool/telemetry
 User=telemetry
 
 [Install]
-Also=telemd.socket telemd.path
+Also=telemprobd.socket
 WantedBy=multi-user.target

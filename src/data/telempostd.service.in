@@ -1,0 +1,12 @@
+[Unit]
+Description=Telemetrics Post Daemon
+ConditionPathExists=!/etc/telemetrics/opt-out
+
+[Service]
+ExecStart=@bindir@/telempostd
+WorkingDirectory=@localstatedir@/spool/telemetry
+User=telemetry
+
+[Install]
+Also=telempostd.path
+WantedBy=multi-user.target
