@@ -1,6 +1,7 @@
 MANPAGES = \
 	docs/man/telemctl.1 \
-	docs/man/telemd.1 \
+	docs/man/telemprobd.1 \
+	docs/man/telempostd.1 \
 	docs/man/telem-record-gen.1 \
 	docs/man/telemetry.3 \
 	docs/man/telemetrics.conf.5

@@ -2,8 +2,8 @@
 
 declare -a SPECIAL_UNITS=(
   hprobe.timer
-  telemd.socket
-  telemd.path
+  telemprobd.socket
+  telempostd.path
 )
 
 declare -a SERVICES=(
@@ -12,7 +12,8 @@ declare -a SERVICES=(
   oops-probe.service
   pstore-probe.service
   klogscanner.service
-  telemd.service
+  telemprobd.service
+  telempostd.service
 )
 
 SCRIPT="$0"
@@ -69,7 +70,8 @@ telem_start() {
 
 telem_is_active() {
   # check only activation units
-  systemctl is-active telemd.socket
+  echo "telemprobd :" $(systemctl is-active telemprobd.socket)
+  echo "telempostd :"  $(systemctl is-active telempostd.path)
 }
 
 telem_opt_out() {
@@ -103,10 +105,10 @@ usage() {
   printf "$format" "stop" "Stops all running telemetry services"
   printf "$format" "start" "Starts all telemetry services"
   printf "$format" "restart" "Restarts all telemetry services"
-  printf "$format" "is-active" "Checks if telemd is active"
+  printf "$format" "is-active" "Checks if telemprobd and telempostd are active"
   printf "$format" "opt-in" "Opts in to telemetry, and starts telemetry services"
   printf "$format" "opt-out" "Opts out of telemetry, and stops telemetry services"
-  printf "$format" "journal" "Prints telemd journal contents. Use -h argument with"
+  printf "$format" "journal" "Prints telemtry journal contents. Use -h argument with"
   printf "$format" ""        "command for more options"
   printf "\n"
   exit 2

@@ -1,0 +1,10 @@
+record_format_version: 1
+nclassificatioooon: crash/kernel/bug
+severity: 0
+machine_id: 1234
+creation_timestamp: 1531420323
+arch: x86_64
+host_type: macbookpro
+build: 23550
+kernel_version: 4.17.4-589.native
+test message

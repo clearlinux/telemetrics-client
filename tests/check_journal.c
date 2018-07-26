@@ -26,7 +26,8 @@ static struct TelemJournal *journal = NULL;
 static char *eid = "00007766547776eb7fc478eb0eb43e43";
 static int K = 20;
 
-void teardown(void) {
+void teardown(void)
+{
         remove(journal_file);
 }
 

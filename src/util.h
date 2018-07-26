@@ -22,7 +22,7 @@
 void *reallocate(void **addr, size_t *allocated, size_t requested);
 
 /* Check if haystacks begins with needle and return a copy of haystack */
-bool get_header(const char *haystack, const char *needle, char **line, size_t len);
+bool get_header(const char *haystack, const char *needle, char **line);
 
 /* Get the value of a header */
 bool get_header_value(const char *header, char **value);

@@ -1,9 +1,9 @@
-======
-telemd
-======
+==========
+telemprobd
+==========
 
 ------------------------
-Telemetry client service
+Telemetry probes service
 ------------------------
 
 :Copyright: \(C) 2017 Intel Corporation, CC-BY-SA-3.0
@@ -13,7 +13,7 @@ Telemetry client service
 SYNOPSIS
 ========
 
-``telemd`` \<flags\>
+``telemprobd`` \<flags\>
 
 ``/etc/telemetrics/telemetrics.conf``
 
@@ -25,8 +25,8 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The ``telemd`` program delivers locally generated telemetry records to a remote
-telemetry service. Telemetry data can be in any format, and is relayed as-is.
+The ``telemprobd`` program handles communication between telemetry client and telemetry
+probes.
 
 
 OPTIONS
@@ -47,12 +47,12 @@ FILES
 
 * ``/usr/share/defaults/telemetrics/telemetrics.conf``
 
-    If no custom configuration file is found, ``telemd`` uses the
+    If no custom configuration file is found, ``telemprobd`` uses the
     settings in this file.
 
 * ``/etc/telemetrics/telemetrics.conf``
 
-    Custom configuration file that ``telemd`` reads. See ``telemetrics.conf``\(5).
+    Custom configuration file that ``telemprobd`` reads. See ``telemetrics.conf``\(5).
 
 
 * ``/etc/telemetrics/opt-in-static-machine-id``

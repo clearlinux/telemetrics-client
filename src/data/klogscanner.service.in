@@ -1,7 +1,7 @@
 [Unit]
 Description=Telemetrics Kernel Log Scanner
-Requires=telemd.socket
-After=telemd.socket oops-probe.service
+Requires=telemprobd.socket
+After=telemprobd.socket oops-probe.service
 
 [Service]
 ExecStart=@bindir@/klogscanner

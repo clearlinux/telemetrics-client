@@ -33,7 +33,8 @@ build-aux/m4/ltversion.m4
 *.trs
 /cscope.*
 /tags
-telemd
+telemprobd
+telempostd
 autoscan.log
 configure.scan
 tprobe

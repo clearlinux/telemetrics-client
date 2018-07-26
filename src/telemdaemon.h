@@ -22,7 +22,6 @@
 #include <sys/queue.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include "journal/journal.h"
 
 #define TM_MACHINE_ID_EXPIRY (3 /*d*/ * 24 /*h*/ * 60 /*m*/ * 60 /*s*/)
 
@@ -55,26 +54,6 @@ typedef struct TelemDaemon {
         size_t current_alloc;
         /* client list head */
         client_list_head client_head;
-        /* Time of last failed post */
-        time_t bypass_http_post_ts;
-        /* Telemetry Journal*/
-        TelemJournal *record_journal;
-        /* Rate limit record and byte arrays */
-        size_t record_burst_array[TM_RATE_LIMIT_SLOTS];
-        size_t byte_burst_array[TM_RATE_LIMIT_SLOTS];
-        /* Rate Limit Configurations */
-        bool rate_limit_enabled;
-        int64_t record_burst_limit;
-        int record_window_length;
-        int64_t byte_burst_limit;
-        int byte_window_length;
-        const char *rate_limit_strategy;
-        /* Spool configuration */
-        bool is_spool_valid;
-        long current_spool_size;
-        /* Record local copy and delivery  */
-        bool record_retention_enabled;
-        bool record_server_delivery_enabled;
         char *machine_id_override;
 } TelemDaemon;
 
@@ -84,21 +63,6 @@ typedef struct TelemDaemon {
  * @param daemon A pointer to the daemon structure.
  */
 void initialize_daemon(TelemDaemon *daemon);
-
-/**
- * Initialize rate-limiting in the daemon
- *
- * @param daemon A pointer to the daemon structure
- */
-void initialize_rate_limit(TelemDaemon *daemon);
-
-/**
- * Initialize record delivery to remote and locally
- * in the daemon
- *
- * @param daemon A pointer to the daemon structure
- */
-void initialize_record_delivery(TelemDaemon *daemon);
 
 /**
  * Add poll fd struct to the array of pollfds.
@@ -183,113 +147,6 @@ void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index);
 void process_record(TelemDaemon *daemon, client *cl);
 
 /**
- * Check if burst limiting is enabled
- *
- * @param burst_limit Burst limit amount. If negative rate limiting
- * is disabled
- *
- * @return true if rate limiting for burst_limit variable is enabled
- */
-bool burst_limit_enabled(int64_t burst_limit);
-
-/**
- * Checks whether record does not exceed the burst threshold
- *
- * @param current_minute The current minute of time the record processed
- * @param burst_limit Amount of records that can be passed within a window
- * @param window_length Window of time burst limit refers to
- * @param array Pointer to array that stores record or byte count
- * @param incValue Amount to increase array slot by
- *
- * @return true if record does not exceed threshold, and false otherwise
- */
-bool rate_limit_check(int current_minute, int64_t burst_limit, int
-                      window_length, size_t *array, size_t incValue);
-
-/**
- * Updates rate limit arrays with passing record information
- *
- * @param current_minute The current minute of time the record processed
- * @param window_length Window of time burst limit refers to
- * @param array Pointer to array that stores record or byte count
- * @param incValue Amount to increase array slot by
- *
- */
-void rate_limit_update(int current_minute, int window_length,
-                       size_t *array, size_t incValue);
-
-/**
- * Checks if the spool strategy is chosen for rate-limiting
- *
- * @param daemon Pointer to the daemon
- *
- * @return true if spool is choosen false if drop is choosen
- */
-bool spool_strategy_selected(TelemDaemon *daemon);
-
-/**
- * Check if daemon should direct-spool after encountering network issues.
- *
- * @param daemon Pointer to the daemon
- * @param time The time as time_t (usually from time())
- *
- * @return true if inside direct spool window, false otherwise.
- */
-bool inside_direct_spool_window(TelemDaemon *daemon, time_t time);
-
-/**
- * Set the start time of the direct spool window. Will use the
- * current time.
- *
- * @param daemon Pointer to the daemon
- *
- * @return no return value.
- */
-void start_network_bypass(TelemDaemon *daemon);
-
-/**
- * Function pointer for posting the records to the server. Replaced by a
- * mock function in the unit tests.
- *
- * @param header_values The header data read from the socket
- * @param body The payload of the record read
- * @param spool Indicate whether the record should be spooled if not
- *    successfully delivered
- *
- * @return true if the record was successfully posted
- */
-extern bool (*post_record_ptr)(char *headers[], char *body, bool spool);
-
-/**
- * Post records on a http connection to server
- *
- * @param header_values The header data read from the socket
- * @param body The payload of the record read
- * @param spool Indicate whether the record should be spooled if not
- *    successfully delivered
- *
- * @return true if the record was successfully posted
- */
-bool post_record_http(char *header_values[], char *body, bool spool);
-
-/**
- * Spool the record in case it cannot be delivered to the server
- *
- * @param headers The headers for the record
- * @param body The payload of the record
- *
- */
-void spool_record(TelemDaemon * daemon, char *headers[], char *body);
-
-/**
- * Save a copy of the record payload locally
- *
- * @param body The payload of the record
- *
- */
-void save_local_copy(TelemDaemon *daemon, char *body);
-
-/**
  * Get random machine id stored in file
  *
  * @return machine id stored in file if successfully read, 0 otherwise
@@ -310,4 +167,5 @@ int update_machine_id(void);
  * or if the file is empty
  */
 char *read_machine_id_override(void);
+
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

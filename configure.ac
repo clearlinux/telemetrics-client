@@ -2,13 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([telemetrics-client], [1.16.3], [https://clearlinux.org/])
+AC_INIT([telemetrics-client], [2.0.0], [https://clearlinux.org/])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.14 -Wall -Werror -Wno-extra-portability foreign subdir-objects])
 AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 AC_CONFIG_MACRO_DIRS([build-aux/m4])
-AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_SRCDIR([src/probe.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.

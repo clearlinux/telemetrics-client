@@ -1,0 +1,16 @@
+record_format_version: 1
+classification: crash/kernel/bug
+severity: 0
+machine_id: 1234
+creation_timestamp: 1418672344
+arch: x86_64
+host_type: macbookpro
+build: 200
+kernel_version: 3.15
+payload_format_version: 1
+system_name: clear-linux-os
+board_name: Qemu|Intel
+cpu_model: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz
+bios_version: Qemu
+event_id: 3a2d799826edc6266d72824d2aac6763
+test message

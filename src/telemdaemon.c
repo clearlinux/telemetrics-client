@@ -29,12 +29,12 @@
 #include <malloc.h>
 #include <sys/uio.h>
 
+#include "iorecord.h"
 #include "telemdaemon.h"
 #include "common.h"
 #include "util.h"
 #include "log.h"
 #include "configuration.h"
-#include "retention.h"
 
 void initialize_daemon(TelemDaemon *daemon)
 {
@@ -43,32 +43,7 @@ void initialize_daemon(TelemDaemon *daemon)
         daemon->nfds = 0;
         daemon->pollfds = NULL;
         daemon->client_head = head;
-        daemon->bypass_http_post_ts = 0;
-        daemon->is_spool_valid = false;
-        daemon->record_journal = open_journal(JOURNAL_PATH);
-        initialize_rate_limit(daemon);
-        initialize_record_delivery(daemon);
-        daemon->current_spool_size = 0;
-}
-
-void initialize_rate_limit(TelemDaemon *daemon)
-{
-        for (int i = 0; i < TM_RATE_LIMIT_SLOTS; i++) {
-                daemon->record_burst_array[i] = 0;
-                daemon->byte_burst_array[i] = 0;
-        }
-        daemon->rate_limit_enabled = rate_limit_enabled_config();
-        daemon->record_burst_limit = record_burst_limit_config();
-        daemon->record_window_length = record_window_length_config();
-        daemon->byte_burst_limit = byte_burst_limit_config();
-        daemon->byte_window_length = byte_window_length_config();
-        daemon->rate_limit_strategy = rate_limit_strategy_config();
-}
-
-void initialize_record_delivery(TelemDaemon *daemon)
-{
-        daemon->record_retention_enabled = record_retention_enabled_config();
-        daemon->record_server_delivery_enabled = record_server_delivery_enabled_config();
+        daemon->machine_id_override = NULL;
 }
 
 client *add_client(client_list_head *client_head, int fd)
@@ -272,42 +247,18 @@ void machine_id_replace(char **machine_header, char *machine_id_override)
         free(old_header);
 }
 
-void save_entry_to_journal(TelemDaemon *daemon, time_t t_stamp, char *headers[])
-{
-        char *classification_value;
-        char *event_id_value;
-
-        if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
-            get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
-                if (new_journal_entry(daemon->record_journal, classification_value, t_stamp, event_id_value) != 0) {
-                        telem_log(LOG_INFO, "new_journal_entry in process_record: failed saving record entry\n");
-                }   
-        }   
-        free(classification_value);
-        free(event_id_value);
-}
-
 void process_record(TelemDaemon *daemon, client *cl)
 {
         int i = 0;
+        int ret = 0;
         char *headers[NUM_HEADERS];
-        bool do_spool = false;
-        bool record_sent = false;
         char *tok = NULL;
         size_t header_size = 0;
         size_t message_size = 0;
         char *temp_headers = NULL;
         char *msg;
         char *body;
-        int current_minute = 0;
-        bool record_check_passed = true;
-        bool byte_check_passed = true;
-        bool record_burst_enabled = true;
-        bool byte_burst_enabled = true;
-        /* Gets the current minute of time */
-        time_t temp = time(NULL);
-        struct tm *tm_s = localtime(&temp);
-        current_minute = tm_s->tm_min;
+        char *recordpath = NULL;
 
         header_size = *(uint32_t *)cl->buf;
         message_size = cl->size - header_size;
@@ -321,7 +272,7 @@ void process_record(TelemDaemon *daemon, client *cl)
         for (i = 0; i < NUM_HEADERS; i++) {
                 const char *header_name = get_header_name(i);
 
-                if (get_header(tok, header_name, &headers[i], strlen(header_name))) {
+                if (get_header(tok, header_name, &headers[i])) {
                         if (strcmp(header_name, TM_MACHINE_ID_STR) == 0) {
                                 machine_id_replace(&headers[i], daemon->machine_id_override);
                         }
@@ -335,355 +286,19 @@ void process_record(TelemDaemon *daemon, client *cl)
         /* TODO : check if the body is within the limits. */
         body = msg + header_size;
 
-        /* Save record in journal */
-        save_entry_to_journal(daemon, temp, headers);
-
-        /* Save local copy */
-        if (daemon->record_retention_enabled) {
-                save_local_copy(daemon, body);
-        }
-
-        /* Bail out if server delivery is not enabled */
-        if (!daemon->record_server_delivery_enabled) {
-#ifdef DEBUG
-                fprintf(stdout, "process_record: record server delivery disabled\n");
-#endif
-                goto end;
-        }
-
-        if (inside_direct_spool_window(daemon, time(NULL))) {
-                telem_log(LOG_INFO, "process_record: delivering directly to spool\n");
-                spool_record(daemon, headers, body);
-                goto end;
-        }
-        if (daemon->record_window_length == -1 ||
-            daemon->byte_window_length == -1) {
-                telem_log(LOG_ERR, "Invalid value for window length\n");
+        /* Save record to stage */
+        ret = asprintf(&recordpath, "%s/XXXXXX", spool_dir_config());
+        if (ret == -1) {
+                telem_log(LOG_ERR, "Failed to allocate memory for record name in staging folder, aborting\n");
                 exit(EXIT_FAILURE);
         }
-        /* Checks if entirety of rate limiting is enabled */
-        if (daemon->rate_limit_enabled) {
-                /* Checks whether record and byte bursts are enabled individually */
-                record_burst_enabled = burst_limit_enabled(daemon->record_burst_limit);
-                byte_burst_enabled = burst_limit_enabled(daemon->byte_burst_limit);
 
-                if (record_burst_enabled) {
-                        record_check_passed = rate_limit_check(current_minute,
-                                                               daemon->record_burst_limit, daemon->record_window_length,
-                                                               daemon->record_burst_array, TM_RECORD_COUNTER);
-                }
-                if (byte_burst_enabled) {
-                        byte_check_passed = rate_limit_check(current_minute,
-                                                             daemon->byte_burst_limit, daemon->byte_window_length,
-                                                             daemon->byte_burst_array, cl->size);
-                }
-                /* If both record and byte burst disabled, rate limiting disabled */
-                if (!record_burst_enabled && !byte_burst_enabled) {
-                        daemon->rate_limit_enabled = false;
-                }
-        }
-
-        /* Sends record if rate limiting is disabled, or all checks passed */
-        if (!daemon->rate_limit_enabled || (record_check_passed && byte_check_passed)) {
-                /* Send the record as https post */
-                record_sent = post_record_ptr(headers, body, true);
-        }
-        // Get rate-limit strategy
-        do_spool = spool_strategy_selected(daemon);
-
-        // Drop record
-        if (!record_sent && !do_spool) {
-                goto end;
-        }
-        // Spool Record
-        else if (!record_sent && do_spool) {
-                start_network_bypass(daemon);
-                telem_log(LOG_INFO, "process_record: initializing direct-spool window\n");
-                spool_record(daemon, headers, body);
-        } else {
-                /* Updates rate limiting arrays if record sent */
-                if (record_burst_enabled) {
-                        rate_limit_update (current_minute, daemon->record_window_length,
-                                           daemon->record_burst_array, TM_RECORD_COUNTER);
-                }
-                if (byte_burst_enabled) {
-                        rate_limit_update (current_minute, daemon->byte_window_length,
-                                           daemon->byte_burst_array, cl->size);
-                }
-        }
-
+        stage_record(recordpath, headers, body);
+        free(recordpath);
 end:
         free(temp_headers);
         for (int k = 0; k < i; k++)
                 free(headers[k]);
-        return;
-}
-
-bool burst_limit_enabled(int64_t burst_limit)
-{
-        return (burst_limit > -1) ? true : false;
-}
-
-bool rate_limit_check(int current_minute, int64_t burst_limit, int
-                      window_length, size_t *array, size_t incValue)
-{
-        size_t count = 0;
-
-        /* Variable to determine last minute allowed in burst window */
-        int window_start = (TM_RATE_LIMIT_SLOTS + (current_minute - window_length + 1))
-                           % TM_RATE_LIMIT_SLOTS;
-
-        /* The modulo is not placed in the for loop inself, because if
-         * the current minute is less than the window start (from wrapping)
-         * the for loop will never be entered.
-         */
-
-        /* Counts all elements within burst_window in array */
-        for (int i = window_start; i < (window_start + window_length); i++) {
-                count += array[i % TM_RATE_LIMIT_SLOTS];
-
-                if ((array[i % TM_RATE_LIMIT_SLOTS] + incValue) >= SIZE_MAX) {
-                        /* Exceeds maximum size array can hold */
-                        return false;
-                }
-        }
-        /* Include current record being processed to count */
-        count += incValue;
-
-        /* Determines whether the count has exceeded the limit or not */
-        return (count > burst_limit) ? false : true;
-}
-
-void rate_limit_update(int current_minute, int window_length, size_t *array,
-                       size_t incValue)
-{
-        /* Variable to determine the amount of zero'd out spots needed */
-        int blank_slots = (TM_RATE_LIMIT_SLOTS - window_length);
-
-        /* Update specified array depending on increment value */
-        array[current_minute] += incValue;
-
-        /* Zero out expired records for record array */
-        for (int i = current_minute + 1; i < (blank_slots + current_minute + 1); i++) {
-                array[i % TM_RATE_LIMIT_SLOTS] = 0;
-        }
-}
-
-bool spool_strategy_selected(TelemDaemon *daemon)
-{
-        /* Performs action depending on strategy choosen */
-        return (strcmp(daemon->rate_limit_strategy, "spool") == 0) ? true : false;
-}
-
-bool inside_direct_spool_window(TelemDaemon *daemon, time_t current_time)
-{
-        return (current_time < daemon->bypass_http_post_ts + 1800) ? true : false;
-}
-
-void start_network_bypass(TelemDaemon *daemon)
-{
-        daemon->bypass_http_post_ts = time(NULL);
-}
-
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
-{
-        telem_log(LOG_DEBUG, "Received data:\n%s\n", ptr);
-        return size * nmemb;
-}
-
-bool post_record_http(char *headers[], char *body, bool spool)
-{
-        CURL *curl;
-        int res = 0;
-        char *content = "Content-Type: application/text";
-        struct curl_slist *custom_headers = NULL;
-        char errorbuf[CURL_ERROR_SIZE];
-        long http_response = 0;
-        const char *cert_file = get_cainfo_config();
-        const char *tid_header = get_tidheader_config();
-
-        // Initialize the libcurl global environment once per POST. This lets us
-        // clean up the environment after each POST so that when the daemon is
-        // sitting idle, it will be consuming as little memory as possible.
-        curl_global_init(CURL_GLOBAL_ALL);
-
-        curl = curl_easy_init();
-        if (!curl) {
-                telem_log(LOG_ERR, "curl_easy_init(): Unable to start libcurl"
-                          " easy session, exiting\n");
-                exit(EXIT_FAILURE);
-                /* TODO: check if memory needs to be released */
-        }
-
-        // Errors for any curl_easy_* functions will store nice error messages
-        // in errorbuf, so send log messages with errorbuf contents
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuf);
-
-        curl_easy_setopt(curl, CURLOPT_URL, server_addr_config());
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-        curl_easy_setopt(curl, CURLOPT_POST, 1);
-#ifdef DEBUG
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-#endif
-
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
-        for (int i = 0; i < NUM_HEADERS; i++) {
-                custom_headers = curl_slist_append(custom_headers, headers[i]);
-        }
-        custom_headers = curl_slist_append(custom_headers, tid_header);
-        // This should be set by probes/libtelemetry in the future
-        custom_headers = curl_slist_append(custom_headers, content);
-
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, custom_headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(body));
-        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
-
-        if (strlen(cert_file) > 0) {
-                if (access(cert_file, F_OK) != -1) {
-                        curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file);
-                        telem_log(LOG_INFO, "cafile was set to %s\n", cert_file);
-                }
-        }
-
-        telem_log(LOG_DEBUG, "Executing curl operation...\n");
-        errorbuf[0] = 0;
-        res = curl_easy_perform(curl);
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
-
-        if (res) {
-                size_t len = strlen(errorbuf);
-                if (len) {
-                        telem_log(LOG_ERR, "Failed sending record: %s%s", errorbuf,
-                                  ((errorbuf[len - 1] != '\n') ? "\n" : ""));
-                } else {
-                        telem_log(LOG_ERR, "Failed sending record: %s\n",
-                                  curl_easy_strerror(res));
-                }
-        } else if (http_response != 201 && http_response != 200) {
-                /*  201 means the record was  successfully created
-                 *  200 is a generic "ok".
-                 *  TODO: Make list of white-listed response codes configurable?
-                 */
-                telem_log(LOG_ERR, "Encountered error %ld on the server\n",
-                          http_response);
-                // We treat HTTP error codes the same as libcurl errors
-                res = 1;
-        } else {
-                telem_log(LOG_INFO, "Record sent successfully\n");
-        }
-
-        curl_slist_free_all(custom_headers);
-        curl_easy_cleanup(curl);
-
-        curl_global_cleanup();
-
-        return res ? false : true;
-}
-
-void save_local_copy(TelemDaemon *daemon, char *body)
-{
-        int ret = 0;
-        char *tmpbuf = NULL;
-        FILE *tmpfile = NULL;
-
-        if (daemon == NULL || daemon->record_journal == NULL || 
-            daemon->record_journal->latest_record_id == NULL) {
-                return;
-        }
-
-        ret = asprintf(&tmpbuf, "%s/%s", RECORD_RETENTION_DIR,
-                       daemon->record_journal->latest_record_id);
-        if (ret == -1) {
-                telem_log(LOG_ERR, "Failed to allocate memory for record full path, aborting\n");
-                return;
-        }
-
-        tmpfile = fopen(tmpbuf, "w");
-        if (!tmpfile) {
-                telem_perror("Error opening local record copy temp file");
-                goto save_err;
-        }
-
-        // Save body
-        fprintf(tmpfile, "%s\n", body);
-        fclose(tmpfile);
-
-save_err:
-        free(tmpbuf);
-        return;
-}
-
-void spool_record(TelemDaemon *daemon, char *headers[], char *body)
-{
-        int ret = 0;
-        struct stat stat_buf;
-        int64_t max_spool_size = 0;
-        char *tmpbuf = NULL;
-        FILE *tmpfile = NULL;
-        int tmpfd = 0;
-
-        if (!daemon->is_spool_valid) {
-                /* If spool is not valid, simply drop the record */
-                return;
-        }
-
-        //check if the size is greater than 1 MB/spool max size
-        max_spool_size = spool_max_size_config();
-        if (max_spool_size != -1) {
-                telem_log(LOG_DEBUG, "Total size of spool dir: %ld\n", daemon->current_spool_size);
-                if (daemon->current_spool_size < 0) {
-                        telem_log(LOG_ERR, "Error getting spool directory size: %s\n",
-                                  strerror(-(int)(daemon->current_spool_size)));
-                        return;
-                } else if (daemon->current_spool_size >= (max_spool_size * 1024)) {
-                        telem_log(LOG_INFO, "Spool dir full, dropping record\n");
-                        return;
-                }
-        }
-
-        // create file with record
-        ret = asprintf(&tmpbuf, "%s/XXXXXX", spool_dir_config());
-        if (ret == -1) {
-                telem_log(LOG_ERR, "Failed to allocate memory for record name, aborting\n");
-                exit(EXIT_FAILURE);
-        }
-
-        tmpfd = mkstemp(tmpbuf);
-        if (tmpfd == -1) {
-                telem_perror("Error while creating temp file");
-                goto spool_err;
-        }
-
-        tmpfile = fdopen(tmpfd, "a");
-        if (!tmpfile) {
-                telem_perror("Error opening temp file");
-                close(tmpfd);
-                if (unlink(tmpbuf)) {
-                        telem_perror("Error deleting temp file");
-                }
-                goto spool_err;
-        }
-
-        // write headers
-        for (int i = 0; i < NUM_HEADERS; i++) {
-                fprintf(tmpfile, "%s\n", headers[i]);
-        }
-
-        //write body
-        fprintf(tmpfile, "%s\n", body);
-        fflush(tmpfile);
-        fclose(tmpfile);
-
-        /* The stat should not fail here unless it is ENOMEM */
-        if (stat(tmpbuf, &stat_buf) == 0) {
-                daemon->current_spool_size += (stat_buf.st_blocks * 512);
-        }
-
-spool_err:
-        free(tmpbuf);
         return;
 }
 

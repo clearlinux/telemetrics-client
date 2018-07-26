@@ -34,8 +34,10 @@
 #include "common.h"
 #include "util.h"
 
-bool get_header(const char *haystack, const char *needle, char **line, size_t len)
+bool get_header(const char *haystack, const char *needle, char **line)
 {
+        size_t len = strlen(needle);
+
         if (haystack && !strncmp(haystack, needle, len)) {
                 *line = strdup(haystack);
                 return true;
