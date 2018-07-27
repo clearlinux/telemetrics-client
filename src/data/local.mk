@@ -9,7 +9,6 @@ pathfix = @sed \
 
 EXTRA_DIST += \
 	%D%/40-core-ulimit.conf \
-	%D%/40-crash-probe.conf.in \
 	%D%/example.conf \
 	%D%/example.1.conf \
 	%D%/hprobe.service.in \
@@ -94,12 +93,6 @@ systemdunit_DATA = \
 %D%/telemd-update-trigger.service: %D%/telemd-update-trigger.service.in
 	$(pathfix) < $< > $@
 
-sysctldir = @SYSTEMD_SYSCTLDIR@
-sysctl_DATA = %D%/40-crash-probe.conf
-
-%D%/40-crash-probe.conf: %D%/40-crash-probe.conf.in
-	$(pathfix) < $< > $@
-
 systemconfdir = @SYSTEMD_SYSTEMCONFDIR@
 systemconf_DATA = %D%/40-core-ulimit.conf
 
@@ -111,7 +104,6 @@ clean-local:
 		%D%/telemetrics.conf \
 		%D%/telemetrics-dirs.conf \
 		%D%/libtelemetry.pc \
-		%D%/40-crash-probe.conf \
 		%D%/journal-probe.service \
 		%D%/oops-probe.service \
 		%D%/pstore-probe.service \
