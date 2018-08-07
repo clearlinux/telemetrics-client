@@ -410,7 +410,7 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
                         model_str_len = strlen(model_name);
                         if (model_str_len > 2) {
                                 model_name = (char *)model_name + 2 * sizeof(char);
-                                model_name[model_str_len - 2] = '\0';
+                                model_name[model_str_len - 3] = '\0';
                         } else {
                                 model_name = "blank";
                         }
