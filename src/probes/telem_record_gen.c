@@ -415,6 +415,7 @@ fail:
         free(opt_class);
         free(opt_payload);
         free(opt_event_id);
+        free(payload);
 
         return ret;
 }
