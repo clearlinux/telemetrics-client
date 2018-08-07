@@ -39,10 +39,11 @@ static char *opt_payload = NULL;
 static uint32_t payload_version = 1;
 static char *opt_payload_file = NULL;
 static char *opt_event_id = NULL;
+static bool opt_print_only = false;
 
 static const struct option prog_opts[] = {
         { "help", no_argument, 0, 'h' },
-        { "config-file", required_argument, 0, 'f' },
+        { "print-only", no_argument, 0, 'o' },
         { "version", no_argument, 0, 'V' },
         { "severity", required_argument, 0, 's' },
         { "class", required_argument, 0, 'c' },
@@ -62,14 +63,14 @@ static void print_help(void)
         printf("  -h, --help            Show help options\n");
         printf("\n");
         printf("Application Options:\n");
-        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
         printf("  -V, --version         Print the program version\n");
         printf("  -s, --severity        Severity level (1-4) - (default 1)\n");
-        printf("  -c, --class           Classification level_1/level_2/level_3\n");
-        printf("  -p, --payload         Record body (max size = 8k)\n");
+        printf("  -c, --class           Classification level_1/level_2/level_3 (required)\n");
+        printf("  -p, --payload         Record body (max size = 8k) (required)\n");
         printf("  -P, --payload-file    File to read payload from\n");
         printf("  -R, --record-version  Version number for format of payload (default 1)\n");
         printf("  -e, --event-id        Event id to use in the record\n");
+        printf("  -o, --print-only      Print record to stdout and do not send it\n");
         printf("\n");
 }
 
@@ -94,7 +95,7 @@ int parse_options(int argc, char **argv)
         long unsigned int tmp = 0;
 
         int opt;
-        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:e:", prog_opts, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:e:o", prog_opts, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 print_help();
@@ -148,6 +149,9 @@ int parse_options(int argc, char **argv)
                                 if (opt_event_id == NULL) {
                                         goto fail;
                                 }
+                                break;
+                        case 'o':
+                                opt_print_only = true;
                                 break;
                 }
         }
@@ -322,31 +326,61 @@ out1:
         return ret;
 }
 
-int send_record(char *payload)
+int instanciate_record(struct telem_ref **t_ref, char *payload)
 {
-        struct telem_ref *t_ref;
         int ret = 0;
 
-        if (tm_create_record(&t_ref, (uint32_t)severity,
-                             opt_class, payload_version) < 0) {
+        if ((ret = tm_create_record(t_ref, (uint32_t)severity,
+                             opt_class, payload_version)) < 0) {
                 goto out1;
         }
 
-        if (opt_event_id && tm_set_event_id(t_ref, opt_event_id) < 0) {
-                goto out2;
+        if ((ret = opt_event_id && tm_set_event_id(*t_ref, opt_event_id)) < 0) {
+                goto out1;
         }
 
-        if (tm_set_payload(t_ref, payload) < 0) {
-                goto out2;
+        if ((ret = tm_set_payload(*t_ref, payload)) < 0) {
+                goto out1;
         }
-
-        if (tm_send_record(t_ref) >= 0) {
-                ret = 1;
-        }
-
-out2:
-        tm_free_record(t_ref);
 out1:
+        return ret;
+}
+
+int send_record(char *payload)
+{
+        struct telem_ref *t_ref = NULL;
+        int ret = 0;
+
+        if ((ret = instanciate_record(&t_ref, payload)) < 0) {
+                 goto out;
+        }
+
+        if ((ret = tm_send_record(t_ref)) < 0) {
+                 goto out;
+        }
+
+out:
+        if (t_ref == NULL) {
+              tm_free_record(t_ref);
+        }
+
+        return ret;
+}
+
+int print_record(char *payload)
+{
+        struct telem_ref *t_ref;
+        int ret = 0;
+        int i = 0;
+
+        if ((ret = instanciate_record(&t_ref, payload)) != -1) {
+                for (i = 0; i < NUM_HEADERS; i++) {
+                          fprintf(stdout, "%s", t_ref->record->headers[i]);
+                }
+        }
+        fprintf(stdout, "%s\n", t_ref->record->payload);
+        tm_free_record(t_ref);
+
         return ret;
 }
 
@@ -367,8 +401,12 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        if (!send_record(payload)) {
-                goto fail;
+        if (opt_print_only == true) {
+                print_record(payload);
+        } else {
+                if (!send_record(payload)) {
+                        goto fail;
+                }
         }
 
         ret = EXIT_SUCCESS;
