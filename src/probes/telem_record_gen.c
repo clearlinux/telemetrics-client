@@ -373,7 +373,7 @@ out:
 
 int print_record(char *payload)
 {
-        struct telem_ref *t_ref;
+        struct telem_ref *t_ref = NULL;
         int ret = 0;
         int i = 0;
 
@@ -381,9 +381,9 @@ int print_record(char *payload)
                 for (i = 0; i < NUM_HEADERS; i++) {
                         fprintf(stdout, "%s", t_ref->record->headers[i]);
                 }
+                fprintf(stdout, "%s\n", t_ref->record->payload);
+                tm_free_record(t_ref);
         }
-        fprintf(stdout, "%s\n", t_ref->record->payload);
-        tm_free_record(t_ref);
 
         return ret;
 }
