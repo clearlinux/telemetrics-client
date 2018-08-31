@@ -81,7 +81,10 @@ long get_spool_dir_size()
         return dir_size;
 }
 
-void spool_records_loop(long *current_spool_size)
+/*
+ * Returns the number of remaining unsent records
+ */
+int spool_records_loop(long *current_spool_size)
 {
         const char *spool_dir_path;
         int numentries;
@@ -94,10 +97,10 @@ void spool_records_loop(long *current_spool_size)
 
         if (numentries == 0) {
                 telem_log(LOG_DEBUG, "No entries in spool\n");
-                return;
+                return numentries;
         } else if (numentries < 0) {
                 telem_perror("Error while scanning spool");
-                return;
+                return 0;
         }
 
         qsort_r(namelist, (size_t)numentries, sizeof(struct dirent *),
@@ -125,6 +128,8 @@ void spool_records_loop(long *current_spool_size)
                 free(namelist[i]);
         }
         free(namelist);
+
+        return records_sent - numentries;
 }
 
 void process_spooled_record(const char *spool_dir, char *name,
