@@ -81,6 +81,7 @@ int main(int argc, char **argv)
         int opt_index = 0;
         nfds_t initial_nfds = 0;
         sigset_t mask;
+        int pending_records;
         //bool interrupted = false;
 
         if (setenv("LC_ALL", "C", 1)) {
@@ -235,7 +236,7 @@ int main(int argc, char **argv)
 
         int spool_process_time = spool_process_time_config();
 
-        spool_records_loop(&(daemon.current_spool_size));
+        pending_records = spool_records_loop(&(daemon.current_spool_size));
         time_t last_spool_run_time = time(NULL);
         time_t last_daemon_start_time = time(NULL);
 
@@ -256,6 +257,9 @@ int main(int argc, char **argv)
 
         /* Loop to accept clients */
         while (1) {
+                static int requeue = 0;
+                int delay = spool_process_time;
+
                 malloc_trim(0);
                 if (initial_nfds == daemon.nfds) {
                         ret = prune_journal(daemon.record_journal, JOURNAL_TMPDIR);
@@ -263,7 +267,15 @@ int main(int argc, char **argv)
                                 telem_log(LOG_WARNING, "Unable to prune journal\n");
                         }
                 }
-                ret = poll(daemon.pollfds, daemon.nfds, spool_process_time * 1000);
+
+                if ((pending_records > 0) && (requeue < 8)) {
+                        requeue++;
+                        delay = requeue * requeue;
+                } else {
+                        requeue = 0;
+                }
+
+                ret = poll(daemon.pollfds, daemon.nfds, delay * 1000);
                 if (ret == -1) {
                         telem_perror("Failed to poll daemon file descriptors");
                         break;
@@ -364,7 +376,7 @@ int main(int argc, char **argv)
 
                 time_t now = time(NULL);
                 if (difftime(now, last_spool_run_time) >= spool_process_time) {
-                        spool_records_loop(&(daemon.current_spool_size));
+                        pending_records = spool_records_loop(&(daemon.current_spool_size));
                         last_spool_run_time = time(NULL);
                 }
 

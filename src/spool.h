@@ -19,7 +19,7 @@
 /**
  * Run the spool record loop periodically
  */
-void spool_records_loop(long *current_spool_size);
+int spool_records_loop(long *current_spool_size);
 
 /**
  * Process the spooled record
