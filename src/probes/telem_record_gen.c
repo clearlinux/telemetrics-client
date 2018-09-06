@@ -409,7 +409,7 @@ int main(int argc, char **argv)
                 print_record(payload);
         }
 
-        if (opt_nopost == false && !send_record(payload)) {
+        if (opt_nopost == false && send_record(payload) != 0) {
                 goto fail;
         }
 
