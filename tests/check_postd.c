@@ -62,7 +62,7 @@ START_TEST(check_handle_client_with_no_data)
         bool success;
         char *filename = ABSTOPSRCDIR "/tests/telempostd/empty_message";
 
-        success = process_staged_record(filename, &tdaemon);
+        success = process_staged_record(filename, false, &tdaemon);
         // Return true to remove corrupted record
         ck_assert(success == true);
 }
@@ -75,7 +75,7 @@ START_TEST(check_handle_client_with_incorrect_data)
         bool success;
         char *filename = ABSTOPSRCDIR "/tests/telempostd/incorrect_message";
 
-        success = process_staged_record(filename, &tdaemon);
+        success = process_staged_record(filename, false, &tdaemon);
         // Return true to remove corrupted record
         ck_assert(success == true);
 }
@@ -88,7 +88,7 @@ START_TEST(check_process_record_with_correct_size_and_data)
         bool success;
         char *filename = ABSTOPSRCDIR "/tests/telempostd/correct_message";
 
-        success = process_staged_record(filename, &tdaemon);
+        success = process_staged_record(filename, false, &tdaemon);
         ck_assert(success == true);
 }
 END_TEST
@@ -100,7 +100,7 @@ START_TEST(check_process_record_with_incorrect_headers)
         bool success;
         char *filename = ABSTOPSRCDIR "/tests/telempostd/incorrect_headers";
 
-        success = process_staged_record(filename, &tdaemon);
+        success = process_staged_record(filename, false, &tdaemon);
         // Return true to remove corrupted record
         ck_assert(success == true);
 }

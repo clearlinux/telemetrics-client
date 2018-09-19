@@ -19,6 +19,7 @@
 #define NFDS 2
 #define TM_RATE_LIMIT_SLOTS (1 /*h*/ * 60 /*m*/)
 #define TM_RECORD_COUNTER (1)
+#define MAX_RETRY_ATTEMPTS 8
 
 #include <poll.h>
 #include <stdbool.h>
@@ -83,17 +84,20 @@ void close_daemon(TelemPostDaemon *daemon);
  * Processed record written on disk
  *
  * @param filename a pointor to record on disk
+ * @param is_retry a boolean value that indicates if
+ *        the record has been previously processed.
  * @param daemon post to telemetry post daemon
  */
-bool process_staged_record(char *filename, TelemPostDaemon *daemon);
+bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemon);
 
 /**
  * Scans staging directory to process files that were
  * missed by file watcher
  *
  * @param daemon a pointer to telemetry post daemon
+ * @return the number of records that were removed from spool
  */
-void staging_records_loop(TelemPostDaemon *daemon);
+int staging_records_loop(TelemPostDaemon *daemon);
 
 /**
  * Posts a record to backend

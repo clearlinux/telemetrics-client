@@ -275,10 +275,10 @@ bool post_record_http(char *headers[], char *body)
         if (res) {
                 size_t len = strlen(errorbuf);
                 if (len) {
-                        telem_log(LOG_ERR, "Failed sending record: %s%s", errorbuf,
+                        telem_log(LOG_DEBUG, "Failed sending record: %s%s", errorbuf,
                                   ((errorbuf[len - 1] != '\n') ? "\n" : ""));
                 } else {
-                        telem_log(LOG_ERR, "Failed sending record: %s\n",
+                        telem_log(LOG_DEBUG, "Failed sending record: %s\n",
                                   curl_easy_strerror(res));
                 }
         } else if (http_response != 201 && http_response != 200) {
@@ -396,12 +396,8 @@ static void rate_limit_checks(TelemPostDaemon *daemon, bool *record_check_passed
 }
 
 /* Wrapper for save local copy */
-static void apply_retention_policies(TelemPostDaemon *daemon, char *headers[], char *body)
+static void apply_retention_policies(TelemPostDaemon *daemon, char *body)
 {
-        time_t temp = time(NULL);
-
-        save_entry_to_journal(daemon, temp, headers);
-
         if (daemon->record_retention_enabled) {
                 save_local_copy(daemon, body);
         }
@@ -467,7 +463,7 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
         return ret;
 }
 
-bool process_staged_record(char *filename, TelemPostDaemon *daemon)
+bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemon)
 {
         int k;
         bool ret = false;
@@ -506,8 +502,13 @@ bool process_staged_record(char *filename, TelemPostDaemon *daemon)
                 goto end_processing_file;
         }
 
-        /** Record retention **/
-        apply_retention_policies(daemon, headers, body);
+        /* Retries should not be recorded */
+        if (is_retry == false) {
+                /** Journal entry **/
+                save_entry_to_journal(daemon, current_time, headers);
+                /** Record retention **/
+                apply_retention_policies(daemon, body);
+        }
 
         /** Record delivery **/
         if (!daemon->record_server_delivery_enabled) {
@@ -570,20 +571,22 @@ static int directory_dot_filter(const struct dirent *entry)
         }
 }
 
-void staging_records_loop(TelemPostDaemon *daemon)
+int staging_records_loop(TelemPostDaemon *daemon)
 {
         int ret;
+        int processed;
         int numentries;
         struct dirent **namelist;
 
         numentries = scandir(spool_dir_config(), &namelist, directory_dot_filter, NULL);
+        processed = 0;
 
         if (numentries == 0) {
                 telem_log(LOG_DEBUG, "No entries in staging\n");
-                return;
+                return numentries;
         } else if (numentries < 0) {
                 telem_perror("Error while scanning staging");
-                return;
+                return numentries;
         }
 
         for (int i = 0; i < numentries; i++) {
@@ -595,8 +598,9 @@ void staging_records_loop(TelemPostDaemon *daemon)
                         telem_log(LOG_ERR, "Failed to allocate memory for staging record full path\n");
                         exit(EXIT_FAILURE);
                 }
-                if (process_staged_record(record_path, daemon)) {
+                if (process_staged_record(record_path, true, daemon)) {
                         unlink(record_path);
+                        processed++;
                 }
                 free(record_path);
         }
@@ -605,11 +609,14 @@ void staging_records_loop(TelemPostDaemon *daemon)
                 free(namelist[i]);
         }
         free(namelist);
+
+        return numentries - processed;
 }
 
 void run_daemon(TelemPostDaemon *daemon)
 {
         int ret;
+        int retry_attempt = MAX_RETRY_ATTEMPTS;
         int spool_process_time = spool_process_time_config();
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
         time_t last_spool_run_time = time(NULL);
@@ -620,9 +627,23 @@ void run_daemon(TelemPostDaemon *daemon)
         assert(daemon->pollfds[signlfd].fd);
         assert(daemon->pollfds[watchfd].fd);
 
+        /* Post at boot failed initialize retries variable */
+        if (daemon->bypass_http_post_ts != 0) {
+                retry_attempt = 1;
+        }
+
         while (1) {
+                int retry_delay = spool_process_time;
                 malloc_trim(0);
-                ret = poll(daemon->pollfds, NFDS, spool_process_time * 1000);
+
+                if (retry_attempt < MAX_RETRY_ATTEMPTS) {
+                        retry_delay = retry_attempt * retry_attempt;
+                        daemon->bypass_http_post_ts = 0;
+                        telem_log(LOG_INFO, "Record delivery failed will retry in %d seconds",
+                                  retry_delay);
+                }
+
+                ret = poll(daemon->pollfds, NFDS, retry_delay * 1000);
                 if (ret == -1) {
                         telem_perror("Failed to poll daemon file descriptors");
                         break;
@@ -671,7 +692,7 @@ void run_daemon(TelemPostDaemon *daemon)
                                                                 exit(EXIT_FAILURE);
                                                         }
                                                         /* Process inotify event */
-                                                        if (process_staged_record(record_name, daemon)) {
+                                                        if (process_staged_record(record_name, false, daemon)) {
                                                                 unlink(record_name);
                                                         }
                                                         free(record_name);
@@ -690,14 +711,25 @@ void run_daemon(TelemPostDaemon *daemon)
                                 telem_log(LOG_INFO, "Telemetry post daemon exiting for recycling\n");
                                 break;
                         }
+                        /* Check if this is a retry */
+                        if (retry_attempt < MAX_RETRY_ATTEMPTS) {
+                                if (staging_records_loop(daemon) == 0) {
+                                        retry_attempt = MAX_RETRY_ATTEMPTS + 1;
+                                } else {
+                                        retry_attempt++;
+                                }
+                        } else if (retry_attempt == MAX_RETRY_ATTEMPTS) {
+                                retry_attempt = MAX_RETRY_ATTEMPTS + 1;
+                                telem_log(LOG_ERR, "Record deliver failed after %d attempts",
+                                          MAX_RETRY_ATTEMPTS);
+                        }
+                        /* Check spool  */
+                        if (difftime(now, last_spool_run_time) >= spool_process_time) {
+                                spool_records_loop(&(daemon->current_spool_size));
+                                last_spool_run_time = time(NULL);
+                        }
                 }
 
-                /* Check spool  */
-                time_t now = time(NULL);
-                if (difftime(now, last_spool_run_time) >= spool_process_time) {
-                        spool_records_loop(&(daemon->current_spool_size));
-                        last_spool_run_time = time(NULL);
-                }
                 /* Check journal records and prune if needed */
                 ret = prune_journal(daemon->record_journal, JOURNAL_TMPDIR);
                 if (ret != 0) {
