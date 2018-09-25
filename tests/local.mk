@@ -46,6 +46,7 @@ dist_check_SCRIPTS = \
 	$(AM_CFLAGS) \
 	@CHECK_CFLAGS@ \
 	@CURL_CFLAGS@
+
 %C%_check_probd_LDADD = \
 	@CHECK_LIBS@ \
 	@CURL_LIBS@ \
@@ -54,9 +55,9 @@ dist_check_SCRIPTS = \
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_check_probd_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_check_probd_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 
@@ -65,10 +66,10 @@ endif
 	src/spool.c \
 	src/iorecord.c \
 	src/retention.c \
-        src/telempostdaemon.c \
-        src/telempostdaemon.h \
-        src/journal/journal.c \
-        src/journal/journal.h
+	src/telempostdaemon.c \
+	src/telempostdaemon.h \
+	src/journal/journal.c \
+	src/journal/journal.h
 
 EXTRA_DIST += \
 	%D%/telempostd/correct_message \
@@ -77,32 +78,35 @@ EXTRA_DIST += \
 	%D%/telempostd/incorrect_message
 
 %C%_check_postd_CFLAGS = \
-        $(AM_CFLAGS) \
-        @CHECK_CFLAGS@ \
-        @CURL_CFLAGS@
+	$(AM_CFLAGS) \
+	@CHECK_CFLAGS@ \
+	@CURL_CFLAGS@ \
+	@JSON_C_CFLAGS@
+
 %C%_check_postd_LDADD = \
-        @CHECK_LIBS@ \
-        @CURL_LIBS@ \
-        $(top_builddir)/src/libtelem-shared.la
+	@CHECK_LIBS@ \
+	@CURL_LIBS@ \
+	@JSON_C_LIBS@ \
+	$(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_check_postd_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_check_postd_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 
 %C%_check_probes_SOURCES = \
-        %D%/read_oopsfile.h \
-        %D%/read_oopsfile.c \
-        %D%/check_probes.c \
+	%D%/read_oopsfile.h \
+	%D%/read_oopsfile.c \
+	%D%/check_probes.c \
 	src/nica/nc-string.c \
 	src/probes/klog_scanner.c \
 	src/probes/klog_scanner.h \
 	src/probes/oops_parser.c \
-	src/probes/oops_parser.h 
+	src/probes/oops_parser.h
 
 EXTRA_DIST += \
 	%D%/oops_test_files/2or3_digit_loglevel.txt \
@@ -132,18 +136,18 @@ EXTRA_DIST += \
 	%D%/oops_test_files/watchdog.txt
 
 %C%_check_probes_CFLAGS = \
-        $(AM_CFLAGS) \
-        @CHECK_CFLAGS@
+	$(AM_CFLAGS) \
+	@CHECK_CFLAGS@
 %C%_check_probes_LDADD = \
-        @CHECK_LIBS@ \
-        $(top_builddir)/src/libtelem-shared.la
+	@CHECK_LIBS@ \
+	$(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_check_probes_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_check_probes_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 

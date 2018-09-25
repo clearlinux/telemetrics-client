@@ -18,8 +18,8 @@ bin_PROGRAMS += \
 	src/nica/b64enc.c
 %C%_bertprobe_LDADD = $(top_builddir)/src/libtelemetry.la
 %C%_bertprobe_LDFLAGS = \
-        $(AM_LDFLAGS) \
-        -pie
+	$(AM_LDFLAGS) \
+	-pie
 
 %C%_telem_record_gen_SOURCES = %D%/telem_record_gen.c
 %C%_telem_record_gen_CFLAGS = \
@@ -31,7 +31,7 @@ bin_PROGRAMS += \
 
 %C%_pstoreclean_SOURCES = %D%/pstore_clean.c
 %C%_pstoreclean_CFLAGS = \
-        $(AM_CFLAGS)
+	$(AM_CFLAGS)
 %C%_pstoreclean_LDADD = \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la
@@ -93,52 +93,52 @@ endif
 
 %C%_klogscanner_SOURCES = \
 	%D%/klog_main.c \
-        %D%/klog_scanner.c \
+	%D%/klog_scanner.c \
 	%D%/klog_scanner.h \
 	%D%/oops_parser.h \
 	src/nica/nc-string.c \
 	%D%/oops_parser.c
 %C%_klogscanner_CFLAGS = \
-        $(AM_CFLAGS)
+	$(AM_CFLAGS)
 %C%_klogscanner_LDADD = \
-        $(top_builddir)/src/libtelemetry.la
+	$(top_builddir)/src/libtelemetry.la
 %C%_klogscanner_LDFLAGS = \
-        $(AM_LDFLAGS) \
-        -pie
+	$(AM_LDFLAGS) \
+	-pie
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_klogscanner_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_klogscanner_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 
 if HAVE_SYSTEMD_JOURNAL
 %C%_klogscanner_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_klogscanner_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 
 %C%_oopsprobe_SOURCES = \
-        %D%/oops_probe.c \
+	%D%/oops_probe.c \
 	%D%/oops_parser.c \
 	src/nica/nc-string.c \
 	%D%/probe.h
 %C%_oopsprobe_CFLAGS = \
-        $(AM_CFLAGS)
+	$(AM_CFLAGS)
 %C%_oopsprobe_LDADD = \
-        $(top_builddir)/src/libtelemetry.la \
-        $(top_builddir)/src/libtelem-shared.la
+	$(top_builddir)/src/libtelemetry.la \
+	$(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_oopsprobe_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
+	$(SYSTEMD_JOURNAL_CFLAGS)
 %C%_oopsprobe_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
+	$(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 

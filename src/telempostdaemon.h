@@ -102,19 +102,21 @@ int staging_records_loop(TelemPostDaemon *daemon);
 /**
  * Posts a record to backend
  *
- * @param headers a pointer to an array with keys and values
- * @param body a pointer to the payload
+ * @param json_str JSON string converted from record headers and payload.
+ *
+ * @return true If the record was successfully posted.
  */
-bool post_record_http(char *headers[], char *body);
+bool post_record_http(char *json_str);
 
 /**
  * Pointer to function to isolate backend call during
  * unit testing.
  *
- * @param headers pointer to array of keys
- * @param body a pinter to payload
+ * @param json_str JSON string converted from record headers and payload.
+ *
+ * @return true If the record was successfully posted.
  * */
-extern bool (*post_record_ptr)(char *headers[], char *body);
+extern bool (*post_record_ptr)(char *json_str);
 
 /** Helper functions **/
 /* rate limit check */
@@ -130,5 +132,35 @@ void rate_limit_update(int current_minute, int window_length, size_t *array,
 
 /* spool strategy check */
 bool spool_strategy_selected(TelemPostDaemon *daemon);
+
+/**
+ *  Converts record headers and body into JSON string to be posted thru http
+ *  connection to server.
+ *
+ * @param headers The header data read from the socket in the following form:
+ *                headers[00] = "record_format_version: 5"
+ *                headers[01] = "classification: org.clearlinux/hello/world"
+ *                ...
+ *                headers[14] = "event_id: 2d548c435a8910681469ba83975e8f10"
+ *
+ * @param body The payload read from socket in the following form:
+ *             payload = "hello\n"
+ *
+ *        On success, pointer to JSON string is posted to http server using
+ *        curl.
+ *        NOTE: JSON string needs to be freed, after curl global cleanup.
+ *        Json string is of the following form, where keys are of their
+ *        value type, eg. integer key-value's are of type int:
+ *
+ *        "{ "record_format_version": "5",
+ *           "classification": "org.clearlinux\/hello\/world",
+ *           ...
+ *           "event_id": "2d548c435a8910681469ba83975e8f10",
+ *           "payload": "hello\n" }"
+ *
+ * @return *char Pointer to resultant json string transformed from the
+ *               record.
+ */
+char *record_to_json(char *headers[], char *body);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

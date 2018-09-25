@@ -202,6 +202,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
         FILE *fp = NULL;
         char *headers[NUM_HEADERS];
         char *payload = NULL;
+        char *json_str = NULL; // JSON str converted from record headers & payload.
         int i, k;
         char line[LINE_MAX] = { 0 };
         long offset;
@@ -254,11 +255,25 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 goto read_error;
         }
 
-        *post_succeeded = post_record_http(headers, payload);
+        /* Convert record headers and payload into json record.
+           Remember to free the json_str object after transmitting
+           the json record via post_record_http(). */
+        json_str = record_to_json(headers, payload);
+
+        if (json_str == NULL) {
+                // Json record conversion failed.
+                goto read_error;
+        }
+        
+        *post_succeeded = post_record_http(json_str);
+        free(json_str);
+
         if (*post_succeeded) {
                 unlink(record_path);
         }
+
 read_error:
+
         if (payload) {
                 free(payload);
         }

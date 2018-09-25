@@ -34,6 +34,8 @@
 #include "retention.h"
 #include "telempostdaemon.h"
 
+#include "json_object.h"
+
 /* spool window check */
 static bool inside_direct_spool_window(TelemPostDaemon *daemon, time_t current_time)
 {
@@ -210,11 +212,97 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
         return size * nmemb;
 }
 
-bool post_record_http(char *headers[], char *body)
+char *record_to_json(char *headers[], char *payload)
+{
+        int result = -1;
+        char *key = NULL;
+        char *value = NULL;
+        json_object *value_json[NUM_HEADERS + 1] = {NULL}; // Extra index for payload.
+        json_object *json_record = NULL;
+        char *json_str = NULL;
+
+        json_record = json_object_new_object(); // Create new JSON object.
+
+        for (int i = 0; i < NUM_HEADERS; i++)
+        {
+                size_t header_len = strlen(headers[i]);
+                char *tmp_header = strndup(headers[i], header_len);
+                char *tok = strtok(tmp_header, ":");
+
+                telem_log(LOG_DEBUG, "headers[%d] = \"%s\"\n", i, headers[i]);
+
+                key = strdup(tok);                        // Key string.
+
+                tok = strtok(NULL, "\n");
+                tok++;                                    // Skip the space.
+
+                value = strdup(tok);                      // Value string.
+
+                // Create the appropriate JSON object.
+                if ((strcmp(key, TM_RECORD_FORMAT_VERSION_STR) == 0) ||
+                    (strcmp(key, TM_SEVERITY_STR)       == 0) ||
+                    (strcmp(key, TM_PAYLOAD_FORMAT_VERSION_STR) == 0))
+                {
+                        // Create JSON value of type int32.
+                        value_json[i] = json_object_new_int(atoi(value));
+                }
+                else if (strcmp(key, TM_CREATION_TIMESTAMP_STR) == 0){
+                        // Create JSON value of type int64.
+                        value_json[i] = json_object_new_int64(atoi(value));
+                }
+                else
+                {
+                        // Create JSON value of type string.
+                        value_json[i] = json_object_new_string(value);
+                }
+
+                // Add key-string/value-string pair to JSON object.
+                result = json_object_object_add(json_record, key, value_json[i]);
+
+                // Free current header, key and value strings to process the next
+                // record header.
+                free(tmp_header);
+                free(key);
+                free(value);
+
+                if (result != 0)
+                {
+                        // Could not add key/value pair to JSON object.
+                        // Fail. json_str is NULL at this point.
+                        goto cleanup;
+                }
+        }
+
+        telem_log(LOG_DEBUG, "payload = \"%s\"\n", payload);
+
+        // Add payload key/value pair to JSON object.
+        value_json[NUM_HEADERS] = json_object_new_string(payload);
+        result = json_object_object_add(json_record, "payload",
+                                        value_json[NUM_HEADERS]);
+
+        if (result != 0)
+        {
+                // Could not add key/value pair to JSON object.
+                // Fail. json_str is NULL at this point.
+                goto cleanup;
+        }
+
+        json_str = strdup(json_object_to_json_string(json_record));
+
+        telem_log(LOG_DEBUG, "json_str = \"%s\"\n", json_str);
+
+cleanup:
+
+        json_object_put(json_record); // Free JSON object.
+
+        return json_str; // Pass
+}
+
+bool post_record_http(char *json_str)
 {
         CURL *curl;
         int res = 0;
-        char *content = "Content-Type: application/text";
+        char *content = "Content-Type: application/json";
         struct curl_slist *custom_headers = NULL;
         char errorbuf[CURL_ERROR_SIZE];
         long http_response = 0;
@@ -248,16 +336,13 @@ bool post_record_http(char *headers[], char *body)
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
-        for (int i = 0; i < NUM_HEADERS; i++) {
-                custom_headers = curl_slist_append(custom_headers, headers[i]);
-        }
         custom_headers = curl_slist_append(custom_headers, tid_header);
         // This should be set by probes/libtelemetry in the future
         custom_headers = curl_slist_append(custom_headers, content);
 
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, custom_headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(body));
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json_str));
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 
         if (strlen(cert_file) > 0) {
@@ -298,7 +383,7 @@ bool post_record_http(char *headers[], char *body)
 
         curl_global_cleanup();
 
-        return res ? false : true;
+        return (res == 0) ? true : false; // Success = true, Failure = false
 }
 
 static void save_local_copy(TelemPostDaemon *daemon, char *body)
@@ -409,6 +494,7 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
 {
 
         bool ret = false;
+        char *json_str = NULL;
         int current_minute;
         bool do_spool = false;
         bool record_sent = false;
@@ -417,6 +503,7 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
         current_minute = tm_s->tm_min;
         /* Checks flags */
         bool record_check_passed = true;
+        bool record_to_json_passed = false;
         bool byte_check_passed = true;
         bool record_burst_enabled = burst_limit_enabled(daemon->record_burst_limit);
         bool byte_burst_enabled =  burst_limit_enabled(daemon->byte_burst_limit);
@@ -424,14 +511,19 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
         /* Perform record and byte rate limiting checks */
         rate_limit_checks(daemon, &record_check_passed, &byte_check_passed);
 
+        /* Convert record headers and payload into json. */
+        json_str = record_to_json(headers, body);
+        record_to_json_passed = (json_str == NULL) ? false : true;
+
         /* Sends record if rate limiting is disabled, or all checks passed */
-        if (!daemon->rate_limit_enabled || (record_check_passed && byte_check_passed)) {
+        if (!daemon->rate_limit_enabled ||
+            (record_check_passed && byte_check_passed && record_to_json_passed)) {
                 /* Send the record as https post */
-                record_sent = post_record_ptr(headers, body);
-                /**
-                 * This is the only point where an error condition could be returned
-                 * if the record was not sent
-                 * */
+                record_sent = post_record_ptr(json_str); // True on success.
+                free(json_str);
+
+                /* This is the only point where an error condition could be
+                   returned if the record was not sent. */
                 ret = record_sent;
         }
         // Get rate-limit strategy

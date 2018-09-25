@@ -40,16 +40,16 @@
 #define TM_BIOS_VERSION 13
 #define TM_EVENT_ID 14
 
-#define TM_RECORD_VERSION_STR "record_format_version"
+#define TM_RECORD_FORMAT_VERSION_STR "record_format_version"
 #define TM_CLASSIFICATION_STR "classification"
 #define TM_SEVERITY_STR "severity"
 #define TM_MACHINE_ID_STR "machine_id"
-#define TM_TIMESTAMP_STR "creation_timestamp"
+#define TM_CREATION_TIMESTAMP_STR "creation_timestamp"
 #define TM_ARCH_STR "arch"
 #define TM_HOST_TYPE_STR "host_type"
-#define TM_SYSTEM_BUILD_STR "build"
+#define TM_BUILD_STR "build"
 #define TM_KERNEL_VERSION_STR "kernel_version"
-#define TM_PAYLOAD_VERSION_STR "payload_format_version"
+#define TM_PAYLOAD_FORMAT_VERSION_STR "payload_format_version"
 #define TM_SYSTEM_NAME_STR "system_name"
 #define TM_BOARD_NAME_STR "board_name"
 #define TM_CPU_MODEL_STR "cpu_model"
@@ -70,7 +70,7 @@
  * structure (e.g. adding or removing a header field). Note that the value
  * should be an unsigned int.
  */
-static const uint32_t RECORD_FORMAT_VERSION = 4;
+static const uint32_t RECORD_FORMAT_VERSION = 5;
 
 #define TM_SITE_VERSION_FILE "/etc/os-release"
 #define TM_DIST_VERSION_FILE "/usr/lib/os-release"

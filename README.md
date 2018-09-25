@@ -35,6 +35,7 @@ Build dependencies
 - (optional) libsystemd, for syslog-style logging to the systemd journal, and
   socket/path activation of telemprobd and telempostd by systemd.
 
+- json-c (>= 0.13.1)
 
 Build and installation
 ---------------------
@@ -135,7 +136,7 @@ The client uses the following configuration options from the configuration file:
   telemprobd listens on for connections from the probes
 * spool_dir: This config option is related to spooling. If the daemon is not
   able to send the telemetry records to the backend server due to reasons such
-  as the network availability, then it stores the records in a spool directory.
+  as network unavailability, then it stores the records in a spool directory.
   This option specifies that path of the spool directory. This directory should
   be owned by the same user that the daemon is running as.
 
@@ -195,28 +196,39 @@ Data reported
 The data reported by the telemetry client could be understood as two main sets:
 metadata and a payload.
 
-The metadata is used to report details of a machine's architecture. The
-following are the metadata values currently collected (Record Format Version 4):
+The metadata is used to report details of a machine's architecture.
+The current format of the metadata's headers and payload components are presented
+to and consumed by the telemetry server in a form based on the EMCA JSON Data
+Interchange Syntax specification. Each metadata component and its value are
+combined into key/value pairs. Consequently the header/value pairs are converted
+to JSON key/value pairs in ASCII form. Similarly, The payload is converted into
+the key "payload" and the value consisting of the contents of the payload in
+ASCII form.
+Following is a list of the metadata values currently collected (Record Format
+Version 5):
 
-* record_format_version: version of the record, currently is 'Version 4'. This
-  value changes when new metadata is added.
+* record_format_version: version of the record, currently is 'Version 5'. This
+  value changes when new metadata is added, or when the format posted to the
+  server is changed. The current record format is based on and fully compliant
+  with the ECMA JSON Data Interchange Syntax. Please see www.json.org for
+  details.
 * classification: this field is used to identify the type of record sent by a
   specific client probe; classifications use the format DOMAIN/PROBE/REST, where
   DOMAIN is the vendor of the probe, PROBE is the probe name, and REST is a
   probe-defined field to classify what is contained in the payload.
 * severity: this is an integer value between 1 and 4 where 1 is "low" and 4 is
   "critical"
-* machine_id: a machine identifier that is rotate every 3 days for privacy reasons.
+* machine_id: a machine identifier that is rotated every 3 days for privacy reasons.
 * creation_timestamp: timestamp when the record was collected.
 * arch: a string describing machine architecture i.e. 'x86_64'.
 * host_type: a string with the combination of 'System Vendor', 'Product Name', and
-  'Product Version' read from dmi file system.
+  'Product Version' read from the dmi file system.
 * build: OS build number.
 * kernel_version: Kernel version.
 * payload_format_version: version of the payload, currently is 'Version 1'.
-* system_name: the value after 'ID=' from '/etc/os-release' (or distribution
+* system_name: the value after 'ID=' from '/etc/os-release' (or from the distribution
   provided folder)
-* board_name: a string read from dmi file system that combines 'Board Name' and
+* board_name: a string read from the dmi file system that combines 'Board Name' and
   'Board Vendor'.
 * cpu_model: cpu model name extracted from '/proc/cpuinfo'.
 * bios_version: BIOS version.
@@ -224,9 +236,22 @@ following are the metadata values currently collected (Record Format Version 4):
   event occurrence.
 
 The payload as mentioned above is reported by probes. The telemetry library adds
-the metadata to the payload (done programatically when using library API) for
+the metadata to the payload (done programatically when using library API). For
 more information about probes go [here](./src/probes).
 
+Following is an example, in literal form, of the metadata and payload presented
+to the telemetry server. NOTE: integer key-value's are of type int:
+
+{
+   "record_format_version": 5,
+   "classification": "org.clearlinux\/hello\/world",
+   ...
+   "event_id": "2d548c435a8910681469ba83975e8f10",
+   "payload": "This is a probe payload."
+}
+
+Note that backslash escape sequences are applied to the key/value pairs as defined
+in the ECMA JSON Data Interchange Syntax specification (www.json.org).
 
 Machine id
 ---------------------

@@ -25,6 +25,8 @@ AC_PROG_MAKE_SET
 # check >= 0.9.12 is required for TAP output
 PKG_CHECK_MODULES([CHECK], [check >= 0.12])
 PKG_CHECK_MODULES([CURL], [libcurl])
+PKG_CHECK_MODULES([JSON_C], [json-c])
+
 AC_CHECK_LIB([elf], [elf_begin], [have_elflib=yes], [AC_MSG_ERROR([Unable to find libelf from elfutils])])
 AC_CHECK_LIB([dw], [dwfl_begin], [have_dwlib=yes], [AC_MSG_ERROR([Unable to find libdw from elfutils])])
 AS_IF([test "x$have_elflib" = "xyes" -a "x$have_dwlib" = "xyes"],
@@ -99,7 +101,7 @@ test -z "${sysctlpath}" && sysctlpath=/usr/lib/sysctl.d
 AC_SUBST(SYSTEMD_SYSCTLDIR, [${sysctlpath}])
 
 AC_ARG_WITH([systemdsystemctldir], AS_HELP_STRING([--with-systemdsystemctldir=DIR],
-            [path to systemd systemctl dir @<:@default=/usr/bin@:>@]), [systemctlpath=${withval}])
+	    [path to systemd systemctl dir @<:@default=/usr/bin@:>@]), [systemctlpath=${withval}])
 test -z "${systemctlpath}" && systemctlpath=/usr/bin
 AC_SUBST(SYSTEMD_SYSTEMCTLDIR, [${systemctlpath}])
 
@@ -120,23 +122,23 @@ AC_ARG_WITH([loglevel], AS_HELP_STRING([--with-loglevel=NUM],
 AC_DEFINE_UNQUOTED([MAX_LOG_LEVEL], [${loglevel}], [Maximum log level for binaries])
 
 AC_ARG_ENABLE([logtype], AS_HELP_STRING([--enable-logtype],
-              [Vector for logging: stderr (default), syslog, systemd]),
+	      [Vector for logging: stderr (default), syslog, systemd]),
 			  [case ${enableval} in
-				 systemd) logtype="systemd";;
-                 syslog)  logtype="syslog" ;;
-                 stderr)  logtype="stderr" ;;
-                 *) AC_MSG_ERROR([bad value ${enableval} for --enable-logtype]);;
-                 esac],
-              [logtype="stderr"])
+				systemd) logtype="systemd";;
+				syslog)  logtype="syslog" ;;
+				stderr)  logtype="stderr" ;;
+				*)       AC_MSG_ERROR([bad value ${enableval} for --enable-logtype]);;
+			  esac],
+	      [logtype="stderr"])
 
 AM_CONDITIONAL([LOG_STDERR], [test x$logtype = xstderr])
 AM_CONDITIONAL([LOG_SYSLOG], [test x$logtype = xsyslog])
 AM_CONDITIONAL([LOG_SYSTEMD], [test x$logtype = xsystemd])
 
 case x$logtype in
-    xsystemd) AC_DEFINE([TM_LOG_SYSTEMD], [1], [Log through systemd apis]);;
-    xsyslog)  AC_DEFINE([TM_LOG_SYSLOG],  [1], [Log through syslog apis]);;
-    xstderr)  AC_DEFINE([TM_LOG_STDERR],  [1], [Log through fprintf(stder...)]);;
+	xsystemd) AC_DEFINE([TM_LOG_SYSTEMD], [1], [Log through systemd apis]);;
+	xsyslog)  AC_DEFINE([TM_LOG_SYSLOG],  [1], [Log through syslog apis]);;
+	xstderr)  AC_DEFINE([TM_LOG_STDERR],  [1], [Log through fprintf(stder...)]);;
 esac
 
 AC_CONFIG_COMMANDS([config dir],[mkdir -p src/data; touch src/data/.dirstamp])

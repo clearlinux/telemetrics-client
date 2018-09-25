@@ -28,6 +28,9 @@ install:
         - wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz
         - tar -xvf check-0.12.0.tar.gz
         - pushd check-0.12.0 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make -j48 && sudo make install && popd
+        - wget -O json-c-0.13.1.tar.gz https://github.com/json-c/json-c/archive/json-c-0.13.1-20180305.tar.gz
+        - mkdir json-c-0.13.1 && tar -xf json-c-0.13.1.tar.gz -C json-c-0.13.1 --strip-components=1
+        - pushd json-c-0.13.1 && ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu && make && sudo make install && popd
 
 script:
     - ./configure && make && make check

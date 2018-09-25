@@ -23,16 +23,16 @@
 
 /*Record headers to be sent in the following order */
 static const char *header_names[] = {
-        TM_RECORD_VERSION_STR,
+        TM_RECORD_FORMAT_VERSION_STR,
         TM_CLASSIFICATION_STR,
         TM_SEVERITY_STR,
         TM_MACHINE_ID_STR,
-        TM_TIMESTAMP_STR,
+        TM_CREATION_TIMESTAMP_STR,
         TM_ARCH_STR,
         TM_HOST_TYPE_STR,
-        TM_SYSTEM_BUILD_STR,
+        TM_BUILD_STR,
         TM_KERNEL_VERSION_STR,
-        TM_PAYLOAD_VERSION_STR,
+        TM_PAYLOAD_FORMAT_VERSION_STR,
         TM_SYSTEM_NAME_STR,
         TM_BOARD_NAME_STR,
         TM_CPU_MODEL_STR,

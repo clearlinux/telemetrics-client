@@ -172,7 +172,7 @@ static int set_record_format_header(struct telem_ref *t_ref)
                 return -ENOMEM;
         } else {
                 status = set_header(&(t_ref->record->headers[TM_RECORD_VERSION]),
-                                    TM_RECORD_VERSION_STR, buf,
+                                    TM_RECORD_FORMAT_VERSION_STR, buf,
                                     &(t_ref->record->header_size));
 
                 free(buf);
@@ -310,7 +310,7 @@ static int set_system_build_header(struct telem_ref *t_ref)
         }
 
         return set_header(&(t_ref->record->headers[TM_SYSTEM_BUILD]),
-                          TM_SYSTEM_BUILD_STR, version, &(t_ref->record->header_size));
+                          TM_BUILD_STR, version, &(t_ref->record->header_size));
 
 }
 
@@ -371,7 +371,8 @@ static int set_timestamp_header(struct telem_ref *t_ref)
                 return -ENOMEM;
         } else {
                 status = set_header(&(t_ref->record->headers[TM_TIMESTAMP]),
-                                    TM_TIMESTAMP_STR, buf, &(t_ref->record->header_size));
+                                    TM_CREATION_TIMESTAMP_STR, buf,
+                                    &(t_ref->record->header_size));
                 free(buf);
         }
 
@@ -769,7 +770,7 @@ static int set_payload_format_header(struct telem_ref *t_ref, uint32_t payload_v
         } else {
                 status = set_header(
                         &(t_ref->record->headers[TM_PAYLOAD_VERSION]),
-                        TM_PAYLOAD_VERSION_STR, buf,
+                        TM_PAYLOAD_FORMAT_VERSION_STR, buf,
                         &(t_ref->record->header_size));
                 free(buf);
         }

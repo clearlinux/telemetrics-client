@@ -10,7 +10,8 @@ bin_PROGRAMS = \
 	%D%/journal/journal.c \
 	%D%/journal/journal.h
 
-%C%_telemprobd_LDADD = $(CURL_LIBS) \
+%C%_telemprobd_LDADD = \
+	$(CURL_LIBS) \
 	%D%/libtelem-shared.la
 
 %C%_telemprobd_CFLAGS = \
@@ -50,10 +51,13 @@ endif
 	%D%/iorecord.c \
 	%D%/iorecord.h
 
-%C%_telempostd_LDADD = $(CURL_LIBS) \
+%C%_telempostd_LDADD = \
+	$(CURL_LIBS) \
+	$(JSON_C_LIBS) \
 	%D%/libtelem-shared.la
 
 %C%_telempostd_CFLAGS = \
+	$(JSON_C_CFLAGS) \
 	$(AM_CFLAGS)
 
 %C%_telempostd_LDFLAGS = \

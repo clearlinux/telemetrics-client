@@ -82,7 +82,7 @@ END_TEST
 START_TEST(record_create_version)
 {
         char *result;
-        if (asprintf(&result, "%s: %u\n", TM_PAYLOAD_VERSION_STR, 2000) < 0) {
+        if (asprintf(&result, "%s: %u\n", TM_PAYLOAD_FORMAT_VERSION_STR, 2000) < 0) {
                 return;
         }
         ck_assert_str_eq(ref->record->headers[TM_PAYLOAD_VERSION], result);
