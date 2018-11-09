@@ -22,8 +22,7 @@ DESCRIPTION
 ===========
 
 Control actions for telemetry services. The command can be used to start,
-restart, or stop ``telemd``\(1), or to opt-in or opt-out of telemetry delivery
-of records to a central telemetry service.
+restart, or stop ``telemprobd``\(1) and ``telempostd``\(1), or to opt-in or opt-out of telemetry delivery of records to a central telemetry service.
 
 
 OPTIONS
@@ -32,11 +31,11 @@ OPTIONS
  * ``start``|``stop``|``restart``:
    Starts, stops or restarts all running telemetry services.
 
- * ``opt-in``: 
+ * ``opt-in``:
    Opts in to telemetry, and starts telemetry services. The opt-out file
    ``/etc/telemetrics/opt-out`` is removed.
 
- * ``opt-out``: 
+ * ``opt-out``:
    Opts out of telemetry, and stops telemetry services. The opt-out file
    ``/etc/telemetrics/opt-out`` is created.
 
@@ -56,4 +55,3 @@ SEE ALSO
 * ``telemd``\(1)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
-
