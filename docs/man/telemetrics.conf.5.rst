@@ -21,8 +21,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-This file contains configuration parameters for the ``telemd``\(1) telemetry
-service daemon. The daemon reads this file at startup if it exists.
+This file contains configuration parameters for the ``telemprobd``\(1) and ``telempostd``\(1) telemetry service daemons. The daemon reads this file at startup if it exists.
 
 
 SYNTAX
@@ -43,7 +42,7 @@ OPTIONS
 
 -  ``socket_path=<path>``
 
-   Path to the socket that `telemd` will listen on.
+   Path to the socket that `telemprobd` will listen on.
 
 -  ``cainfo=<path>``
 
@@ -104,7 +103,7 @@ OPTIONS
 SEE ALSO
 ========
 
-* ``telemd``\(1)
+* ``telemprobd``\(1)
+* ``telempostd``\(1)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
-

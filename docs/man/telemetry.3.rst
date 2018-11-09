@@ -14,9 +14,9 @@ SYNOPSIS
 ========
 
 ``#include "telemetry.h"``
-  
+
 ``struct telem_ref { struct telem_record *record; };``
-  
+
 ``int tm_create_record(struct telem_ref **t_ref, uint32_t severity, char *classification, uint32_t payload_version)``
 
 ``int tm_set_payload(struct telem_ref *t_ref, char *payload)``
@@ -32,7 +32,7 @@ DESCRIPTION
 ===========
 
 The functions in the telemetry library facilitate the delivery of
-telemetry data to the ``telemd``\(1) service.
+telemetry data to the ``telemprobd``\(1) service.
 
 The function ``tm_create_record()`` initializes a telemetry record and
 sets the severity and classification of that record, as well as the
@@ -61,7 +61,6 @@ do not return any values.
 SEE ALSO
 ========
 
-* ``telemd``\(1)
+* ``telemprobd``\(1)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
-

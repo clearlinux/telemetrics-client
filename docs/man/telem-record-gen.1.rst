@@ -19,10 +19,10 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-Generate and attempt to send a telemetry record to ``telemd``\(1). This
+Generate and attempt to send a telemetry record to ``telemprobd``\(1). This
 program can be used to create a telemetry record from a shell script
 or from another program using e.g. ``system()``. The program connects
-to a local ``telemd``\(1) daemon to spool the record for delivery to
+to a local ``telemprobd``\(1) daemon to spool the record for delivery to
 the actual collection service.
 
 The payload can be provided as standard input, as a file with the
@@ -79,4 +79,3 @@ SEE ALSO
 * ``telemd``\(1)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
-
