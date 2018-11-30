@@ -377,7 +377,7 @@ int print_record(char *payload)
         int ret = 0;
         int i = 0;
 
-        if ((ret = instanciate_record(&t_ref, payload)) != -1) {
+        if ((ret = instanciate_record(&t_ref, payload)) == 0) {
                 for (i = 0; i < NUM_HEADERS; i++) {
                         fprintf(stdout, "%s", t_ref->record->headers[i]);
                 }
