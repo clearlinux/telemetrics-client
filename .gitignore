@@ -42,6 +42,7 @@ hprobe
 bertprobe
 crashprobe
 journalprobe
+pythonprobe
 telem-record-gen
 klogscanner
 oopsprobe
