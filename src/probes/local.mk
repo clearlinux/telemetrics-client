@@ -5,8 +5,15 @@ bin_PROGRAMS += \
 	%D%/klogscanner \
 	%D%/pstoreprobe \
 	%D%/oopsprobe \
+	%D%/pythonprobe \
 	%D%/pstoreclean \
 	%D%/bertprobe
+
+%C%_pythonprobe_SOURCES = %D%/python-probe.c
+%C%_pythonprobe_LDADD = $(top_builddir)/src/libtelemetry.la
+%C%_pythonprobe_LDFLAGS = \
+	$(AM_LDFLAGS) \
+	-pie
 
 %C%_hprobe_SOURCES = %D%/hello.c
 %C%_hprobe_LDADD = $(top_builddir)/src/libtelemetry.la

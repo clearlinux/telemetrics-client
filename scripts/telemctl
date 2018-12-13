@@ -7,6 +7,7 @@ declare -a SPECIAL_UNITS=(
   klogscanner.service
   oops-probe.service
   journal-probe.service
+  python-probe.service
 )
 
 declare -a SERVICES=(
