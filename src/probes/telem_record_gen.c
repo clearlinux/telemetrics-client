@@ -228,13 +228,13 @@ int allocate_payload_buffer(char **payload)
 {
         int ret = 0;
 
-        *payload = (char *)malloc(MAX_PAYLOAD_SIZE);
+        *payload = (char *)malloc(MAX_PAYLOAD_LENGTH);
 
         if (*payload == NULL) {
                 goto out1;
         }
 
-        *payload = memset(*payload, 0, MAX_PAYLOAD_SIZE);
+        *payload = memset(*payload, 0, MAX_PAYLOAD_LENGTH);
         ret = 1;
 
 out1:
@@ -256,7 +256,7 @@ int get_payload_from_file(char **payload)
         }
 
         bytes_in = fread(*payload, 1,
-                         MAX_PAYLOAD_SIZE - 1, fp);
+                         MAX_PAYLOAD_LENGTH - 1, fp);
 
         /* if fread fails */
         if (bytes_in == 0 && ferror(fp) != 0) {
@@ -277,8 +277,8 @@ void get_payload_from_opt(char **payload)
         size_t len = 0;
 
         len = strlen(opt_payload);
-        if (len >= MAX_PAYLOAD_SIZE) {
-                len = MAX_PAYLOAD_SIZE - 1;
+        if (len >= MAX_PAYLOAD_LENGTH) {
+                len = MAX_PAYLOAD_LENGTH - 1;
         }
         strncpy(*payload, opt_payload, len);
 }
@@ -288,9 +288,9 @@ void get_payload_from_stdin(char **payload)
         size_t bytes_in = 0;
         int c;
 
-        bytes_in = fread(*payload, 1, MAX_PAYLOAD_SIZE - 1, stdin);
+        bytes_in = fread(*payload, 1, MAX_PAYLOAD_LENGTH - 1, stdin);
 
-        if (bytes_in == MAX_PAYLOAD_SIZE - 1) {
+        if (bytes_in == MAX_PAYLOAD_LENGTH - 1) {
                 /* Throw away the rest of stdin */
                 while (EOF != (c = fgetc(stdin))) {
                         continue;

@@ -43,13 +43,13 @@ static int allocate_payload_buffer(char **payload)
 {
         int ret = 0;
 
-        *payload = (char *)malloc(MAX_PAYLOAD_SIZE);
+        *payload = (char *)malloc(MAX_PAYLOAD_LENGTH);
 
         if (*payload == NULL) {
                 goto out;
         }
 
-        *payload = memset(*payload, 0, MAX_PAYLOAD_SIZE);
+        *payload = memset(*payload, 0, MAX_PAYLOAD_LENGTH);
         ret = 1;
 
 out:
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
                 goto fail;
         }
 
-        if (!(ret = nc_b64enc_filename(bert_record_file, payload, MAX_PAYLOAD_SIZE))) {
+        if (!(ret = nc_b64enc_filename(bert_record_file, payload, MAX_PAYLOAD_LENGTH))) {
                 printf("Failed to read payload from: %s\n", bert_record_file);
                 goto fail;
         }
