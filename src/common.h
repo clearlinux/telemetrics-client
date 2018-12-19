@@ -78,16 +78,13 @@ static const uint32_t RECORD_FORMAT_VERSION = 4;
 #define TM_OPT_OUT_FILE "/etc/telemetrics/opt-out"
 
 /* Currently max supported payload size is 8kb */
-#define MAX_PAYLOAD_SIZE 8192
+#define MAX_PAYLOAD_LENGTH 8192
 
 /* Maximum size for a category string is 122 bytes */
 #define MAX_CLASS_LENGTH 122
 
 /* Maximum size for a sub category 40 bytes */
 #define MAX_SUBCAT_LENGTH 40
-
-/* Max Payload size is 8 kibabytes (8192) */
-#define MAX_PAYLOAD_LENGTH 8192
 
 /* SPOOL DEFINES */
 /* Spooling should run every TM_SPOOL_RUN_MAX atleast */
