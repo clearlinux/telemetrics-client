@@ -35,10 +35,10 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBtelem\-record\-gen\fP <options>
 .SH DESCRIPTION
 .sp
-Generate and attempt to send a telemetry record to \fBtelemd\fP(1). This
+Generate and attempt to send a telemetry record to \fBtelemprobd\fP(1). This
 program can be used to create a telemetry record from a shell script
 or from another program using e.g. \fBsystem()\fP\&. The program connects
-to a local \fBtelemd\fP(1) daemon to spool the record for delivery to
+to a local \fBtelemprobd\fP(1) daemon to spool the record for delivery to
 the actual collection service.
 .sp
 The payload can be provided as standard input, as a file with the
@@ -79,7 +79,7 @@ File to read payload from.
 Version number for format of payload (default 1).
 .IP \(bu 2
 \fB\-e\fP, \fB\-\-event\-id\fP <version>:
-Event id to use in the record. If not provided a ramdonly generated id will be assigned to record.
+Event id to use in the record. If not provided a randomly generated id will be assigned to record.
 .UNINDENT
 .UNINDENT
 .UNINDENT

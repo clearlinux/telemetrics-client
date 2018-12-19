@@ -37,8 +37,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fB/usr/share/defaults/telemetrics/telemetrics.conf\fP
 .SH DESCRIPTION
 .sp
-This file contains configuration parameters for the \fBtelemd\fP(1) telemetry
-service daemon. The daemon reads this file at startup if it exists.
+This file contains configuration parameters for the \fBtelemprobd\fP(1) and \fBtelempostd\fP(1) telemetry service daemons. The daemon reads this file at startup if it exists.
 .SH SYNTAX
 .sp
 The configuration file contains \fBkey=value\fP pairs, formatted as plain
@@ -54,7 +53,7 @@ Server URL including protocol designator.
 .IP \(bu 2
 \fBsocket_path=<path>\fP
 .sp
-Path to the socket that \fItelemd\fP will listen on.
+Path to the socket that \fItelemprobd\fP will listen on.
 .IP \(bu 2
 \fBcainfo=<path>\fP
 .sp
@@ -114,7 +113,9 @@ delivery over network. Valid stategies: \fBspool\fP, \fBdrop\fP\&.
 .SH SEE ALSO
 .INDENT 0.0
 .IP \(bu 2
-\fBtelemd\fP(1)
+\fBtelemprobd\fP(1)
+.IP \(bu 2
+\fBtelempostd\fP(1)
 .IP \(bu 2
 \fI\%https://github.com/clearlinux/telemetrics\-client\fP
 .IP \(bu 2
