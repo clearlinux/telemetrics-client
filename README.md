@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/clearlinux/telemetrics-client.svg?branch=master)](https://travis-ci.org/clearlinux/telemetrics-client)
+
 Telemetrics-client
 ==================
 
