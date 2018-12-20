@@ -75,7 +75,7 @@ int main(int argc, char **argv)
                 { NULL, 0, NULL, 0 }
         };
 
-        while ((c = getopt_long(argc, argv, "f:hHV", opts, &opt_index)) != -1) {
+        while ((c = getopt_long(argc, argv, "f:hV", opts, &opt_index)) != -1) {
                 switch (c) {
                         case 'f':
                                 if (asprintf(&cfile, "%s", (char *)optarg) < 0) {
