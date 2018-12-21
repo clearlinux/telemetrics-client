@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-void print_usage(char *prog)
+static void print_usage(char *prog)
 {
         printf("%s: Usage\n", prog);
         printf("  -f,  --config_file    Configuration file. This overides the other parameters\n");
@@ -41,12 +41,11 @@ int main(int argc, char **argv)
         struct telem_ref *tm_handle = NULL;
         char *payload2;
         char *str;
+        int ret;
 
         // Following vars are for arg parsing.
         int c;
-        char *cfile = NULL;
         int opt_index = 0;
-        int ret = 0;
 
         struct option opts[] = {
                 { "config_file", 1, NULL, 'f' },
@@ -57,6 +56,7 @@ int main(int argc, char **argv)
         };
 
         while ((c = getopt_long(argc, argv, "f:hHV", opts, &opt_index)) != -1) {
+                char *cfile = NULL;
                 switch (c) {
                         case 'f':
                                 if (asprintf(&cfile, "%s", (char *)optarg) < 0) {
@@ -72,6 +72,7 @@ int main(int argc, char **argv)
                                 }
 
                                 tm_set_config_file(cfile);
+                                free(cfile);
                                 break;
                         case 'H':
                                 str = "org.clearlinux/heartbeat/ping";
@@ -94,28 +95,31 @@ int main(int argc, char **argv)
 
         if ((ret = tm_create_record(&tm_handle, severity, classification,
                                     payload_version)) < 0) {
-                printf("Failed to create record: %s\n", strerror(-ret));
-                ret = 1;
-                goto fail;
+                fprintf(stderr, "Failed to create record: %s\n",
+                       strerror(-ret));
+                ret = EXIT_FAILURE;
+                goto done;
         }
 
         if ((ret = tm_set_payload(tm_handle, payload2)) < 0) {
-                printf("Failed to set record payload: %s\n", strerror(-ret));
-                ret = 1;
-                goto fail;
+                fprintf(stderr, "Failed to set record payload: %s\n",
+                        strerror(-ret));
+                ret = EXIT_FAILURE;
+                goto done;
         }
 
         free(payload2);
 
         if ((ret = tm_send_record(tm_handle)) < 0) {
-                printf("Failed to send record to daemon: %s\n", strerror(-ret));
-                ret = 1;
-                goto fail;
+                fprintf(stderr, "Failed to send record to daemon: %s\n",
+                        strerror(-ret));
+                ret = EXIT_FAILURE;
+                goto done;
         } else {
                 printf("Successfully sent record to daemon.\n");
-                ret = 0;
+                ret = EXIT_SUCCESS;
         }
-fail:
+done:
         tm_free_record(tm_handle);
         tm_handle = NULL;
 
