@@ -4,14 +4,14 @@ declare -a SPECIAL_UNITS=(
   hprobe.timer
   telemprobd.socket
   telempostd.path
+  klogscanner.service
+  oops-probe.service
+  journal-probe.service
 )
 
 declare -a SERVICES=(
   hprobe.service
-  journal-probe.service
-  oops-probe.service
   pstore-probe.service
-  klogscanner.service
   telemprobd.service
   telempostd.service
 )
