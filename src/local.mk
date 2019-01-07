@@ -11,7 +11,8 @@ bin_PROGRAMS = \
 	%D%/journal/journal.h
 
 %C%_telemprobd_LDADD = $(CURL_LIBS) \
-	%D%/libtelem-shared.la
+	%D%/libtelem-shared.la \
+	%D%/libtelemetry.la
 
 %C%_telemprobd_CFLAGS = \
 	$(AM_CFLAGS)
@@ -51,7 +52,8 @@ endif
 	%D%/iorecord.h
 
 %C%_telempostd_LDADD = $(CURL_LIBS) \
-	%D%/libtelem-shared.la
+	%D%/libtelem-shared.la \
+	%D%/libtelemetry.la
 
 %C%_telempostd_CFLAGS = \
 	$(AM_CFLAGS)

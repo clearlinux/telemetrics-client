@@ -31,6 +31,7 @@
 #include <signal.h>
 #include <malloc.h>
 
+#include "telemetry.h"
 #include "config.h"
 #include "common.h"
 #ifdef  HAVE_SYSTEMD_SD_DAEMON_H
@@ -74,7 +75,6 @@ int main(int argc, char **argv)
         client *cl = NULL;
         client *current_client = NULL;
         int c;
-        char *config_file = NULL;
         int opt_index = 0;
         sigset_t mask;
         //bool interrupted = false;
@@ -92,18 +92,12 @@ int main(int argc, char **argv)
 
         while ((c = getopt_long(argc, argv, "f:hV", opts, &opt_index)) != -1) {
                 switch (c) {
-                        case 'f':
-                                config_file = optarg;
-                                struct stat buf;
-                                ret = stat(config_file, &buf);
-
-                                /* check if the file exists and is a regular file */
-                                if (ret == -1 || !S_ISREG(buf.st_mode)) {
-                                        telem_log(LOG_ERR, "Configuration file"
+                         case 'f':
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file"
                                                   " path not valid\n");
-                                        exit(EXIT_FAILURE);
+                                    exit(EXIT_FAILURE);
                                 }
-                                set_config_file(config_file);
                                 break;
                         case 'h':
                                 print_usage(argv[0]);

@@ -63,7 +63,7 @@ typedef struct configuration {
 } configuration;
 
 /* Sets the configuration file to be used later */
-void set_config_file(char *filename);
+int set_config_file(const char *filename);
 
 /* Parses the ini format config file */
 bool read_config_from_file(char *filename, struct configuration *config);
