@@ -777,9 +777,9 @@ static int set_payload_format_header(struct telem_ref *t_ref, uint32_t payload_v
         return status;
 }
 
-void tm_set_config_file(char *c_file)
+int tm_set_config_file(const char *c_file)
 {
-        set_config_file(c_file);
+        return set_config_file(c_file);
 }
 
 /**

@@ -52,7 +52,7 @@ const char *config_key_bool[] = { NULL, "rate_limit_enabled", "daemon_recycling_
 
 static struct configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
 
-int validate_config_file(char *f)
+static int validate_config_file(const char *f)
 {
         struct stat sbuf;
 
@@ -60,26 +60,34 @@ int validate_config_file(char *f)
                 return -EINVAL;
         }
 
+        /* check if the file exists and is a regular file */
         if (stat(f, &sbuf) != 0) {
                 return -errno;
+        }
+
+        if (!S_ISREG(sbuf.st_mode)) {
+                return -EINVAL;
         }
 
         return 0;
 
 }
 
-void set_config_file(char *filename)
+int set_config_file(const char *filename)
 {
+        int ret;
 
-        /* TODO: This should return a status, but that will require coordinating
-         * an API change.  For now, config-entries referencing a null config
-         * file will fail, so the end result still works. */
-
-        if (validate_config_file(filename) == 0) {
-                config_file = strdup(filename);
-                cmd_line_cfg = true;
+        if ((ret = validate_config_file(filename)) == 0) {
+                char *filename1 = strdup(filename);
+                if (filename1 == NULL) {
+                    ret = -errno;
+                } else {
+                    config_file = filename1;
+                    cmd_line_cfg = true;
+                }
         }
 
+        return ret;
 }
 
 bool read_config_from_file(char *config_file, struct configuration *config)

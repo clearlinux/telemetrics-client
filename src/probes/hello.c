@@ -23,6 +23,7 @@
 #include "telemetry.h"
 
 #include "config.h"
+#include "log.h"
 
 static void print_usage(char *prog)
 {
@@ -56,23 +57,13 @@ int main(int argc, char **argv)
         };
 
         while ((c = getopt_long(argc, argv, "f:hHV", opts, &opt_index)) != -1) {
-                char *cfile = NULL;
                 switch (c) {
                         case 'f':
-                                if (asprintf(&cfile, "%s", (char *)optarg) < 0) {
-                                        exit(EXIT_FAILURE);
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file"
+                                                  " path not valid\n");
+                                    exit(EXIT_FAILURE);
                                 }
-
-                                struct stat buf;
-                                ret = stat(cfile, &buf);
-
-                                /* check if the file exists and is a regular file */
-                                if (ret == -1 || !S_ISREG(buf.st_mode)) {
-                                        exit(EXIT_FAILURE);
-                                }
-
-                                tm_set_config_file(cfile);
-                                free(cfile);
                                 break;
                         case 'H':
                                 str = "org.clearlinux/heartbeat/ping";

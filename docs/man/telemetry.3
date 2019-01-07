@@ -44,7 +44,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 \fBvoid tm_free_record(struct telem_ref *t_ref)\fP
 .sp
-\fBvoid tm_set_config_file(char *c_file)\fP
+\fBint tm_set_config_file(const char *c_file)\fP
 .SH DESCRIPTION
 .sp
 The functions in the telemetry library facilitate the delivery of
@@ -67,8 +67,8 @@ configuration path to the telemetry library.
 .SH RETURN VALUES
 .sp
 All these functions return \fB0\fP on success, or a non\-zero return value
-if an error occurred. The functions \fBtm_free_record()\fP and \fBtm_set_config_file()\fP
-do not return any values.
+if an error occurred. The function \fBtm_free_record()\fP does not return
+any value.
 .SH SEE ALSO
 .INDENT 0.0
 .IP \(bu 2
