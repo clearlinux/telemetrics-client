@@ -25,7 +25,7 @@ SYNOPSIS
 
 ``void tm_free_record(struct telem_ref *t_ref)``
 
-``void tm_set_config_file(char *c_file)``
+``int tm_set_config_file(const char *c_file)``
 
 
 DESCRIPTION
@@ -54,8 +54,8 @@ RETURN VALUES
 =============
 
 All these functions return ``0`` on success, or a non-zero return value
-if an error occurred. The functions ``tm_free_record()`` and ``tm_set_config_file()``
-do not return any values.
+if an error occurred. The function ``tm_free_record()`` does not return
+any value.
 
 
 SEE ALSO

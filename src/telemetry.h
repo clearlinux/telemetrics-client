@@ -58,11 +58,11 @@ struct telem_ref {
 /**
  * Set the configuration file name to use
  *
- * @param c_file Absolute file name of the configuration file. If the path name
- * provided is not an absolute path, or the path given cannot be successfuly
- * stat'd, then the effective configuration file is left unchanged.
+ * @param c_file Absolute file name of the configuration file.
+ * @return 0 on success, or a negative errno-style value on error. In case of 
+ *     an error return the effective configuration file is left unchanged.
  */
-void tm_set_config_file(char *c_file);
+int tm_set_config_file(const char *c_file);
 
 /**
  * Create a new telemetrics record

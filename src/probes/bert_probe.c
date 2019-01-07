@@ -25,6 +25,7 @@
 #include "nica/b64enc.h"
 
 #include "config.h"
+#include "log.h"
 
 static const char bert_record_file[] = "/sys/firmware/acpi/tables/data/BERT";
 static const char telem_record_class[] = "org.clearlinux/bert/debug";
@@ -61,13 +62,11 @@ int main(int argc, char **argv)
         struct telem_ref *tm_handle = NULL;
         char *classification = (char *)telem_record_class;
         char *payload = NULL;
+        int ret = 0;
 
         // Following vars are for arg parsing.
         int c;
-        char *cfile = NULL;
         int opt_index = 0;
-        int ret = 0;
-
         struct option opts[] = {
                 { "config_file", 1, NULL, 'f' },
                 { "help", 0, NULL, 'h' },
@@ -78,19 +77,11 @@ int main(int argc, char **argv)
         while ((c = getopt_long(argc, argv, "f:hV", opts, &opt_index)) != -1) {
                 switch (c) {
                         case 'f':
-                                if (asprintf(&cfile, "%s", (char *)optarg) < 0) {
-                                        exit(EXIT_FAILURE);
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file"
+                                                  " path not valid\n");
+                                    exit(EXIT_FAILURE);
                                 }
-
-                                struct stat buf;
-                                ret = stat(cfile, &buf);
-
-                                /* check if the file exists and is a regular file */
-                                if (ret == -1 || !S_ISREG(buf.st_mode)) {
-                                        exit(EXIT_FAILURE);
-                                }
-
-                                tm_set_config_file(cfile);
                                 break;
                         case 'h':
                                 print_usage(argv[0]);
@@ -132,7 +123,6 @@ int main(int argc, char **argv)
         }
 
 fail:
-        free(cfile);
         tm_free_record(tm_handle);
         tm_handle = NULL;
 

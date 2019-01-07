@@ -312,8 +312,6 @@ static bool process_journal(void)
         }
 }
 
-static char *config_file = NULL;
-
 static const struct option prog_opts[] = {
         { "help", no_argument, 0, 'h' },
         { "config-file", required_argument, 0, 'f' },
@@ -330,14 +328,9 @@ static void print_help(void)
         printf("  -h, --help            Show help options\n");
         printf("\n");
         printf("Application Options:\n");
-        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
+        printf("  -f, --config_file     Specify a configuration file other than default\n");
         printf("  -V, --version         Print the program version\n");
         printf("\n");
-}
-
-static void free_strings(void)
-{
-        free(config_file);
 }
 
 int main(int argc, char **argv)
@@ -354,7 +347,11 @@ int main(int argc, char **argv)
                                 printf(PACKAGE_VERSION "\n");
                                 goto success;
                         case 'f':
-                                config_file = strdup(optarg);
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file"
+                                                  " path not valid\n");
+                                    exit(EXIT_FAILURE);
+                                }
                                 break;
                 }
         }
@@ -366,8 +363,6 @@ int main(int argc, char **argv)
 success:
         ret = EXIT_SUCCESS;
 fail:
-        free_strings();
-
         if (journal) {
                 sd_journal_close(journal);
         }

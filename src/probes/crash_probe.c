@@ -463,7 +463,6 @@ static bool is_banned_path(char *fullpath)
         return false;
 }
 
-static char *config_file = NULL;
 static char *core_file = NULL;
 static char *proc_path = NULL;
 static long int signal_num = -1;
@@ -490,7 +489,7 @@ static void print_help(void)
         printf("  -h, --help            Show help options\n");
         printf("\n");
         printf("Application Options:\n");
-        printf("  -f, --config-file     Path to configuration file (not implemented yet)\n");
+        printf("  -f, --config_file     Specify a configuration file other than default\n");
         printf("  -c, --core-file       Path to core file to process\n");
         printf("  -p, --process-name    Name of process for crash report (required)\n");
         printf("  -E, --process-path    Absolute path of crashed process, with ! or / delimiters\n");
@@ -532,7 +531,11 @@ int main(int argc, char **argv)
                                 printf(PACKAGE_VERSION "\n");
                                 goto success;
                         case 'f':
-                                config_file = strdup(optarg);
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file"
+                                                  " path not valid\n");
+                                    exit(EXIT_FAILURE);
+                                }
                                 break;
                         case 'c':
                                 core_file = strdup(optarg);
