@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright © 2015-2019 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -18,44 +18,40 @@
 #include "oops_parser.h"
 
 /**
+ * Process the buffer and send it to the backend
+ *
+ * @param *bufp A pointer to a buffer containing the bytes read
+ *		from the kernel ring buffer
+ * @param bytes Number of bytes read from ring buffer into bufp
+ * 
+ * @return 0 on succes, -1 on failure
+ *
+ */
+int klog_process_buffer(char *bufp, int bytes);
+/**
  * Splits the buffer into individual lines
  *
  * @param *bufp A pointer to a buffer containing the bytes read
  *		from the kernel ring buffer
- * @param bytes Bytes read from ring buffer into bufp
+ * @param bytes Number of bytes read from ring buffer into bufp
  *
  */
 void split_buf_by_line(char *bufp, int bytes);
 
 /**
- * Allocates memory for oops message to write to file
- *
- * @return 0 on succes, -1 on failure
- */
-int allocate_filespace(void);
-
-/**
- * Writes the oops message to tmp file
+ * Process the oops message and send it to the backend
  *
  * @param msg Struct that contains oops message lines and linecount
  *
  */
-void write_oops_to_file(struct oops_log_msg *msg);
-
+void klog_process_oops_msgs(struct oops_log_msg *msg);
 /**
  * Signal handler for cleanup purposes
  *
  * @param signum An integer for the signal type
  *
  */
-void signal_handler(int signum);
-
-/**
- * For Unit Tests Purposes
- * Determines whether an oops has been written to a file
- *
- * @return true if oops is written, false if not
- */
-bool get_oops_written(void);
+void signal_handler_fail(int signum);
+void signal_handler_success(int signum);
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
