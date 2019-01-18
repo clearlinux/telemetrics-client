@@ -4,7 +4,6 @@ bin_PROGRAMS += \
 	%D%/telem-record-gen \
 	%D%/klogscanner \
 	%D%/pstoreprobe \
-	%D%/oopsprobe \
 	%D%/pythonprobe \
 	%D%/pstoreclean \
 	%D%/bertprobe
@@ -129,25 +128,6 @@ if HAVE_SYSTEMD_JOURNAL
 endif
 endif
 
-%C%_oopsprobe_SOURCES = \
-        %D%/oops_probe.c \
-	%D%/oops_parser.c \
-	src/nica/nc-string.c \
-	%D%/probe.h
-%C%_oopsprobe_CFLAGS = \
-        $(AM_CFLAGS)
-%C%_oopsprobe_LDADD = \
-        $(top_builddir)/src/libtelemetry.la \
-        $(top_builddir)/src/libtelem-shared.la
-
-if LOG_SYSTEMD
-if HAVE_SYSTEMD_JOURNAL
-%C%_oopsprobe_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
-%C%_oopsprobe_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
-endif
-endif
 
 if HAVE_SYSTEMD_JOURNAL
 if HAVE_SYSTEMD_ID128

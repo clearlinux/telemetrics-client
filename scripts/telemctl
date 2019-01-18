@@ -5,7 +5,6 @@ declare -a SPECIAL_UNITS=(
   telemprobd.socket
   telempostd.path
   klogscanner.service
-  oops-probe.service
   journal-probe.service
   python-probe.service
 )

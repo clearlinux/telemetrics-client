@@ -14,7 +14,7 @@ The default probes provided along the telemetry client code are:
 * journalprobe: a probe that monitors the systemd journal for log messages
   from failed services.
 
-* oopsprobe: a probe to collect 'oops messages' when the kernel detects a
+* klogscanner: a probe to collect 'oops messages' when the kernel detects a
   problem.
 
 * pstoreprobe: probe to collect messages left on pstore filesystem.

@@ -45,7 +45,6 @@ journalprobe
 pythonprobe
 telem-record-gen
 klogscanner
-oopsprobe
 pstoreclean
 pstoreprobe
 telem_journal

@@ -1,9 +1,24 @@
+/*
+ * This program is part of the Clear Linux Project
+ *
+ * Copyright © 2015-2019 Intel Corporation
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms and conditions of the GNU Lesser General Public License, as
+ * published by the Free Software Foundation; either version 2.1 of the License,
+ * or (at your option) any later version.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
 #define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/klog.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
 #include <malloc.h>
@@ -22,54 +37,48 @@ int main(void)
         int log_size = 0;
         char *bufp = NULL;
         size_t buflen = 0;
-        int bytes = 0;
 
-        oops_parser_init(write_oops_to_file);
+        oops_parser_init(klog_process_oops_msgs);
 
-        // Allocate space to write the oops file to
-        if (allocate_filespace() < 0) {
-                telem_log(LOG_ERR, "%s\n", strerror(errno));
-                return 1;
-        }
-
-        // Signal Handling to close and unlink empty files
-        if (signal (SIGINT, signal_handler) == SIG_ERR) {
+        // Signal Handling to terminate the probe.
+        if (signal (SIGINT, signal_handler_fail) == SIG_ERR) {
                 telem_log(LOG_ERR, "Error handling interrupt signal\n");
         }
-        if (signal (SIGTERM, signal_handler) == SIG_ERR) {
+        if (signal (SIGTERM, signal_handler_success) == SIG_ERR) {
                 telem_log(LOG_ERR, "Error handling terminating signal\n");
         }
 
+        // Gets the size of the kernel ring buffer
+        log_size = klogctl(SYSLOG_ACTION_SIZE_BUFFER, NULL, 0);
+        if (log_size < 0) {
+                telem_log(LOG_ERR, "Cannot read size of kernel ring buffer: %s\n", strerror(errno));
+                return 1;
+        }
+
+        buflen = (size_t)log_size;
+        if (buflen > MAX_BUF) {
+                buflen = MAX_BUF;
+        }
+
+        // Gets the contents of the kernel ring buffer
+        bufp = (char *)malloc(buflen);
+
         while (1) {
-                // Gets the size of the kernel ring buffer
-                log_size = klogctl(SYSLOG_ACTION_SIZE_BUFFER, NULL, 0);
-                if (log_size < 0) {
-                        telem_log(LOG_ERR, "Cannot read size of kernel ring buffer: %s\n", strerror(errno));
-                        return 1;
-                }
-
-                buflen = (size_t)log_size;
-
-                if (buflen > MAX_BUF) {
-                        buflen = MAX_BUF;
-                }
-
-                // Gets the contents of the kernel ring buffer
-                bufp = (char *)calloc(buflen, sizeof(char));
-
+                int bytes_read;
+ 
                 malloc_trim(0);
-                bytes = klogctl(SYSLOG_ACTION_READ, bufp, (int)buflen);
-                if (bytes < 0) {
+                memset(bufp, 0, buflen);
+                bytes_read = klogctl(SYSLOG_ACTION_READ, bufp, (int)buflen);
+                if (bytes_read < 0) {
                         telem_log(LOG_ERR, "Cannot read contents of kernel ring buffer: %s\n", strerror(errno));
                         return 1;
                 }
 
-                // Splits the buffer into separate lines with /0 terminating
-                split_buf_by_line(bufp, (size_t)bytes);
-
-                free(bufp);
+                klog_process_buffer(bufp, (size_t)bytes_read);
         }
 
+        // Not reached
+        free(bufp);
         return 0;
 }
 

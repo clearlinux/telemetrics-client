@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright © 2015-2019 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -15,11 +15,10 @@
  */
 
 #define _GNU_SOURCE
-
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/klog.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -27,20 +26,54 @@
 #include "log.h"
 #include "oops_parser.h"
 #include "klog_scanner.h"
+#include "telemetry.h"
+#include "nica/nc-string.h"
 
-#define MAX_OOPS_MSG_LENGTH 1024
-#define FILE_PATH KERNELOOPSDIR "/kerneloopsXXXXXX"
+static bool oops_processed = false;
 
-static int fd;
-char filename[] = FILE_PATH;
-int last_line_length;
+static uint32_t version = 1;
 
-bool oops_written = false;
+static bool send_data(char *backtrace, char *class, uint32_t severity)
+{
+        struct telem_ref *handle = NULL;
+        int ret;
+
+        if ((ret = tm_create_record(&handle, severity, class, version)) < 0) {
+                telem_log(LOG_ERR, "Failed to create record: %s",
+                          strerror(-ret));
+                return false;
+        }
+
+        if ((ret = tm_set_payload(handle, backtrace)) < 0) {
+                telem_log(LOG_ERR, "Failed to set payload: %s", strerror(-ret));
+                tm_free_record(handle);
+                return false;
+        }
+
+        if ((ret = tm_send_record(handle)) < 0) {
+                telem_log(LOG_ERR, "Failed to send record: %s", strerror(-ret));
+                tm_free_record(handle);
+                return false;
+        }
+
+        tm_free_record(handle);
+
+        return true;
+}
+
+int klog_process_buffer(char *bufp, int bytes)
+{
+        // Splits the buffer into separate lines with /0 terminating
+        split_buf_by_line(bufp, (size_t)bytes);
+        return 0;
+}
+
 void split_buf_by_line(char *bufp, int bytes)
 {
         char *start;
         char *eol;
         size_t linelength = 0;
+        oops_processed = false;
 
         while (bytes > 0) {
                 eol = memchr(bufp, '\n', (size_t)bytes);
@@ -57,87 +90,80 @@ void split_buf_by_line(char *bufp, int bytes)
                 if (bytes >= 0) {
                         start[linelength] = '\0';
                         parse_single_line(start, linelength);
+                        if (oops_processed == true) {
+                        #ifdef DEBUG
+                            printf("[%s] oops_processed detected !\n", __func__);
+                        #endif
+                            break;
+                        }
                         linelength = 0;
                 }
         }
 }
 
-int allocate_filespace()
+void klog_process_oops_msgs(struct oops_log_msg *msg)
 {
-        int allocate_disk = 0;
-        strcpy(filename, FILE_PATH);
-
-        fd = mkstemp(filename);
-        if (fchmod(fd, 0644) == -1) {
-                telem_log(LOG_ERR, "Error while changing permissions for file %s: %s\n",
-                          filename, strerror(errno));
-        }
-
-        if (fd == -1) {
-                telem_log(LOG_ERR, "fd error: %s\n", strerror(errno));
-                return -1;
-        }
-
-        // Allocates disk space to write kernel oops to
-        allocate_disk = fallocate(fd, 0, 0, MAX_OOPS_MSG_LENGTH);
-        if (allocate_disk != 0) {
-                telem_log(LOG_ERR, "Error allocating disk space: %s\n", strerror(errno));
-                return -1;
-        }
-        return 0;
-}
-
-void write_oops_to_file(struct oops_log_msg *msg)
-{
-        ssize_t writer;
-        size_t linelength;
+        size_t linelength, size;
         char *line;
+        char *contents = NULL;
+        nc_string *payload;
 
+        // pass 1: calculate buffer size
+        size = 0;
+        for (int i = 0; i < msg->length; i++) {
+                size += strlen(msg->lines[i]) + 1;
+        }
+
+        contents = malloc(size);
+        if (!contents) {
+                telem_log(LOG_ERR, "Call to malloc failed");
+                oops_processed = true;
+                return;
+        }
+
+        // pass 2: copy strings into the buffer
+        size_t done = 0;
+        char *bp = contents;
         for (int i = 0; i < msg->length; i++) {
                 //Add the newline character to the end of each line
                 line = msg->lines[i];
                 linelength = strlen(line);
-                line[linelength] = '\n';
-                linelength++;
+                strncpy(bp, line, linelength);
+                bp[linelength] = '\n';
+                done += linelength + 1;
+                bp = contents + done;
+        }
 
-                // Write each line of oops to file
-                writer = write(fd, line, linelength);
-                if (writer == -1) {
-                        telem_log(LOG_ERR, "Error writing buffer to file: %s\n", strerror(errno));
-                        exit(EXIT_FAILURE);
+        struct oops_log_msg oops_msg;
+        if (handle_entire_oops(contents, (long)size, &oops_msg)) {
+            #ifdef DEBUG
+                printf("Raw message:\n");
+                for (int i = 0; i < oops_msg.length; i++) {
+                        printf("%s\n", oops_msg.lines[i]);
                 }
+            #endif
+                payload = parse_payload(&oops_msg);
+            #ifdef DEBUG
+                printf("Payload Parsed :%s\n", payload->str);
+            #endif
+                oops_msg_cleanup(&oops_msg);
+                send_data(payload->str, (char *)oops_msg.pattern->classification, (uint32_t)oops_msg.pattern->severity);
+                nc_string_free(payload);
+        } else {
+                /* File does no contain an oops! */
+                telem_log(LOG_ERR, "Did not find an oops in the oops directory\n");
         }
 
-        telem_log(LOG_INFO, "Oops written to file\n");
-        oops_written = true;
-        close(fd);
-
-        // Allocate more space to prepare for another oops
-        if (allocate_filespace() < 0) {
-                telem_log(LOG_ERR, "%s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
+        free(contents);
+        oops_processed = true;
 }
 
-bool get_oops_written(void)
+void signal_handler_success(int signum)
 {
-        return oops_written;
+        exit(EXIT_SUCCESS);
 }
 
-char *get_file_name(void)
-{
-        return filename;
-}
-
-__attribute__((destructor))
-void clean_up(void)
-{
-        // Unlink empty file and close any open file
-        unlink(filename);
-        close(fd);
-}
-
-void signal_handler(int signum)
+void signal_handler_fail(int signum)
 {
         exit(EXIT_FAILURE);
 }

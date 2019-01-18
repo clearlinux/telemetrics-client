@@ -136,6 +136,7 @@ EXTRA_DIST += \
         @CHECK_CFLAGS@
 %C%_check_probes_LDADD = \
         @CHECK_LIBS@ \
+        $(top_builddir)/src/libtelemetry.la \
         $(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD

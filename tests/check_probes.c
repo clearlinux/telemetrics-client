@@ -40,27 +40,6 @@ void callback_func(struct oops_log_msg *msg)
         pl = parse_payload(msg);
 }
 
-void setup(char *oopsfile)
-{
-        char *buf = NULL;
-        int buflen = 0;
-
-        oops_parser_cleanup();
-
-        buf = readfile(oopsfile);
-        buflen = (int)getbuflen();
-
-        oops_parser_init(write_oops_to_file);
-
-        // Allocate space to write the oops file to
-        if (allocate_filespace() < 0) {
-                telem_log(LOG_ERR, "%s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
-
-        split_buf_by_line(buf, buflen);
-}
-
 void setup_payload(char *oopsfile)
 {
         char *buf = NULL;

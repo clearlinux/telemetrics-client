@@ -24,7 +24,6 @@ AM_CPPFLAGS = \
 	-DABSTOPSRCDIR=\"$(abs_top_srcdir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	-DLOCALSTATEDIR=\"$(localstatedir)\" \
-	-DKERNELOOPSDIR=\"$(localstatedir)/cache/telemetry/oops\" \
 	-DPSTOREDIR=\"$(localstatedir)/cache/telemetry/pstore\" \
 	-DTESTOOPSDIR=\"$(top_srcdir)/tests/oops_test_files\"
 

@@ -16,7 +16,6 @@ EXTRA_DIST += \
 	%D%/hprobe.timer \
 	%D%/bert-probe.service.in \
 	%D%/journal-probe.service.in \
-	%D%/oops-probe.service.in \
 	%D%/python-probe.service.in \
 	%D%/pstore-probe.service.in \
 	%D%/klogscanner.service.in \
@@ -54,7 +53,6 @@ systemdunit_DATA = \
 	%D%/hprobe.timer \
 	%D%/bert-probe.service \
 	%D%/journal-probe.service \
-	%D%/oops-probe.service \
 	%D%/python-probe.service \
 	%D%/pstore-probe.service \
 	%D%/klogscanner.service \
@@ -72,9 +70,6 @@ systemdunit_DATA = \
 	$(pathfix) < $< > $@
 
 %D%/journal-probe.service: %D%/journal-probe.service.in
-	$(pathfix) < $< > $@
-
-%D%/oops-probe.service: %D%/oops-probe.service.in
 	$(pathfix) < $< > $@
 
 %D%/pstore-probe.service: %D%/pstore-probe.service.in
@@ -125,7 +120,6 @@ clean-local:
 		%D%/libtelemetry.pc \
 		%D%/40-crash-probe.conf \
 		%D%/journal-probe.service \
-		%D%/oops-probe.service \
 		%D%/pstore-probe.service \
 		%D%/klogscanner.service \
 		%D%/pstore-clean.service \

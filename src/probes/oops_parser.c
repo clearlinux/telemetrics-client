@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright 2015-2019 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -152,9 +152,9 @@ struct oops_pattern oops_patterns_arr[] = {
         },
 };
 
-int oops_patterns_cnt = sizeof(oops_patterns_arr) / sizeof(struct oops_pattern);
+static int oops_patterns_cnt = sizeof(oops_patterns_arr) / sizeof(struct oops_pattern);
 
-char *skip_log_level(char *line)
+static char *skip_log_level(char *line)
 {
         char *start = line;
 
@@ -169,7 +169,7 @@ char *skip_log_level(char *line)
         return start;
 }
 
-char *skip_timestamp(char *line)
+static char *skip_timestamp(char *line)
 {
         char *start = line;
 
@@ -184,7 +184,7 @@ char *skip_timestamp(char *line)
         return start;
 }
 
-char *skip_space(char *line)
+static char *skip_space(char *line)
 {
         char *start = line;
 
@@ -194,7 +194,7 @@ char *skip_space(char *line)
         return start;
 }
 
-char *skip_spaces(char *line)
+static char *skip_spaces(char *line)
 {
         char *start = line;
 
@@ -204,7 +204,7 @@ char *skip_spaces(char *line)
         return start;
 }
 
-bool starts_with(const char *line, const char *line_end, const char *substr)
+static bool starts_with(const char *line, const char *line_end, const char *substr)
 {
         size_t substrlen = strlen(substr);
 
@@ -214,7 +214,7 @@ bool starts_with(const char *line, const char *line_end, const char *substr)
         return false;
 }
 
-bool str_starts_with_casei(const char *line, const char *substr)
+static bool str_starts_with_casei(const char *line, const char *substr)
 {
         size_t len = strlen(substr);
 
@@ -224,7 +224,7 @@ bool str_starts_with_casei(const char *line, const char *substr)
         return false;
 }
 
-bool pattern_matches(char *line, char *line_end, struct oops_pattern *pattern)
+static bool pattern_matches(char *line, char *line_end, struct oops_pattern *pattern)
 {
         if (pattern->is_regex) {
                 return (regexec(&(pattern->regex), line, 0, NULL, 0) == 0);
@@ -233,7 +233,7 @@ bool pattern_matches(char *line, char *line_end, struct oops_pattern *pattern)
         }
 }
 
-void init_pattern_regex(void)
+static void init_pattern_regex(void)
 {
         for (int i = 0; i < oops_patterns_cnt; i++) {
                 struct oops_pattern *pattern = &oops_patterns_arr[i];
@@ -244,7 +244,7 @@ void init_pattern_regex(void)
         }
 }
 
-void free_pattern_regex(void)
+static void free_pattern_regex(void)
 {
         for (int i = 0; i < oops_patterns_cnt; i++) {
                 struct oops_pattern *pattern = &oops_patterns_arr[i];
@@ -261,7 +261,6 @@ bool handle_entire_oops(char *buf, long size, struct oops_log_msg *msg)
         int i;
 
         msg->length = 0;
-        init_pattern_regex();
 
         line_end = memchr(buf, '\n', (size_t)size);
         if (line_end == NULL) {
@@ -318,7 +317,6 @@ void oops_msg_cleanup(struct oops_log_msg *msg)
                 free(msg->lines[i]);
         }
         msg->length = 0;
-        free_pattern_regex();
 }
 
 static struct oops_log_msg oops_msg;
@@ -333,7 +331,7 @@ void oops_parser_init(oops_handler_t handler)
         init_pattern_regex();
 }
 
-void handle_msg_end(void)
+static void handle_msg_end(void)
 {
         for (int i = 0; i < oops_msg.length; i++) {
                 free(oops_msg.lines[i]);
@@ -426,7 +424,6 @@ void parse_single_line(char *line, size_t size)
                         }
                 }
         }
-
 }
 
 struct stack_frame {
@@ -437,7 +434,7 @@ struct stack_frame {
         struct stack_frame *next;
 };
 
-void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, char *start)
+static void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, char *start)
 {
         /*
          * Format is:
@@ -536,7 +533,7 @@ void stack_frame_append(struct stack_frame **head, struct stack_frame **tail, ch
         frame->module = "kernel";
 }
 
-void stack_frame_free(struct stack_frame **head)
+static void stack_frame_free(struct stack_frame **head)
 {
         struct stack_frame *frame;
 
@@ -553,7 +550,7 @@ void stack_frame_free(struct stack_frame **head)
  * CPU: 2 PID: 0 Comm: swapper/2 Not tainted  3.10.4-100.fc18.x86_64 #1
  * CPU: 3 PID: 0 Comm: swapper/3 Not tainted 4.0.5-300.fc22.x86_64 #1
  */
-void parse_kernel_cpu_line(char *line, char **kernel_version, char **tainted)
+static void parse_kernel_cpu_line(char *line, char **kernel_version, char **tainted)
 {
         char *end = NULL;
 
@@ -626,7 +623,7 @@ static struct reg_s *reg_head = NULL;
  *
  */
 
-void parse_registers(char *line)
+static void parse_registers(char *line)
 {
         uint64_t value;
         struct reg_s *reg_entry = NULL;
@@ -739,7 +736,7 @@ void parse_registers(char *line)
 
 }
 
-void append_registers_to_bt(nc_string **backtrace)
+static void append_registers_to_bt(nc_string **backtrace)
 {
         struct reg_s *reg_entry = reg_head;
 
@@ -762,7 +759,7 @@ void append_registers_to_bt(nc_string **backtrace)
         }
 }
 
-nc_string *parse_backtrace(struct oops_log_msg *msg)
+static nc_string *parse_backtrace(struct oops_log_msg *msg)
 {
         struct stack_frame *head = NULL, *tail = NULL, *elem = NULL;
         //int in_stack_dump = 0;
