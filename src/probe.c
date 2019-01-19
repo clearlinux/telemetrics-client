@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
         int spool_process_time = spool_process_time_config();
-        time_t last_daemon_start_time = time(NULL);
+        time_t last_record_received = time(NULL);
 
         ret = update_machine_id();
         if (ret == -1) {
@@ -309,13 +309,14 @@ int main(int argc, char **argv)
                                         }
                                         assert(current_client);
                                         handle_client(&daemon, i, current_client);
+                                        last_record_received = time(NULL);
                                 }
                         }
                 } else {
                         time_t now = time(NULL);
                         /* time to recycle the daemon has elapsed*/
                         if (daemon_recycling_enabled &&
-                            difftime(now, last_daemon_start_time) >= TM_DAEMON_EXIT_TIME) {
+                            difftime(now, last_record_received) >= TM_DAEMON_EXIT_TIME) {
                                 /* Exit */
                                 telem_log(LOG_INFO, "Daemon exiting for recycling\n");
                                 goto clean_exit;

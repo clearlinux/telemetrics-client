@@ -70,7 +70,7 @@ OPTIONS
 
 -  ``spool_process_time=<seconds>``
 
-   Time in seconds for processing spool. Valid range: 120..3600. Values
+   Time in seconds for processing spool. Valid range: 120..300. Values
    outside this range are clamped.
 
 -  ``rate_limit_enabled=<true|false>``
