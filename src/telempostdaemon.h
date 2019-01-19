@@ -20,6 +20,7 @@
 #define TM_RATE_LIMIT_SLOTS (1 /*h*/ * 60 /*m*/)
 #define TM_RECORD_COUNTER (1)
 #define MAX_RETRY_ATTEMPTS 8
+#define NETWORK_BYPASS_DURATION TM_DAEMON_EXIT_TIME
 
 #include <poll.h>
 #include <stdbool.h>

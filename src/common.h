@@ -86,9 +86,12 @@ static const uint32_t RECORD_FORMAT_VERSION = 4;
 /* Maximum size for a sub category 40 bytes */
 #define MAX_SUBCAT_LENGTH 40
 
+/* Exit daemon after idle for this duration in seconds */
+#define TM_DAEMON_EXIT_TIME  (5 * 60)
+
 /* SPOOL DEFINES */
-/* Spooling should run every TM_SPOOL_RUN_MAX atleast */
-#define TM_SPOOL_RUN_MAX (60 /*min*/ * 60 /*sec*/)
+/* Spooling should run at least every TM_SPOOL_RUN_MAX */
+#define TM_SPOOL_RUN_MAX TM_DAEMON_EXIT_TIME
 
 /* Spooling should not run more often than TM_SPOOL_RUN_MIN */
 #define TM_SPOOL_RUN_MIN (2 /*min*/ * 60 /*sec*/)
@@ -98,9 +101,6 @@ static const uint32_t RECORD_FORMAT_VERSION = 4;
 
 /* Maximum records that can be processed in a single spool run loop*/
 #define TM_SPOOL_MAX_PROCESS_RECORDS 60
-
-/* Time to check to exit from  the daemon */
-#define TM_DAEMON_EXIT_TIME  (2 /*h*/ * 60 /*m*/ * 60 /*sec*/)
 
 /* Very simple structure. Array of header strings and a payload. Calling
  * program is reponsible for passing in the payload as a simple string.

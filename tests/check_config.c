@@ -40,7 +40,7 @@ START_TEST(check_read_valid_config)
         ck_assert_str_eq(config.strValues[CONF_SPOOL_DIR], "/tmp/spool");
         ck_assert_int_eq(config.intValues[CONF_RECORD_EXPIRY], 1200);
         ck_assert_int_eq(config.intValues[CONF_SPOOL_MAX_SIZE], 1024);
-        ck_assert_int_eq(config.intValues[CONF_SPOOL_PROCESS_TIME], 900);
+        ck_assert_int_eq(config.intValues[CONF_SPOOL_PROCESS_TIME], 180);
         ck_assert_int_eq(config.intValues[CONF_RECORD_BURST_LIMIT], 100);
         ck_assert_int_eq(config.intValues[CONF_RECORD_WINDOW_LENGTH], 15);
         ck_assert_int_eq(config.intValues[CONF_BYTE_BURST_LIMIT], 1000);
@@ -94,7 +94,7 @@ START_TEST(check_config_initialised)
         ck_assert_str_eq(spool_dir_config(), "/tmp/spool");
         ck_assert_int_eq(record_expiry_config(), 1200);
         ck_assert_int_eq(spool_max_size_config(), 1024);
-        ck_assert_int_eq(spool_process_time_config(), 900);
+        ck_assert_int_eq(spool_process_time_config(), 180);
         ck_assert_int_eq(record_burst_limit_config(), 100);
         ck_assert_int_eq(record_window_length_config(), 15);
         ck_assert_int_eq(byte_burst_limit_config(), 1000);

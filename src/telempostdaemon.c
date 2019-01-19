@@ -37,7 +37,7 @@
 /* spool window check */
 static bool inside_direct_spool_window(TelemPostDaemon *daemon, time_t current_time)
 {
-        return (current_time < daemon->bypass_http_post_ts + 1800) ? true : false;
+        return (current_time < daemon->bypass_http_post_ts + NETWORK_BYPASS_DURATION) ? true : false;
 }
 
 /* set http bypass */
@@ -620,7 +620,7 @@ void run_daemon(TelemPostDaemon *daemon)
         int spool_process_time = spool_process_time_config();
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
         time_t last_spool_run_time = time(NULL);
-        time_t last_daemon_start_time = time(NULL);
+        time_t last_record_received = time(NULL);
 
         assert(daemon);
         assert(daemon->pollfds);
@@ -696,6 +696,7 @@ void run_daemon(TelemPostDaemon *daemon)
                                                                 unlink(record_name);
                                                         }
                                                         free(record_name);
+                                                        last_record_received = time(NULL);
                                                 }
                                         }
 
@@ -706,7 +707,7 @@ void run_daemon(TelemPostDaemon *daemon)
                         time_t now = time(NULL);
                         /* time to recycle the daemon has elapsed*/
                         if (daemon_recycling_enabled &&
-                            difftime(now, last_daemon_start_time) >= TM_DAEMON_EXIT_TIME) {
+                            difftime(now, last_record_received) >= TM_DAEMON_EXIT_TIME) {
                                 /* Exit */
                                 telem_log(LOG_INFO, "Telemetry post daemon exiting for recycling\n");
                                 break;
