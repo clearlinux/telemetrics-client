@@ -221,71 +221,6 @@ static void drop_privs(void)
         assert(getegid() == pw->pw_gid);
 }
 
-static void handle_inotify_event(const struct inotify_event *event)
-{
-        if (!event) {
-                telem_perror("Null event received");
-                return;
-        }
-
-        if (event->len == 0) {
-                telem_perror("inotify event received with no file.");
-                return;
-        }
-
-        if (event->mask & IN_MOVED_TO) {
-                if (event->mask & IN_ISDIR) {
-                        return;
-                }
-
-                #ifdef DEBUG
-                telem_log(LOG_DEBUG, "New file moved to the monitored location: %s\n", event->name);
-                #endif
-                deliver_payload(event->name);
-        }
-}
-
-static void wait_for_payload(void)
-{
-        int inotify_fd;
-        char buf[4096];
-        char *ptr = NULL;
-        ssize_t len;
-        const struct inotify_event *event;
-
-        inotify_fd = inotify_init();
-        if (inotify_fd == -1) {
-                telem_log(LOG_ERR, "Failed to create inotify instance: %s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
-
-        if (inotify_add_watch(inotify_fd, PYTHON_TELEMETRY_DIR, IN_MOVED_TO) == -1) {
-                telem_perror("Error adding watch to the inotify instance");
-        }
-
-        while (true) {
-                len = read(inotify_fd, buf, sizeof buf);
-                if (len <= 0) {
-                        telem_perror("error reading event");
-                        continue;
-                }
-
-                if (len < sizeof(struct inotify_event)) {
-                        telem_perror("Incomplete event received");
-                        continue;
-                }
-
-                /* Loop over all events in the buffer */
-                for (ptr = buf; ptr < buf + len;
-                     ptr += sizeof(struct inotify_event) + event->len) {
-
-                        event = (const struct inotify_event *)ptr;
-                        /* handle the event */
-                        handle_inotify_event(event);
-                }
-        }
-}
-
 static void print_usage(char *prog)
 {
         printf("%s: Usage\n", prog);
@@ -354,8 +289,5 @@ int main(int argc, char **argv)
         }
 
         closedir(dir);
-
-        /* Wait for any new python exception files to appear */
-        wait_for_payload();
         exit(EXIT_SUCCESS);
 }
