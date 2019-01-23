@@ -1,5 +1,5 @@
 d @localstatedir@/lib/telemetry 0755 telemetry telemetry -
-d @localstatedir@/lib/telemetry/python 0777 telemetry telemetry -
+d @localstatedir@/lib/telemetry/python 01777 telemetry telemetry -
 d @localstatedir@/spool/telemetry 0750 telemetry telemetry -
 d @localstatedir@/log/telemetry 0750 telemetry telemetry -
 d @localstatedir@/log/telemetry/records 0750 telemetry telemetry -

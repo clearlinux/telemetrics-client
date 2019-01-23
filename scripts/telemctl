@@ -6,7 +6,7 @@ declare -a SPECIAL_UNITS=(
   telempostd.path
   klogscanner.service
   journal-probe.service
-  python-probe.service
+  python-probe.path
 )
 
 declare -a SERVICES=(
