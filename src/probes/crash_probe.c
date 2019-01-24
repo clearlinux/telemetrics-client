@@ -69,7 +69,6 @@ static char error_class[30] = "org.clearlinux/crash/error";
 static char unknown_class[30] = "org.clearlinux/crash/unknown";
 
 static char temp_core[] = "/tmp/corefile-XXXXXX";
-static bool keep_core = false;
 
 static const Dwfl_Callbacks cb =
 {
@@ -609,8 +608,6 @@ int main(int argc, char **argv)
 
                 backtrace = nc_string_dup("Crash from Clear package build\n");
 
-                keep_core = true;
-
                 if (!send_data(&backtrace, unknown_severity, clr_build_class)) {
                         goto fail;
                 }
@@ -621,8 +618,6 @@ int main(int argc, char **argv)
                 telem_log(LOG_NOTICE, "Ignoring core (third-party binary)\n");
 
                 backtrace = nc_string_dup("Crash from third party\n");
-
-                keep_core = true;
 
                 if (!send_data(&backtrace, unknown_severity, unknown_class)) {
                         goto fail;
@@ -676,11 +671,6 @@ success:
 
         ret = EXIT_SUCCESS;
 fail:
-        // Do not remove the core file if any errors occur
-        if (ret == EXIT_FAILURE) {
-                keep_core = true;
-        }
-
         free(core_file);
         free(proc_name);
         free(proc_path);
@@ -710,8 +700,8 @@ fail:
         }
 
         // Remove the core file by default, except when the --core-file option
-        // is specified, or when keep_core is overridden to true.
-        if (!core_file && !keep_core) {
+        // is specified.
+        if (!core_file) {
                 unlink(temp_core);
         }
 
