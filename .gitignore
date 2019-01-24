@@ -56,7 +56,11 @@ src/gcc.out
 tests/demo
 tests/check_config
 tests/check_daemon
+tests/check_journal
 tests/check_libtelemetry
+tests/check_ncb64
+tests/check_postd
+tests/check_probd
 tests/check_probes
 src/data/*.path
 src/data/*.service
