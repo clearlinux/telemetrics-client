@@ -323,3 +323,8 @@ $ sudo telemctl journal --record_id a19a0d41ba16788881e274b19b8a1be4 --include_r
 $ org.clearlinux/hello/world     Mon 2018-04-02 17:48:01 UTC a19a0d41ba16788881e274b19b8a1be4 5de9de8d5f3c6a7d445d75ba01cc3322 60c014cd-4693-40f1-b334-548cd932949b
 $ hello
 ```
+
+## Security Disclosures
+
+To report a security issue or receive security advisories please follow procedures
+in this [link](https://01.org/security).
