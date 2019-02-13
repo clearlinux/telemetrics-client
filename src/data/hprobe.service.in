@@ -5,7 +5,7 @@ After=telemprobd.socket
 ConditionPathExists=!/etc/telemetrics/opt-out
 
 [Service]
-ExecStart=@bindir@/hprobe -H
+ExecStart=@bindir@/hprobe -Hlu
 User=telemetry
 
 [Install]
