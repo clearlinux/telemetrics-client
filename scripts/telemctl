@@ -5,7 +5,7 @@ declare -a SPECIAL_UNITS=(
   telemprobd.socket
   telempostd.path
   klogscanner.service
-  journal-probe.service
+  journal-probe-tail.service
   python-probe.path
 )
 
@@ -14,6 +14,7 @@ declare -a SERVICES=(
   pstore-probe.service
   telemprobd.service
   telempostd.service
+  journal-probe.service
 )
 
 SCRIPT="$0"

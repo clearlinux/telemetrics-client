@@ -265,7 +265,7 @@ static bool add_filters(sd_journal *journal)
         return true;
 }
 
-static bool process_journal(void)
+static bool process_journal(bool process_existing)
 {
         int r;
 
@@ -279,8 +279,14 @@ static bool process_journal(void)
                 return false;
         }
 
-        if (!process_existing_entries(journal)) {
-                return false;
+        if (process_existing) {
+                if (!process_existing_entries(journal)) {
+                        return false;
+                }
+        } else {
+                if ((sd_journal_seek_tail(journal) < 0) || (sd_journal_previous(journal) < 0)) {
+                        return false;
+                }
         }
 
         struct pollfd pfd;
@@ -316,6 +322,7 @@ static const struct option prog_opts[] = {
         { "help", no_argument, 0, 'h' },
         { "config-file", required_argument, 0, 'f' },
         { "version", no_argument, 0, 'V' },
+        { "tail", no_argument, 0, 't' },
         { 0, 0, 0, 0 }
 };
 
@@ -329,6 +336,7 @@ static void print_help(void)
         printf("\n");
         printf("Application Options:\n");
         printf("  -f, --config_file     Specify a configuration file other than default\n");
+        printf("  -t, --tail            Don't process entries already in the journal\n");
         printf("  -V, --version         Print the program version\n");
         printf("\n");
 }
@@ -337,8 +345,9 @@ int main(int argc, char **argv)
 {
         int ret = EXIT_FAILURE;
         int opt;
+        bool process_existing = true;
 
-        while ((opt = getopt_long(argc, argv, "hf:V", prog_opts, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hf:Vt", prog_opts, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 print_help();
@@ -353,10 +362,13 @@ int main(int argc, char **argv)
                                     exit(EXIT_FAILURE);
                                 }
                                 break;
+                        case 't':
+                                process_existing = false;
+                                break;
                 }
         }
 
-        if (!process_journal()) {
+        if (!process_journal(process_existing)) {
                 goto fail;
         }
 
