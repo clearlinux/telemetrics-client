@@ -1,0 +1,12 @@
+[Unit]
+Description=Telemetrics Systemd Journal Probe
+Requires=telemprobd.socket
+After=telemprobd.socket
+ConditionPathExists=!/etc/telemetrics/opt-out
+
+[Service]
+ExecStart=@bindir@/journalprobe -t
+User=telemetry
+
+[Install]
+WantedBy=multi-user.target
