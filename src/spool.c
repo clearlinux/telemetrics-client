@@ -216,8 +216,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 const char *header_name = get_header_name(i);
                 if (!fgets(line, LINE_MAX, fp)) {
                         telem_log(LOG_ERR, "Error while parsing record file\n");
-                        fclose(fp);
-                        return;
+                        goto read_error;
                 }
                 //Get rid of trailing newline
                 strtok(line, "\n");
@@ -242,8 +241,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
 
         if (!payload) {
                 telem_log(LOG_ERR, "Could not allocate memory for payload\n");
-                fclose(fp);
-                return;
+                goto read_error;
         }
         memset(payload, 0, (size_t)size);
 
