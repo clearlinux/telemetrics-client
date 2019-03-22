@@ -41,11 +41,16 @@ bool _fgets(char *s, int n, FILE *stream)
         return true;
 }
 
-void stage_record(char *filepath, char *headers[], char *body)
+void stage_record(char *filepath, char *headers[], char *body, char *cfg_file)
 {
         int tmpfd;
         FILE *tmpfile = NULL;
 
+#ifdef DEBUG
+        fprintf(stderr, "DEBUG: [%s] filepath:%s\n",__func__, filepath);
+        fprintf(stderr, "DEBUG: [%s] body:%s\n",__func__, body);
+        fprintf(stderr, "DEBUG: [%s] cfg:%s\n",__func__, cfg_file);
+#endif
         // Use default path if not provided
         if (filepath == NULL) {
                 telem_log(LOG_ERR, "filepath value must be provided, aborting\n");
@@ -73,6 +78,11 @@ void stage_record(char *filepath, char *headers[], char *body)
                 goto clean_exit;
         }
 
+        // write cfg info if exists
+        if (cfg_file != NULL) {
+                fprintf(tmpfile, "%s%s\n", CFG_PREFIX, cfg_file);
+        }
+
         // write headers
         for (int i = 0; i < NUM_HEADERS; i++) {
                 fprintf(tmpfile, "%s\n", headers[i]);
@@ -88,15 +98,20 @@ clean_exit:
         return;
 }
 
-bool read_record(char *fullpath, char *headers[], char **body)
+bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
 {
         int i, ret = 0;
         bool result = false;
         FILE *fp = NULL;
         long offset;
-        char line[LINE_MAX] = { 0 };
+#if (LINE_MAX > PATH_MAX)
+        char line[LINE_MAX+1] = { 0 };
+#else
+        char line[PATH_MAX+1] = { 0 };
+#endif
         struct stat buf;
         long size;
+        uint32_t cfg_prefix = 0;
 
         ret = stat(fullpath, &buf);
         if (ret == -1) {
@@ -111,9 +126,40 @@ bool read_record(char *fullpath, char *headers[], char **body)
                 return false;
         }
 
+        // First line may contain configuration file path
+        if (fread(&cfg_prefix, CFG_PREFIX_LENGTH, 1, fp) != 1) {
+                telem_log(LOG_ERR, "Error while parsing staged record configuration info.\n");
+                goto read_error;
+        }
+
+        if (cfg_prefix == CFG_PREFIX_32BIT) {
+                if (!_fgets(line, sizeof(line), fp)) {
+                        telem_log(LOG_ERR, "Error while parsing staged record [%x]\n", cfg_prefix);
+                        goto read_error;
+                }
+
+                size_t pathlen = strlen(line);
+                *cfg_file = malloc(pathlen + 1);
+                if (cfg_file == NULL) {
+                        telem_log(LOG_ERR, "Could not allocate memory for config file path\n");
+                        goto read_error;
+                }
+                strcpy (*cfg_file, line);
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: [%s] cfg_file specified: %s\n", __func__, *cfg_file);
+#endif
+        } else {
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: [%s] no user cfg file specified, cfg_prefix: %08x\n",
+                                __func__, cfg_prefix);
+#endif
+                *cfg_file = NULL;
+                rewind(fp);
+        }
+
         for (i = 0; i < NUM_HEADERS; i++) {
                 const char *header_name = get_header_name(i);
-                if (!_fgets(line, LINE_MAX, fp)) {
+                if (!_fgets(line, sizeof(line), fp)) {
                         telem_log(LOG_ERR, "Error while parsing staged record\n");
                         fclose(fp);
                         return false;

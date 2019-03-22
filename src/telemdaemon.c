@@ -259,11 +259,34 @@ void process_record(TelemDaemon *daemon, client *cl)
         char *msg;
         char *body;
         char *recordpath = NULL;
+        char *cfg_file = NULL;;
+        size_t cfg_info_size = 0;
+        uint8_t *buf;
 
-        header_size = *(uint32_t *)cl->buf;
-        message_size = cl->size - header_size;
+        buf = cl->buf;
+
+        /* Check for an optional CFG_PREFIX in the first 32 bits */
+        if (*(uint32_t *)buf == CFG_PREFIX_32BIT) {
+                char *cfg  = (char *)cl->buf;
+
+                cfg_file = cfg + CFG_PREFIX_LENGTH;
+                cfg_info_size = CFG_PREFIX_LENGTH + strlen(cfg_file) + 1;
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: [%s] cfg_file: %s\n", __func__, cfg_file);
+#endif
+        }
+
+        buf += cfg_info_size;
+        header_size = *(uint32_t *)buf;
+        message_size = cl->size - (cfg_info_size + header_size);
+#ifdef DEBUG
+        fprintf(stderr, "DEBUG: [%s] cl->size: %zu\n", __func__, cl->size);
+        fprintf(stderr, "DEBUG: [%s] header_size: %zu\n", __func__, header_size);
+        fprintf(stderr, "DEBUG: [%s] message_size: %zu\n", __func__, message_size);
+        fprintf(stderr, "DEBUG: [%s] cfg_info_size: %zu\n", __func__, cfg_info_size);
+#endif
         assert(message_size > 0);      //TODO:Check for min and max limits
-        msg = (char *)cl->buf + sizeof(uint32_t);
+        msg = (char *)buf + sizeof(uint32_t);
 
         /* Copying the headers as strtok modifies the orginal buffer */
         temp_headers = strndup(msg, header_size);
@@ -293,7 +316,7 @@ void process_record(TelemDaemon *daemon, client *cl)
                 exit(EXIT_FAILURE);
         }
 
-        stage_record(recordpath, headers, body);
+        stage_record(recordpath, headers, body, cfg_file);
         free(recordpath);
 end:
         free(temp_headers);

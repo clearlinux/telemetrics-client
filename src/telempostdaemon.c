@@ -210,7 +210,7 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
         return size * nmemb;
 }
 
-bool post_record_http(char *headers[], char *body)
+bool post_record_http(char *headers[], char *body, char *cfg)
 {
         CURL *curl;
         int res = 0;
@@ -220,6 +220,25 @@ bool post_record_http(char *headers[], char *body)
         long http_response = 0;
         const char *cert_file = get_cainfo_config();
         const char *tid_header = get_tidheader_config();
+        const char *saved_config_file = NULL;
+
+        if (cfg != NULL) {
+                saved_config_file = get_config_file();
+                if (set_config_file(cfg) != 0) {
+                       telem_log(LOG_ERR, "set-config_file(): Failed to set %s\n", cfg);
+                       // If we fail to load the specified config file, do not send the
+                       // record out. We don't want to send the record out with different
+                       // settings than explicitly requested.
+                       // However, report success so the record gets deleted.
+                       res = 0;
+                       goto Done;
+                }
+                reload_config();
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: override server_addr:%s\n", __func__,
+                        server_addr_config());
+#endif
+        }
 
         // Initialize the libcurl global environment once per POST. This lets us
         // clean up the environment after each POST so that when the daemon is
@@ -297,6 +316,20 @@ bool post_record_http(char *headers[], char *body)
         curl_easy_cleanup(curl);
 
         curl_global_cleanup();
+
+Done:
+        if (saved_config_file != NULL) {
+                if (set_config_file(saved_config_file) != 0) {
+                        telem_log(LOG_ERR, "set-config_file(): Failed to set %s",
+                                  saved_config_file);
+                        res = 1;
+                }
+                reload_config();
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: restored server_addr:%s\n",
+                        __func__, server_addr_config());
+#endif
+        }
 
         return res ? false : true;
 }
@@ -405,7 +438,7 @@ static void apply_retention_policies(TelemPostDaemon *daemon, char *body)
 
 /* Deliver record to backend if rate limiting policies are met otherwise
  * spool record for future delivery */
-static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
+static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body, char* cfg_file)
 {
 
         bool ret = false;
@@ -427,7 +460,7 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body)
         /* Sends record if rate limiting is disabled, or all checks passed */
         if (!daemon->rate_limit_enabled || (record_check_passed && byte_check_passed)) {
                 /* Send the record as https post */
-                record_sent = post_record_ptr(headers, body);
+                record_sent = post_record_ptr(headers, body, cfg_file);
                 /**
                  * This is the only point where an error condition could be returned
                  * if the record was not sent
@@ -472,13 +505,14 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
         struct stat buf;
         time_t current_time = time(NULL);
         int64_t max_spool_size = 0;
+        char *cfg_file = NULL;
 
         for (k = 0; k < NUM_HEADERS; k++) {
                 headers[k] = NULL;
         }
 
         /** Load record **/
-        if ((ret = read_record(filename, headers, &body)) == false) {
+        if ((ret = read_record(filename, headers, &body, &cfg_file)) == false) {
                 telem_log(LOG_WARNING, "unable to read record\n");
                 ret = true; // Record corrupted? true will remove record
                 goto end_processing_file;
@@ -545,7 +579,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
         }
 
         /** Deliver or spool **/
-        ret = deliver_record(daemon, headers, body);
+        ret = deliver_record(daemon, headers, body, cfg_file);
 
 end_processing_file:
         /** Update spool size if record will be removed **/
@@ -559,6 +593,9 @@ end_processing_file:
                 free(headers[k]);
         }
 
+        if (cfg_file != NULL) {
+                free(cfg_file);
+        }
         return ret;
 }
 

@@ -65,6 +65,12 @@ typedef struct configuration {
 /* Sets the configuration file to be used later */
 int set_config_file(const char *filename);
 
+/* Gets the configuration currently in use */
+const char *get_config_file(void);
+
+/* Gets the configuration specified via command line or NULL */
+const char *get_cmd_line_config_file(void);
+
 /* Parses the ini format config file */
 bool read_config_from_file(char *filename, struct configuration *config);
 

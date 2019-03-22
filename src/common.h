@@ -102,6 +102,11 @@ static const uint32_t RECORD_FORMAT_VERSION = 4;
 /* Maximum records that can be processed in a single spool run loop*/
 #define TM_SPOOL_MAX_PROCESS_RECORDS 60
 
+/* Definitions for config file override */
+#define CFG_PREFIX        "CFG:"
+#define CFG_PREFIX_LENGTH 4
+#define CFG_PREFIX_32BIT  0x3a474643
+
 /* Very simple structure. Array of header strings and a payload. Calling
  * program is reponsible for passing in the payload as a simple string.
  */
@@ -113,5 +118,6 @@ struct telem_record {
 };
 
 const char *get_header_name(int ind);
+
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

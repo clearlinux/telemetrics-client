@@ -27,12 +27,12 @@
 
 TelemPostDaemon tdaemon;
 
-bool dummy_post(char *headers[], char *body)
+bool dummy_post(char *headers[], char *body, char *cfg_file)
 {
         return true;
 }
 
-bool (*post_record_ptr)(char *headers[], char *body) = dummy_post;
+bool (*post_record_ptr)(char *headers[], char *body, char *cfg_file) = dummy_post;
 
 void setup(void)
 {
