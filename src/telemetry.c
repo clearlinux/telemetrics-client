@@ -1252,6 +1252,8 @@ int tm_send_record(struct telem_ref *t_ref)
         int ret = 0;
         int k = 0;
         struct stat unused;
+        size_t cfg_file_name_size = 0;
+        const char *cfg_file_name = NULL;
 
         k = stat(TM_OPT_OUT_FILE, &unused);
         if (k == 0) {
@@ -1270,7 +1272,28 @@ int tm_send_record(struct telem_ref *t_ref)
         }
 
         total_size = t_ref->record->header_size + t_ref->record->payload_size;
+
+        /*
+         * The user may want to use a custom (cmd line specified) config file.
+         * If that is the case, we need to include the absolute path in the data packet.
+         * We optionally add the string CFG:<absolute path> as the first string
+         * in the data. If the receiving end sees this in the data, it should
+         * use the config file specified to override any default telemetrics.conf
+         * files.
+         */
+
+        cfg_file_name = get_cmd_line_config_file();
+        if (cfg_file_name != NULL) {
+                cfg_file_name_size = strlen(cfg_file_name) + 1;
+                total_size += (cfg_file_name_size + CFG_PREFIX_LENGTH);
+        }
+
 #ifdef DEBUG
+        if (cfg_file_name != NULL) {
+                fprintf(stderr, "DEBUG: CFG field size : %zu\n", cfg_file_name_size + CFG_PREFIX_LENGTH);
+                fprintf(stderr, "DEBUG: CFG file name : %s\n", cfg_file_name);
+        }
+
         fprintf(stderr, "DEBUG: Header size : %zu\n", t_ref->record->header_size);
         fprintf(stderr, "DEBUG: Payload size : %zu\n", t_ref->record->payload_size);
 
@@ -1279,7 +1302,10 @@ int tm_send_record(struct telem_ref *t_ref)
 
         /*
          * Allocating buffer for what we intend to send.  Buffer layout is:
-         * <uint32_t total_size><uint32_t header_size><headers + Payload>
+         * <uint32_t total_size>     : so recv knows how much to read
+         * <custom cfg file field>   : optional
+         * <uint32_t header_size>
+         * <headers + Payload>
          * <null-byte>
          * The additional char at the end ensures null termination
          */
@@ -1298,6 +1324,13 @@ int tm_send_record(struct telem_ref *t_ref)
 
         memcpy(data, &total_size, sizeof(uint32_t));
         offset += sizeof(uint32_t);
+
+        if (cfg_file_name != NULL) {
+                memcpy(data + offset, CFG_PREFIX, CFG_PREFIX_LENGTH);
+                offset += CFG_PREFIX_LENGTH;
+                memcpy(data + offset, cfg_file_name, cfg_file_name_size);
+                offset += cfg_file_name_size;
+        }
 
         memcpy(data + offset, &t_ref->record->header_size, sizeof(uint32_t));
         offset += sizeof(uint32_t);

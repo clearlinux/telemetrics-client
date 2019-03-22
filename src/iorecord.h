@@ -24,7 +24,7 @@
  * @param body record message content
  *
  */
-void stage_record(char *path, char *headers[], char *body);
+void stage_record(char *path, char *headers[], char *body, char *cfg);
 
 /**
  * Reads a telemetry record
@@ -35,4 +35,4 @@ void stage_record(char *path, char *headers[], char *body);
  *
  * @return true if successful otherwise false
  */
-bool read_record(char *fullpath, char *headers[], char **body);
+bool read_record(char *fullpath, char *headers[], char **body, char **cfg);

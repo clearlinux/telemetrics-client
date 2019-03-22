@@ -73,6 +73,19 @@ static int validate_config_file(const char *f)
 
 }
 
+const char *get_config_file(void)
+{
+        return config_file;
+}
+
+const char *get_cmd_line_config_file(void)
+{
+        if (cmd_line_cfg == true) {
+                return config_file;
+        }
+        return NULL;
+}
+
 int set_config_file(const char *filename)
 {
         int ret;
@@ -160,11 +173,10 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                 }
         }
 
-        config->initialized = true;
         return true;
 }
 
-void initialize_config(void)
+static void initialize_config(void)
 {
         if (config.initialized) {
                 return;
@@ -195,6 +207,8 @@ void initialize_config(void)
 #endif
                 exit(EXIT_FAILURE);
         }
+
+        config.initialized = true;
 }
 
 void reload_config(void)

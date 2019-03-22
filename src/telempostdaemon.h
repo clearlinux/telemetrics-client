@@ -105,8 +105,10 @@ int staging_records_loop(TelemPostDaemon *daemon);
  *
  * @param headers a pointer to an array with keys and values
  * @param body a pointer to the payload
+ * @param cfg_file a pointer to a non-default configuration
+ *        file to be used.
  */
-bool post_record_http(char *headers[], char *body);
+bool post_record_http(char *headers[], char *body, char *cfg_file);
 
 /**
  * Pointer to function to isolate backend call during
@@ -115,7 +117,7 @@ bool post_record_http(char *headers[], char *body);
  * @param headers pointer to array of keys
  * @param body a pinter to payload
  * */
-extern bool (*post_record_ptr)(char *headers[], char *body);
+extern bool (*post_record_ptr)(char *headers[], char *body, char *cfg_file);
 
 /** Helper functions **/
 /* rate limit check */

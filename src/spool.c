@@ -202,9 +202,15 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
         FILE *fp = NULL;
         char *headers[NUM_HEADERS];
         char *payload = NULL;
-        int i, k;
-        char line[LINE_MAX] = { 0 };
+        int num_headers = 0, k;
+#if (LINE_MAX > PATH_MAX)
+        char line[LINE_MAX+1] = { 0 };
+#else
+        char line[PATH_MAX+1] = { 0 };
+#endif
         long offset;
+        char *cfg_file = NULL;
+        uint32_t cfg_prefix = 0;
 
         fp = fopen(record_path, "r");
         if (fp == NULL) {
@@ -212,15 +218,49 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 return;
         }
 
-        for (i = 0; i < NUM_HEADERS; i++) {
-                const char *header_name = get_header_name(i);
-                if (!fgets(line, LINE_MAX, fp)) {
+        // First line optionally contains configuration file path
+        if (fread(&cfg_prefix, CFG_PREFIX_LENGTH, 1, fp) != 1) {
+                telem_log(LOG_ERR, "Error while parsing spooled record configuration info.\n");
+                goto read_error;
+        }
+
+        if (cfg_prefix == CFG_PREFIX_32BIT) {
+                size_t pathlen;
+                char *nl;
+
+                if (!fgets(line, sizeof(line), fp)) {
+                        telem_log(LOG_ERR, "Error while parsing record file\n");
+                        goto read_error;
+                }
+
+                if ((nl = strchr(line, '\n')) != NULL) {
+                        *nl = '\0';
+                }
+
+                pathlen = strlen(line);
+                cfg_file = malloc(pathlen + 1);
+                if (cfg_file == NULL) {
+                        telem_log(LOG_ERR, "Could not allocate memory for config file path\n");
+                        goto read_error;
+                }
+                strcpy (cfg_file, line);
+#ifdef DEBUG
+                fprintf(stderr, "DEBUG: [%s] cfg_file: %s\n", __func__, cfg_file);
+#endif
+        } else {
+                cfg_file = NULL;
+                rewind(fp);
+        }
+
+        for (num_headers = 0; num_headers < NUM_HEADERS; num_headers++) {
+                const char *header_name = get_header_name(num_headers);
+                if (!fgets(line, sizeof(line), fp)) {
                         telem_log(LOG_ERR, "Error while parsing record file\n");
                         goto read_error;
                 }
                 //Get rid of trailing newline
                 strtok(line, "\n");
-                if (get_header(line, header_name, &headers[i])) {
+                if (get_header(line, header_name, &headers[num_headers])) {
                         continue;
                 } else {
                         telem_log(LOG_ERR, "transmit_spooled_record: Incorrect"
@@ -252,7 +292,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                 goto read_error;
         }
 
-        *post_succeeded = post_record_http(headers, payload);
+        *post_succeeded = post_record_http(headers, payload, cfg_file);
         if (*post_succeeded) {
                 unlink(record_path);
         }
@@ -265,8 +305,12 @@ read_error:
                 fclose(fp);
         }
 
-        for (k = 0; k < i; k++) {
+        for (k = 0; k < num_headers; k++) {
                 free(headers[k]);
+        }
+
+        if (cfg_file) {
+                free(cfg_file);
         }
 }
 
