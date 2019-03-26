@@ -5,13 +5,15 @@ pathfix = @sed \
 	-e 's|@localstatedir[@]|$(localstatedir)|g' \
 	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
 	-e 's|@SOCKETDIR[@]|$(SOCKETDIR)|g' \
-	-e 's|@systemctldir[@]|$(SYSTEMD_SYSTEMCTLDIR)|g'
+	-e 's|@systemctldir[@]|$(SYSTEMD_SYSTEMCTLDIR)|g' \
+	-e 's|@BACKEND_ADDR[@]|$(BACKEND_ADDR)|g'
 
 EXTRA_DIST += \
 	%D%/40-core-ulimit.conf \
 	%D%/40-crash-probe.conf.in \
 	%D%/example.conf \
 	%D%/example.1.conf \
+	%D%/example.2.conf \
 	%D%/hprobe.service.in \
 	%D%/hprobe.timer \
 	%D%/bert-probe.service.in \

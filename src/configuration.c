@@ -38,17 +38,46 @@ static NcHashmap *keyfile = NULL;
 static bool cmd_line_cfg = false;
 
 /* Conf strings, integers, and booleans expected in the conf file */
-const char *config_key_str[] = { NULL, "server", "socket_path", "spool_dir",
-                                 "rate_limit_strategy", "cainfo",
-                                 "tidheader", NULL };
+static const char *config_key_str[] = { "server",
+                                        "socket_path",
+                                        "spool_dir",
+                                        "rate_limit_strategy",
+                                        "cainfo",
+                                        "tidheader"};
 
-const char *config_key_int[] = { NULL, "record_expiry", "spool_max_size",
-                                 "spool_process_time", "record_window_length",
-                                 "byte_window_length", "record_burst_limit",
-                                 "byte_burst_limit", NULL };
+static const char *config_key_int[] = { "record_expiry",
+                                        "spool_max_size",
+                                        "spool_process_time",
+                                        "record_window_length",
+                                        "byte_window_length",
+                                        "record_burst_limit",
+                                        "byte_burst_limit" };
 
-const char *config_key_bool[] = { NULL, "rate_limit_enabled", "daemon_recycling_enabled",
-                                  "record_retention_enabled", "record_server_delivery_enabled", NULL };
+static const char *config_key_bool[] = { "rate_limit_enabled",
+                                         "daemon_recycling_enabled",
+                                         "record_retention_enabled",
+                                         "record_server_delivery_enabled" };
+
+static const char *config_str_default[] = { DEFAULT_SERVER_ADDR,
+                                            DEFAULT_SOCKET_PATH,
+                                            DEFAULT_SPOOL_DIR,
+                                            DEFAULT_RATE_LIMIT_STRATEGY,
+                                            DEFAULT_CAINFO,
+                                            DEFAULT_TIDHEADER };
+
+static const bool config_bool_default[] = { DEFAULT_RATE_LIMIT_ENABLED,
+                                            DEFAULT_DAEMON_RECYCLING_ENABLED,
+                                            DEFAULT_RECORD_RETENTION_ENABLED,
+                                            DEFAULT_RECORD_SERVER_DELIVERY_ENABLED };
+
+static const int config_int_default[] = { DEFAULT_RECORD_EXPIRY,
+                                          DEFAULT_SPOOL_MAX_SIZE,
+                                          DEFAULT_SPOOL_PROCESS_TIME,
+                                          DEFAULT_RECORD_WINDOW_LENGTH,
+                                          DEFAULT_BYTE_WINDOW_LENGTH,
+                                          DEFAULT_RECORD_BURST_LIMIT,
+                                          DEFAULT_BYTE_BURST_LIMIT };
+
 
 static struct configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
 
@@ -103,6 +132,24 @@ int set_config_file(const char *filename)
         return ret;
 }
 
+bool set_default_config_values(struct configuration *config)
+{
+        for (int i = 0; i < CONF_STR_MAX; i++) {
+                config->strValues[i] = strdup(config_str_default[i]);
+                        if (config->strValues[i] == NULL) {
+                                fprintf(stderr, "ERR: could not set config item %s: %s\n", config_key_str[i], strerror(errno));
+                                return false;
+                        }
+        }
+        for (int i = 0; i < CONF_INT_MAX; i++) {
+                config->intValues[i] = config_int_default[i];
+        }
+        for (int i = 0; i < CONF_BOOL_MAX; i++) {
+                config->boolValues[i] = config_bool_default[i];
+        }
+        return true;
+}
+
 bool read_config_from_file(char *config_file, struct configuration *config)
 {
         if (keyfile != NULL) {
@@ -116,7 +163,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
 #endif
                 return false;
         } else {
-                for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
+                for (int i = 0; i < CONF_STR_MAX; i++) {
                         char *ptr;
                         ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_str[i]);
                         if (ptr) {
@@ -125,50 +172,38 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                         return false;
                                 }
                         } else {
-                                fprintf(stderr, "ERR: missing key with string value: %s\n", config_key_str[i]);
-                                return false;
+                                config->strValues[i] = strdup(config_str_default[i]);
                         }
+
                 }
-                for (int i = CONF_INT_MIN + 1; i < CONF_INT_MAX; i++) {
+
+                for (int i = 0; i < CONF_INT_MAX; i++) {
                         char *ptr;
                         ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_int[i]);
                         if (ptr) {
+                                errno = 0;
                                 config->intValues[i] = strtoll(ptr, NULL, 10);
+                                if (errno != 0) {
+                                        return false;
+                                }
                         } else {
-                                fprintf(stderr, "ERR: missing key with integer value: %s\n", config_key_int[i]);
-                                return false;
+                                config->intValues[i] = config_int_default[i];
                         }
                 }
 
-                for (int i = CONF_BOOL_MIN + 1; i < CONF_BOOL_MAX; i++) {
+                for (int i = 0; i < CONF_BOOL_MAX; i++) {
                         char *ptr;
                         ptr = nc_hashmap_get(nc_hashmap_get(keyfile, "settings"), config_key_bool[i]);
-                        config->boolValues[i] = false;
-
                         if (ptr) {
-                                if (strcasecmp(ptr, "TRUE") == 0) {
+                                if ((strcasecmp(ptr, "TRUE") == 0) || (strcmp(ptr, "1") == 0)) {
                                         config->boolValues[i] = true;
-                                }
-                                if (strcasecmp(ptr, "1") == 0) {
-                                        config->boolValues[i] = true;
-                                }
-                        } else {
-                                /* New configuration keys, CONF_RECORD_RETENTION_ENABLED and CONF_RECORD_SERVER_DELIVERY_ENABLED
-                                 * default values, otherwise update will require changes in custom configurations */
-                                if (i == CONF_RECORD_RETENTION_ENABLED) {
-#ifdef DEBUG
-                                        fprintf(stderr, "WARN: missing boolean optional key: %s\n", config_key_bool[i]);
-#endif
-                                        config->boolValues[i] = RECORD_RETENTION_ENABLED_DEFAULT;
-                                } else if (i == CONF_RECORD_SERVER_DELIVERY_ENABLED) {
-#ifdef DEBUG
-                                        fprintf(stderr, "WARN: missing boolean optional key: %s\n", config_key_bool[i]);
-#endif
-                                        config->boolValues[i] = RECORD_SERVER_DELIVERY_ENABLED_DEFAULT;
+                                } else if ((strcasecmp(ptr, "FALSE") == 0) || (strcmp(ptr, "0") == 0)) {
+                                        config->boolValues[i] = false;
                                 } else {
-                                        fprintf(stderr, "ERR: missing key with boolean value: %s\n", config_key_bool[i]);
                                         return false;
                                 }
+                        } else {
+                                config->boolValues[i] = config_bool_default[i];
                         }
                 }
         }
@@ -187,25 +222,25 @@ static void initialize_config(void)
                 if (access(etc_config_file, R_OK) == 0) {
                         config_file = etc_config_file;
                 } else {
-                        if (access(default_config_file,
-                                   R_OK) == 0) {
+                        if (access(default_config_file, R_OK) == 0) {
                                 config_file = default_config_file;
-                        } else {
-                                /* If there is no default config, exit with failure */
-#ifdef DEBUG
-                                fprintf(stderr, "ERR: No configuration file"
-                                        " found, exiting\n");
-#endif
-                                exit(EXIT_FAILURE);
                         }
                 }
         }
-        if (!read_config_from_file(config_file, &config)) {
-                /* Error while parsing file  */
+
+        if (config_file) {
+                if (!read_config_from_file(config_file, &config)) {
+                        /* Error while parsing file  */
 #ifdef DEBUG
-                fprintf(stderr, "ERR: Error while parsing configuration file\n");
+                        fprintf(stderr, "ERR: Error while parsing configuration file\n");
 #endif
-                exit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
+                }
+        }
+        else {
+                if (!set_default_config_values(&config)) {
+                        exit(EXIT_FAILURE);
+                }
         }
 
         config.initialized = true;
@@ -228,7 +263,7 @@ void free_configuration(void)
                 return;
         }
 
-        for (int i = CONF_STR_MIN + 1; i < CONF_STR_MAX; i++) {
+        for (int i = 0; i < CONF_STR_MAX; i++) {
                 free(config.strValues[i]);
         }
 

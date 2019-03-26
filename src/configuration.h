@@ -18,13 +18,31 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* Default configuration settings */
+#define DEFAULT_SERVER_ADDR BACKEND_ADDR
+#define DEFAULT_SOCKET_PATH "/run/telem-0"
+#define DEFAULT_SPOOL_DIR LOCALSTATEDIR "/spool/telemetry"
+#define DEFAULT_RATE_LIMIT_STRATEGY "spool"
+#define DEFAULT_CAINFO ""
+#define DEFAULT_TIDHEADER "X-Telemetry-TID: 6907c830-eed9-4ce9-81ae-76daf8d88f0f"
+
+#define DEFAULT_RECORD_EXPIRY 1200
+#define DEFAULT_SPOOL_MAX_SIZE 5120
+#define DEFAULT_SPOOL_PROCESS_TIME 120
+#define DEFAULT_RECORD_WINDOW_LENGTH 15
+#define DEFAULT_BYTE_WINDOW_LENGTH 20
+#define DEFAULT_RECORD_BURST_LIMIT 1000
+#define DEFAULT_BYTE_BURST_LIMIT -1
+
+#define DEFAULT_RATE_LIMIT_ENABLED true
+#define DEFAULT_DAEMON_RECYCLING_ENABLED true
+#define DEFAULT_RECORD_RETENTION_ENABLED false
+#define DEFAULT_RECORD_SERVER_DELIVERY_ENABLED true
+
 #define TM_MAX_WINDOW_LENGTH (1 /*h*/ * 60 /*m*/)
-#define RECORD_RETENTION_ENABLED_DEFAULT false
-#define RECORD_SERVER_DELIVERY_ENABLED_DEFAULT true
 
 enum config_str_keys {
-        CONF_STR_MIN = 0,
-        CONF_SERVER_ADDR,
+        CONF_SERVER_ADDR = 0,
         CONF_SOCKET_PATH,
         CONF_SPOOL_DIR,
         CONF_RATE_LIMIT_STRATEGY,
@@ -34,8 +52,7 @@ enum config_str_keys {
 };
 
 enum config_int_keys {
-        CONF_INT_MIN = 0,
-        CONF_RECORD_EXPIRY,
+        CONF_RECORD_EXPIRY = 0,
         CONF_SPOOL_MAX_SIZE,
         CONF_SPOOL_PROCESS_TIME,
         CONF_RECORD_WINDOW_LENGTH,
@@ -46,8 +63,7 @@ enum config_int_keys {
 };
 
 enum config_bool_keys {
-        CONF_BOOL_MIN = 0,
-        CONF_RATE_LIMIT_ENABLED,
+        CONF_RATE_LIMIT_ENABLED = 0,
         CONF_DAEMON_RECYCLING_ENABLED,
         CONF_RECORD_RETENTION_ENABLED,
         CONF_RECORD_SERVER_DELIVERY_ENABLED,
@@ -70,6 +86,9 @@ const char *get_config_file(void);
 
 /* Gets the configuration specified via command line or NULL */
 const char *get_cmd_line_config_file(void);
+
+/* Sets all default configuration values to a given config */
+bool set_default_config_values(struct configuration *config);
 
 /* Parses the ini format config file */
 bool read_config_from_file(char *filename, struct configuration *config);

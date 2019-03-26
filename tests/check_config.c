@@ -55,18 +55,61 @@ START_TEST(check_read_valid_config)
 }
 END_TEST
 
-START_TEST(check_read_valid_config_defaults)
+START_TEST(check_default_config)
 {
-        char *config_file = TOPSRCDIR "/src/data/example.conf";
+        configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
+        int ret = set_default_config_values(&config);
+        ck_assert(ret == true);
+
+        ck_assert_str_eq(config.strValues[CONF_SERVER_ADDR], DEFAULT_SERVER_ADDR);
+        ck_assert_str_eq(config.strValues[CONF_SOCKET_PATH], DEFAULT_SOCKET_PATH);
+        ck_assert_str_eq(config.strValues[CONF_SPOOL_DIR], DEFAULT_SPOOL_DIR);
+        ck_assert_str_eq(config.strValues[CONF_RATE_LIMIT_STRATEGY], DEFAULT_RATE_LIMIT_STRATEGY);
+        ck_assert_str_eq(config.strValues[CONF_CAINFO], DEFAULT_CAINFO);
+        ck_assert_str_eq(config.strValues[CONF_TIDHEADER], DEFAULT_TIDHEADER);
+
+        ck_assert_int_eq(config.intValues[CONF_RECORD_EXPIRY], DEFAULT_RECORD_EXPIRY);
+        ck_assert_int_eq(config.intValues[CONF_SPOOL_MAX_SIZE], DEFAULT_SPOOL_MAX_SIZE);
+        ck_assert_int_eq(config.intValues[CONF_SPOOL_PROCESS_TIME], DEFAULT_SPOOL_PROCESS_TIME);
+        ck_assert_int_eq(config.intValues[CONF_RECORD_WINDOW_LENGTH], DEFAULT_RECORD_WINDOW_LENGTH);
+        ck_assert_int_eq(config.intValues[CONF_BYTE_WINDOW_LENGTH], DEFAULT_BYTE_WINDOW_LENGTH);
+        ck_assert_int_eq(config.intValues[CONF_RECORD_BURST_LIMIT], DEFAULT_RECORD_BURST_LIMIT);
+        ck_assert_int_eq(config.intValues[CONF_BYTE_BURST_LIMIT], DEFAULT_BYTE_BURST_LIMIT);
+
+        ck_assert(config.boolValues[CONF_RATE_LIMIT_ENABLED] == DEFAULT_RATE_LIMIT_ENABLED);
+        ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == DEFAULT_DAEMON_RECYCLING_ENABLED);
+        ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == DEFAULT_RECORD_RETENTION_ENABLED);
+        ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == DEFAULT_RECORD_SERVER_DELIVERY_ENABLED);
+}
+END_TEST
+
+START_TEST(check_layered_config)
+{
+        char *config_file = TOPSRCDIR "/src/data/example.2.conf";
         configuration config = { { 0 }, { 0 }, { 0 }, false, NULL };
 
         int ret = read_config_from_file(config_file, &config);
         ck_assert(ret == true);
 
-        // RECORD_RETENTION_ENABLED_DEFAULT = false
-        ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == RECORD_RETENTION_ENABLED_DEFAULT);
-        // RECORD_SERVER_DELIVERY_ENABLED_DEFAULT = true
-        ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == RECORD_SERVER_DELIVERY_ENABLED_DEFAULT);
+        ck_assert_str_eq(config.strValues[CONF_SERVER_ADDR], "http://127.0.0.1");
+        ck_assert_str_eq(config.strValues[CONF_SOCKET_PATH], DEFAULT_SOCKET_PATH);
+        ck_assert_str_eq(config.strValues[CONF_SPOOL_DIR], DEFAULT_SPOOL_DIR);
+        ck_assert_str_eq(config.strValues[CONF_RATE_LIMIT_STRATEGY], DEFAULT_RATE_LIMIT_STRATEGY);
+        ck_assert_str_eq(config.strValues[CONF_CAINFO], "/tmp/cacert.crt");
+        ck_assert_str_eq(config.strValues[CONF_TIDHEADER], DEFAULT_TIDHEADER);
+
+        ck_assert_int_eq(config.intValues[CONF_RECORD_EXPIRY], DEFAULT_RECORD_EXPIRY);
+        ck_assert_int_eq(config.intValues[CONF_SPOOL_MAX_SIZE], DEFAULT_SPOOL_MAX_SIZE);
+        ck_assert_int_eq(config.intValues[CONF_SPOOL_PROCESS_TIME], DEFAULT_SPOOL_PROCESS_TIME);
+        ck_assert_int_eq(config.intValues[CONF_RECORD_WINDOW_LENGTH], DEFAULT_RECORD_WINDOW_LENGTH);
+        ck_assert_int_eq(config.intValues[CONF_BYTE_WINDOW_LENGTH], DEFAULT_BYTE_WINDOW_LENGTH);
+        ck_assert_int_eq(config.intValues[CONF_RECORD_BURST_LIMIT], DEFAULT_RECORD_BURST_LIMIT);
+        ck_assert_int_eq(config.intValues[CONF_BYTE_BURST_LIMIT], DEFAULT_BYTE_BURST_LIMIT);
+
+        ck_assert(config.boolValues[CONF_RATE_LIMIT_ENABLED] == DEFAULT_RATE_LIMIT_ENABLED);
+        ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == DEFAULT_DAEMON_RECYCLING_ENABLED);
+        ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == DEFAULT_RECORD_RETENTION_ENABLED);
+        ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == DEFAULT_RECORD_SERVER_DELIVERY_ENABLED);
 }
 END_TEST
 
@@ -117,7 +160,8 @@ Suite *config_suite(void)
         TCase *t = tcase_create("config");
         tcase_add_test(t, check_read_config_for_invalid_file);
         tcase_add_test(t, check_read_valid_config);
-        tcase_add_test(t, check_read_valid_config_defaults);
+        tcase_add_test(t, check_default_config);
+        tcase_add_test(t, check_layered_config);
         tcase_add_test(t, check_read_valid_config_record_retention_delivery);
         tcase_add_test(t, check_config_initialised);
 
