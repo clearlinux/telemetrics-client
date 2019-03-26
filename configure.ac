@@ -119,6 +119,11 @@ AC_ARG_WITH([loglevel], AS_HELP_STRING([--with-loglevel=NUM],
 	    [loglevel=5])
 AC_DEFINE_UNQUOTED([MAX_LOG_LEVEL], [${loglevel}], [Maximum log level for binaries])
 
+AC_ARG_WITH([backendserveraddr], AS_HELP_STRING([--with-backendserveraddr=URI],
+	    [uri to telemetrics backend server @<:@default=https://clr.telemetry.intel.com/v2/collector@:>@]), [backendaddr=${withval}])
+test -z "${backendaddr}" && backendaddr=https://clr.telemetry.intel.com/v2/collector
+AC_SUBST(BACKEND_ADDR, [${backendaddr}])
+
 AC_ARG_ENABLE([logtype], AS_HELP_STRING([--enable-logtype],
               [Vector for logging: stderr (default), syslog, systemd]),
 			  [case ${enableval} in
