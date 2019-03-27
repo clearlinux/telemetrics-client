@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright 2019 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -32,7 +32,6 @@
 #include "common.h"
 #include "telemetry.h"
 
-static char *config_file = NULL;
 static uint32_t severity = 1;
 static char *opt_class = NULL;
 static char *opt_payload = NULL;
@@ -53,6 +52,7 @@ static const struct option prog_opts[] = {
         { "payload-file", required_argument, 0, 'P' },
         { "record-version", required_argument, 0, 'R' },
         { "event-id", required_argument, 0, 'e' },
+        { "config-file", required_argument, 0, 'f' },
         { 0, 0, 0, 0 }
 };
 
@@ -74,31 +74,18 @@ static void print_help(void)
         printf("  -e, --event-id        Event id to use in the record\n");
         printf("  -o, --echo            Echo record to stdout\n");
         printf("  -n, --no-post         Do not post record just print\n");
+        printf("  -f, --config_file     Specify a configuration file other than default\n");
         printf("\n");
 }
 
-const unsigned int count_chars(const char *check, const char character)
+static bool parse_options(int argc, char **argv)
 {
-        unsigned int count = 0U;
-        if (check == NULL) {
-                return count;
-        }
-        for (; *check != '\0'; ++check) {
-                if (*check == character) {
-                        ++count;
-                }
-        }
-        return count;
-}
-
-int parse_options(int argc, char **argv)
-{
-        int ret = 0;
+        bool ret = false;
         char *endptr = NULL;
         long unsigned int tmp = 0;
 
         int opt;
-        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:e:on", prog_opts, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hc:Vs:c:p:P:R:e:onf:", prog_opts, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 print_help();
@@ -159,31 +146,38 @@ int parse_options(int argc, char **argv)
                         case 'n':
                                 opt_nopost = true;
                                 break;
+                        case 'f':
+                                if (tm_set_config_file(optarg) != 0) {
+                                    telem_log(LOG_ERR, "Configuration file path not valid\n");
+                                    exit(EXIT_FAILURE);
+                                }
+                                break;
                 }
         }
 
-        ret = 1;
+        ret = true;
 fail:
         return ret;
 }
 
-int validate_opts(void)
+static bool validate_opts(void)
 {
-        size_t len;
-        int ret = 0;
+        size_t i, len;
+        int x, slashes = 0;
         const char alphab[] = EVENT_ID_ALPHAB;
+        bool ret = false;
 
         /* classification */
         if (opt_class == NULL) {
                 fprintf(stderr, "Error: Classification required. See --help.\n");
                 return ret;
-
         }
+
         len = strlen(opt_class);
 
-        if ((len == 0) || (len > 120)) {
+        if ((len == 0) || (len > MAX_CLASS_LENGTH)) {
                 fprintf(stderr, "Error: Valid size for classification "
-                        "is 1-120 chars\n");
+                        "is 1-%d chars\n", MAX_CLASS_LENGTH);
                 return ret;
         }
 
@@ -195,11 +189,26 @@ int validate_opts(void)
                 }
         }
 
-        if (count_chars(opt_class, '/') != 2) {
+        for (i = 0, x = 0; i <= (len - 1); i++, x++) {
+                if (opt_class[i] == '/') {
+                        slashes++;
+                        x = 0;
+                } else {
+                        if (x > MAX_SUBCAT_LENGTH) {
+                                fprintf(stderr, "Error: Classification strings"
+                                        " between slashes should have at most"
+                                        " %d chars\n", MAX_SUBCAT_LENGTH);
+                                return ret;
+                        }
+                }
+        }
+
+        if (slashes != 2) {
                 fprintf(stderr, "Error: Classification needs to be in "
                         "most/to/least specific format, 2 \'/\' required.\n");
                 return ret;
         }
+
 
         /* Severity */
         if ((severity) < 1 || (severity > 4)) {
@@ -221,29 +230,12 @@ int validate_opts(void)
                 }
         }
 
-        return 1;
+        return true;
 }
 
-int allocate_payload_buffer(char **payload)
+static bool get_payload_from_file(char **payload)
 {
-        int ret = 0;
-
-        *payload = (char *)malloc(MAX_PAYLOAD_LENGTH);
-
-        if (*payload == NULL) {
-                goto out1;
-        }
-
-        *payload = memset(*payload, 0, MAX_PAYLOAD_LENGTH);
-        ret = 1;
-
-out1:
-        return ret;
-}
-
-int get_payload_from_file(char **payload)
-{
-        int ret = 1;
+        bool ret = false;
         FILE *fp = NULL;
         size_t bytes_in = 0;
 
@@ -260,10 +252,10 @@ int get_payload_from_file(char **payload)
 
         /* if fread fails */
         if (bytes_in == 0 && ferror(fp) != 0) {
-                ret = 0;
                 goto out;
         }
 
+        ret = true;
 out:
         if (fp) {
                 fclose(fp);
@@ -272,7 +264,7 @@ out:
 
 }
 
-void get_payload_from_opt(char **payload)
+static void get_payload_from_opt(char **payload)
 {
         size_t len = 0;
 
@@ -283,7 +275,7 @@ void get_payload_from_opt(char **payload)
         strncpy(*payload, opt_payload, len);
 }
 
-void get_payload_from_stdin(char **payload)
+static void get_payload_from_stdin(char **payload)
 {
         size_t bytes_in = 0;
         int c;
@@ -299,40 +291,40 @@ void get_payload_from_stdin(char **payload)
 
 }
 
-int get_payload(char **payload)
+static bool get_payload(char **payload)
 {
-        int ret = 0;
+        bool ret = false;
 
-        if (!allocate_payload_buffer(payload)) {
-                goto out1;
-        }
+        *payload = (char *)calloc(sizeof(char), MAX_PAYLOAD_LENGTH);
+
+        if (*payload == NULL)
+                return false;
 
         if (opt_payload_file) {
 
                 if (get_payload_from_file(payload)) {
-                        ret = 1;
+                        ret = true;
                 }
 
         } else if (opt_payload) {
 
                 get_payload_from_opt(payload);
-                ret = 1;
+                ret = true;
 
         } else {
                 get_payload_from_stdin(payload);
-                ret = 1;
+                ret = true;
         }
 
-        if (ret == 0) {
+        if (ret == false) {
                 free(*payload);
                 *payload = NULL;
         }
 
-out1:
         return ret;
 }
 
-int instanciate_record(struct telem_ref **t_ref, char *payload)
+static int instanciate_record(struct telem_ref **t_ref, char *payload)
 {
         int ret = 0;
 
@@ -352,7 +344,7 @@ out1:
         return ret;
 }
 
-int send_record(char *payload)
+static int send_record(char *payload)
 {
         struct telem_ref *t_ref = NULL;
         int ret = 0;
@@ -371,7 +363,7 @@ out:
         return ret;
 }
 
-int print_record(char *payload)
+static int print_record(char *payload)
 {
         struct telem_ref *t_ref = NULL;
         int ret = 0;
@@ -415,7 +407,6 @@ int main(int argc, char **argv)
 
         ret = EXIT_SUCCESS;
 fail:
-        free(config_file);
         free(opt_class);
         free(opt_payload);
         free(opt_event_id);
