@@ -616,7 +616,7 @@ int staging_records_loop(TelemPostDaemon *daemon)
 void run_daemon(TelemPostDaemon *daemon)
 {
         int ret;
-        int retry_attempt = MAX_RETRY_ATTEMPTS;
+        int retry_attempt = 0;
         int spool_process_time = spool_process_time_config();
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
         time_t last_spool_run_time = time(NULL);
@@ -713,7 +713,7 @@ void run_daemon(TelemPostDaemon *daemon)
                                 break;
                         }
                         /* Check if this is a retry */
-                        if (retry_attempt < MAX_RETRY_ATTEMPTS) {
+                        if ((retry_attempt > 0) && (retry_attempt < MAX_RETRY_ATTEMPTS)) {
                                 if (staging_records_loop(daemon) == 0) {
                                         retry_attempt = MAX_RETRY_ATTEMPTS + 1;
                                 } else {
