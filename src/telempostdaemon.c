@@ -653,7 +653,8 @@ int staging_records_loop(TelemPostDaemon *daemon)
 void run_daemon(TelemPostDaemon *daemon)
 {
         int ret;
-        int retry_attempt = MAX_RETRY_ATTEMPTS;
+        /* retry_attempt of zero indicates we don't need to retry */
+        int retry_attempt = 0;
         int spool_process_time = spool_process_time_config();
         bool daemon_recycling_enabled = daemon_recycling_enabled_config();
         time_t last_spool_run_time = time(NULL);
@@ -664,7 +665,7 @@ void run_daemon(TelemPostDaemon *daemon)
         assert(daemon->pollfds[signlfd].fd);
         assert(daemon->pollfds[watchfd].fd);
 
-        /* Post at boot failed initialize retries variable */
+        /* If we failed to send spooled records, indicate we need to retry */
         if (daemon->bypass_http_post_ts != 0) {
                 retry_attempt = 1;
         }
@@ -673,7 +674,8 @@ void run_daemon(TelemPostDaemon *daemon)
                 int retry_delay = spool_process_time;
                 malloc_trim(0);
 
-                if (retry_attempt < MAX_RETRY_ATTEMPTS) {
+                /* check if we need to retry sending spooled records */
+                if (retry_attempt > 0) {
                         retry_delay = retry_attempt * retry_attempt;
                         daemon->bypass_http_post_ts = 0;
                         telem_log(LOG_INFO, "Record delivery failed will retry in %d seconds",
@@ -749,18 +751,23 @@ void run_daemon(TelemPostDaemon *daemon)
                                 telem_log(LOG_INFO, "Telemetry post daemon exiting for recycling\n");
                                 break;
                         }
-                        /* Check if this is a retry */
-                        if (retry_attempt < MAX_RETRY_ATTEMPTS) {
+
+                        /* Check if this was a retry attempt */
+                        if (retry_attempt > 0) {
+                                /* Stop attempting retries if successful, increment counter if not */
                                 if (staging_records_loop(daemon) == 0) {
-                                        retry_attempt = MAX_RETRY_ATTEMPTS + 1;
+                                        retry_attempt = 0;
                                 } else {
                                         retry_attempt++;
                                 }
-                        } else if (retry_attempt == MAX_RETRY_ATTEMPTS) {
-                                retry_attempt = MAX_RETRY_ATTEMPTS + 1;
-                                telem_log(LOG_ERR, "Record deliver failed after %d attempts",
-                                          MAX_RETRY_ATTEMPTS);
+                                /* Give up if counter reaches MAX_RETRY_ATTEMPTS */
+                                if (retry_attempt == MAX_RETRY_ATTEMPTS) {
+                                        telem_log(LOG_ERR, "Record deliver failed after %d attempts",
+                                                  MAX_RETRY_ATTEMPTS);
+                                        retry_attempt = 0;
+                                }
                         }
+
                         /* Check spool  */
                         if (difftime(now, last_spool_run_time) >= spool_process_time) {
                                 spool_records_loop(&(daemon->current_spool_size));
