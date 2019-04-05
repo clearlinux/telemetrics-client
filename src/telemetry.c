@@ -35,6 +35,7 @@
 #include "common.h"
 #include "configuration.h"
 #include "telemetry.h"
+#include "log.h"
 
 /**
  * Return a file descriptor to either site's version file
@@ -233,6 +234,7 @@ static int set_system_name_header(struct telem_ref *t_ref)
         int fd;
         char buf[SMALL_LINE_BUF] = { 0 };
         char name[SMALL_LINE_BUF] = { 0 };
+        char variant[SMALL_LINE_BUF] = { 0 };
 
         fd = version_file();
         if (fd == -1) {
@@ -243,12 +245,18 @@ static int set_system_name_header(struct telem_ref *t_ref)
         } else {
                 fs = fdopen(fd, "r");
                 while (fgets(buf, SMALL_LINE_BUF, fs)) {
-                        if (sscanf(buf, "ID=%s", name) < 1) {
-                                continue;
-                        } else {
+                        if (sscanf(buf, "ID=%s", name) > 0) {
                                 break;
                         }
                 }
+                rewind(fs);
+                while (fgets(buf, SMALL_LINE_BUF, fs)) {
+                        if (sscanf(buf, "VARIANT_ID=%s", variant) > 0) {
+                                break;
+                        }
+                }
+
+                fclose(fs);
 
                 if (strlen(name) == 0) {
 #ifdef DEBUG
@@ -257,11 +265,22 @@ static int set_system_name_header(struct telem_ref *t_ref)
                         sprintf(name, "unknown");
                 }
 
-                fclose(fs);
+                if (strlen(variant) == 0) {
+                        snprintf(buf, sizeof(buf), "%s", name);
+                } else {
+                        /* We do not want the header to be greater than 80 characters, allow truncation */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+                        if (snprintf(buf, sizeof(buf), "%s_%s", name, variant) > sizeof(buf)) {
+                                telem_log(LOG_WARNING, "WARNING: truncating system name header to 80 characters\n");
+                        }
+                        telem_debug("DEBUG: Found variant OS information: %s\n", variant);
+#pragma GCC diagnostic pop
+                }
         }
 
         return set_header(&(t_ref->record->headers[TM_SYSTEM_NAME]),
-                          TM_SYSTEM_NAME_STR, name,
+                          TM_SYSTEM_NAME_STR, buf,
                           &(t_ref->record->header_size));
 
 }
