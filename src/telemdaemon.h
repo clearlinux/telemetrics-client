@@ -62,7 +62,7 @@ typedef struct TelemDaemon {
  *
  * @param daemon A pointer to the daemon structure.
  */
-void initialize_daemon(TelemDaemon *daemon);
+void initialize_probe_daemon(TelemDaemon *daemon);
 
 /**
  * Add poll fd struct to the array of pollfds.

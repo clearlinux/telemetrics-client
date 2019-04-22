@@ -178,7 +178,7 @@ static void initialize_record_delivery(TelemPostDaemon *daemon)
         daemon->record_server_delivery_enabled = record_server_delivery_enabled_config();
 }
 
-void initialize_daemon(TelemPostDaemon *daemon)
+void initialize_post_daemon(TelemPostDaemon *daemon)
 {
         assert(daemon);
 

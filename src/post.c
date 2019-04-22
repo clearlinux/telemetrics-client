@@ -72,7 +72,7 @@ int main(int argc, char **argv)
                 }
         }
 
-        initialize_daemon(&daemon);
+        initialize_post_daemon(&daemon);
 
         daemon.current_spool_size = get_spool_dir_size();
 

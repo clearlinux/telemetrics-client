@@ -41,63 +41,6 @@ bool _fgets(char *s, int n, FILE *stream)
         return true;
 }
 
-void stage_record(char *filepath, char *headers[], char *body, char *cfg_file)
-{
-        int tmpfd;
-        FILE *tmpfile = NULL;
-
-#ifdef DEBUG
-        fprintf(stderr, "DEBUG: [%s] filepath:%s\n",__func__, filepath);
-        fprintf(stderr, "DEBUG: [%s] body:%s\n",__func__, body);
-        fprintf(stderr, "DEBUG: [%s] cfg:%s\n",__func__, cfg_file);
-#endif
-        // Use default path if not provided
-        if (filepath == NULL) {
-                telem_log(LOG_ERR, "filepath value must be provided, aborting\n");
-                exit(EXIT_FAILURE);
-        }
-
-        tmpfd = mkstemp(filepath);
-        if (!tmpfd) {
-                telem_perror("Error opening staging file");
-                close(tmpfd);
-                if (unlink(filepath)) {
-                        telem_perror("Error deleting staging file");
-                }
-                goto clean_exit;
-        }
-
-        // open file
-        tmpfile = fdopen(tmpfd, "a");
-        if (!tmpfile) {
-                telem_perror("Error opening temp stage file");
-                close(tmpfd);
-                if (unlink(filepath)) {
-                        telem_perror("Error deleting temp stage file");
-                }
-                goto clean_exit;
-        }
-
-        // write cfg info if exists
-        if (cfg_file != NULL) {
-                fprintf(tmpfile, "%s%s\n", CFG_PREFIX, cfg_file);
-        }
-
-        // write headers
-        for (int i = 0; i < NUM_HEADERS; i++) {
-                fprintf(tmpfile, "%s\n", headers[i]);
-        }
-
-        //write body
-        fprintf(tmpfile, "%s\n", body);
-        fflush(tmpfile);
-        fclose(tmpfile);
-
-clean_exit:
-
-        return;
-}
-
 bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
 {
         int i, ret = 0;

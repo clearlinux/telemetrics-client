@@ -6,7 +6,6 @@ bin_PROGRAMS = \
 	%D%/probe.c \
 	%D%/telemdaemon.c \
 	%D%/telemdaemon.h \
-	%D%/iorecord.c \
 	%D%/journal/journal.c \
 	%D%/journal/journal.h
 
