@@ -65,7 +65,7 @@ typedef struct TelemPostDaemon {
  *
  * @param daemon a pointer to telemetry post daemon
  */
-void initialize_daemon(TelemPostDaemon *daemon);
+void initialize_post_daemon(TelemPostDaemon *daemon);
 
 /**
  * Starts daemon

@@ -17,16 +17,6 @@
 #include <stdbool.h>
 
 /**
- * Save a telemetry record to disk
- *
- * @param path pointer to a directory to save record
- * @param headers pointer to array of headers and values
- * @param body record message content
- *
- */
-void stage_record(char *path, char *headers[], char *body, char *cfg);
-
-/**
  * Reads a telemetry record
  *
  * @param fullpath pointer to full path file name

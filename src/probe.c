@@ -111,7 +111,7 @@ int main(int argc, char **argv)
                                 exit(EXIT_FAILURE);
                 }
         }
-        initialize_daemon(&daemon);
+        initialize_probe_daemon(&daemon);
 
         sigemptyset(&mask);
 

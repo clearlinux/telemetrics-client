@@ -39,7 +39,7 @@ void setup(void)
         char *config_file = ABSTOPSRCDIR "/src/data/example.conf";
         set_config_file(config_file);
 
-        initialize_daemon(&tdaemon);
+        initialize_post_daemon(&tdaemon);
 }
 
 START_TEST(check_daemon_is_initialized)
