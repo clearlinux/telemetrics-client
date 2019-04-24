@@ -51,12 +51,6 @@
 #include "telemdaemon.h"
 #include "configuration.h"
 
-/*
- *  Using a function pointer for unit testing to isolate the call to actual post function.
- *  The call to post the record to the server is stubbed out in the unit tests
- *  using pointer to a fake function.
- */
-
 void print_usage(char *prog)
 {
         printf("%s: Usage\n", prog);
@@ -249,8 +243,8 @@ int main(int argc, char **argv)
                                         }
 
                                         if (fdsi.ssi_signo == SIGTERM || fdsi.ssi_signo == SIGINT) {
-                                                telem_log(LOG_INFO, "Received either a \
-                                                                     SIGINT/SIGTERM signal\n");
+                                                telem_log(LOG_INFO, "Received either a "
+                                                                     "SIGINT/SIGTERM signal\n");
                                                 goto clean_exit;
                                         }
 
