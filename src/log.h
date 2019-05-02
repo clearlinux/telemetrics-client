@@ -42,8 +42,8 @@
 
 #ifdef DEBUG
 #define telem_debug(...) do { \
-                (telem_log(LOG_DEBUG, "%s():[%d]", __func__, __LINE__), \
-                 telem_log(LOG_DEBUG, __VA_ARGS__)); \
+                telem_log(LOG_DEBUG, "%s():[%d] ", __func__, __LINE__); \
+                telem_log(LOG_DEBUG, __VA_ARGS__); \
 } while (0);
 #else
 #define telem_debug(...) do {} while (0);
