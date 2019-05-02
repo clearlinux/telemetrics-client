@@ -91,10 +91,8 @@ void split_buf_by_line(char *bufp, int bytes)
                         start[linelength] = '\0';
                         parse_single_line(start, linelength);
                         if (oops_processed == true) {
-                        #ifdef DEBUG
-                            printf("[%s] oops_processed detected !\n", __func__);
-                        #endif
-                            break;
+                                telem_debug("oops_processed detected !\n");
+                                break;
                         }
                         linelength = 0;
                 }
@@ -136,16 +134,14 @@ void klog_process_oops_msgs(struct oops_log_msg *msg)
 
         struct oops_log_msg oops_msg;
         if (handle_entire_oops(contents, (long)size, &oops_msg)) {
-            #ifdef DEBUG
-                printf("Raw message:\n");
+#ifdef DEBUG
+                telem_debug("DEBUG: Raw oops message:\n");
                 for (int i = 0; i < oops_msg.length; i++) {
-                        printf("%s\n", oops_msg.lines[i]);
+                        telem_log(LOG_DEBUG, "%s\n", oops_msg.lines[i]);
                 }
-            #endif
+#endif
                 payload = parse_payload(&oops_msg);
-            #ifdef DEBUG
-                printf("Payload Parsed :%s\n", payload->str);
-            #endif
+                telem_debug("DEBUG: Payload Parsed :%s\n", payload->str);
                 oops_msg_cleanup(&oops_msg);
                 send_data(payload->str, (char *)oops_msg.pattern->classification, (uint32_t)oops_msg.pattern->severity);
                 nc_string_free(payload);

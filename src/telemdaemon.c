@@ -165,7 +165,7 @@ bool handle_client(TelemDaemon *daemon, nfds_t ind, client *cl)
                         cl->offset = 0;
                         cl->size = RECORD_SIZE_LEN;
                         processed = true;
-                        telem_log(LOG_DEBUG, "Record processed for client %d\n", cl->fd);
+                        telem_debug("DEBUG: Record processed for client %d\n", cl->fd);
                         break;
                 }
         } while (len > 0);
@@ -252,11 +252,9 @@ static void stage_record(char *filepath, char *headers[], char *body, char *cfg_
         int tmpfd;
         FILE *tmpfile = NULL;
 
-#ifdef DEBUG
-        fprintf(stderr, "DEBUG: [%s] filepath:%s\n",__func__, filepath);
-        fprintf(stderr, "DEBUG: [%s] body:%s\n",__func__, body);
-        fprintf(stderr, "DEBUG: [%s] cfg:%s\n",__func__, cfg_file);
-#endif
+        telem_debug("DEBUG: filepath:%s\n", filepath);
+        telem_debug("DEBUG: body:%s\n", body);
+        telem_debug("DEBUG: cfg:%s\n", cfg_file);
         // Use default path if not provided
         if (filepath == NULL) {
                 telem_log(LOG_ERR, "filepath value must be provided, aborting\n");
@@ -328,20 +326,16 @@ void process_record(TelemDaemon *daemon, client *cl)
 
                 cfg_file = cfg + CFG_PREFIX_LENGTH;
                 cfg_info_size = CFG_PREFIX_LENGTH + strlen(cfg_file) + 1;
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: [%s] cfg_file: %s\n", __func__, cfg_file);
-#endif
+                telem_debug("DEBUG: cfg_file: %s\n", cfg_file);
         }
 
         buf += cfg_info_size;
         header_size = *(uint32_t *)buf;
         message_size = cl->size - (cfg_info_size + header_size);
-#ifdef DEBUG
-        fprintf(stderr, "DEBUG: [%s] cl->size: %zu\n", __func__, cl->size);
-        fprintf(stderr, "DEBUG: [%s] header_size: %zu\n", __func__, header_size);
-        fprintf(stderr, "DEBUG: [%s] message_size: %zu\n", __func__, message_size);
-        fprintf(stderr, "DEBUG: [%s] cfg_info_size: %zu\n", __func__, cfg_info_size);
-#endif
+        telem_debug("DEBUG: cl->size: %zu\n", cl->size);
+        telem_debug("DEBUG: header_size: %zu\n", header_size);
+        telem_debug("DEBUG: message_size: %zu\n", message_size);
+        telem_debug("DEBUG: cfg_info_size: %zu\n", cfg_info_size);
         assert(message_size > 0);      //TODO:Check for min and max limits
         msg = (char *)buf + sizeof(uint32_t);
 

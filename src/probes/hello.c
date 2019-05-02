@@ -90,7 +90,7 @@ static char *create_payload(unsigned options)
 
                 num_bundles = scandir("/usr/share/clear/bundles", &entries, nodots, alphasort);
                 if (num_bundles < 0) {
-                        telem_log(LOG_ERR, "scandir failed: %s\n", strerror(errno));
+                        telem_perror("scandir failed");
                         free(payload);
                         return NULL;
                 }

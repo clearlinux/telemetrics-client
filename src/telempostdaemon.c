@@ -234,10 +234,7 @@ bool post_record_http(char *headers[], char *body, char *cfg)
                        goto Done;
                 }
                 reload_config();
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: override server_addr:%s\n", __func__,
-                        server_addr_config());
-#endif
+                telem_debug("DEBUG: override server_addr:%s\n", server_addr_config());
         }
 
         // Initialize the libcurl global environment once per POST. This lets us
@@ -325,10 +322,7 @@ Done:
                         res = 1;
                 }
                 reload_config();
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: restored server_addr:%s\n",
-                        __func__, server_addr_config());
-#endif
+                telem_debug("DEBUG: restored server_addr:%s\n", server_addr_config());
         }
 
         return res ? false : true;
@@ -546,9 +540,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
 
         /** Record delivery **/
         if (!daemon->record_server_delivery_enabled) {
-#ifdef DEBUG
-                telem_log(LOG_WARNING, "record server delivery disabled\n");
-#endif
+                telem_log(LOG_INFO, "record server delivery disabled\n");
                 // Not an error condition
                 ret = true;
                 goto end_processing_file;
@@ -556,9 +548,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
 
         /** Spool policies **/
         if (inside_direct_spool_window(daemon, time(NULL))) {
-#ifdef DEBUG
                 telem_log(LOG_INFO, "process_record: delivering directly to spool\n");
-#endif
                 /* Check spool max size conf */
                 max_spool_size = spool_max_size_config();
                 if (max_spool_size != -1 &&

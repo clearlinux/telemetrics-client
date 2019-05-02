@@ -51,7 +51,7 @@ int main(void)
         // Gets the size of the kernel ring buffer
         log_size = klogctl(SYSLOG_ACTION_SIZE_BUFFER, NULL, 0);
         if (log_size < 0) {
-                telem_log(LOG_ERR, "Cannot read size of kernel ring buffer: %s\n", strerror(errno));
+                telem_perror("Cannot read size of kernel ring buffer");
                 return 1;
         }
 
@@ -70,7 +70,7 @@ int main(void)
                 memset(bufp, 0, buflen);
                 bytes_read = klogctl(SYSLOG_ACTION_READ, bufp, (int)buflen);
                 if (bytes_read < 0) {
-                        telem_log(LOG_ERR, "Cannot read contents of kernel ring buffer: %s\n", strerror(errno));
+                        telem_perror("Cannot read contents of kernel ring buffer");
                         return 1;
                 }
 
