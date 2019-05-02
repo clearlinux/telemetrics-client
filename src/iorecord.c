@@ -88,14 +88,9 @@ bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
                         goto read_error;
                 }
                 strcpy (*cfg_file, line);
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: [%s] cfg_file specified: %s\n", __func__, *cfg_file);
-#endif
+                telem_debug("DEBUG: cfg_file specified: %s\n", *cfg_file);
         } else {
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: [%s] no user cfg file specified, cfg_prefix: %08x\n",
-                                __func__, cfg_prefix);
-#endif
+                telem_debug("DEBUG: no user cfg file specified, cfg_prefix: %08x\n", cfg_prefix);
                 *cfg_file = NULL;
                 rewind(fp);
         }

@@ -77,9 +77,7 @@ static int set_header(char **dest, const char *prefix, char *value, size_t *head
         rc = asprintf(dest, "%s: %s\n", prefix, value);
 
         if (rc < 0) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 return -ENOMEM;
         } else {
                 *header_size += (size_t)rc;
@@ -238,9 +236,7 @@ static int set_system_name_header(struct telem_ref *t_ref)
 
         fd = version_file();
         if (fd == -1) {
-#ifdef DEBUG
-                fprintf(stderr, "WARNING: Cannot find os-release file\n");
-#endif
+                telem_log(LOG_WARNING, "WARNING: Cannot find os-release file\n");
                 sprintf(name, "unknown");
         } else {
                 fs = fdopen(fd, "r");
@@ -259,9 +255,7 @@ static int set_system_name_header(struct telem_ref *t_ref)
                 fclose(fs);
 
                 if (strlen(name) == 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "WARNING: Cannot find os-release field: ID\n");
-#endif
+                        telem_log(LOG_WARNING, "WARNING: Cannot find os-release field: ID\n");
                         sprintf(name, "unknown");
                 }
 
@@ -304,9 +298,7 @@ static int set_system_build_header(struct telem_ref *t_ref)
 
         fd = version_file();
         if (fd == -1) {
-#ifdef DEBUG
-                fprintf(stderr, "WARNING: Cannot find build version file\n");
-#endif
+                telem_log(LOG_WARNING, "WARNING: Cannot find build version file\n");
                 sprintf(version, "0");
         } else {
                 fs = fdopen(fd, "r");
@@ -319,9 +311,7 @@ static int set_system_build_header(struct telem_ref *t_ref)
                 }
 
                 if (strlen(version) == 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "WARNING: Cannot find build version number\n");
-#endif
+                        telem_log(LOG_WARNING, "WARNING: Cannot find build version number\n");
                         sprintf(version, "0");
                 }
 
@@ -435,7 +425,7 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
                         }
                 } else {
                         model_name = "blank";
-                        fprintf(stderr, "NOTICE: Unable to find attribute:%s\n", attr_name);
+                        telem_log(LOG_NOTICE, "NOTICE: Unable to find attribute:%s\n", attr_name);
                 }
 
                 status = set_header(
@@ -444,9 +434,7 @@ static int set_cpu_model_header(struct telem_ref *t_ref)
                         &(t_ref->record->header_size));
 
         } else {
-#ifdef DEBUG
-                fprintf(stderr, "NOTICE: Unable to open /proc/cpuinfo\n");
-#endif
+                telem_log(LOG_NOTICE, "NOTICE: Unable to open /proc/cpuinfo\n");
                 status = -1;
         }
 
@@ -480,9 +468,7 @@ static int get_dmi_value(const char *source, const char *key, char **buf)
         *buf = (char *)malloc(sizeof(char) * SMALL_LINE_BUF);
 
         if (*buf == NULL) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 return -ENOMEM;
         }
 
@@ -505,9 +491,7 @@ static int get_dmi_value(const char *source, const char *key, char **buf)
                 if (new_size == 0) {
                         old_value = *buf;
                         if (asprintf(buf, "blank") < 0) {
-#ifdef DEBUG
-                                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                                 ret = -ENOMEM;
                         }
                         free(old_value);
@@ -524,24 +508,18 @@ static int get_dmi_value(const char *source, const char *key, char **buf)
                         if (j == new_size) {
                                 old_value = *buf;
                                 if (asprintf(buf, "blank") < 0) {
-#ifdef DEBUG
-                                        fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                                        telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                                         ret = -ENOMEM;
                                 }
                                 free(old_value);
                         }
                 }
         } else {
-#ifdef DEBUG
-                fprintf(stderr, "NOTICE: Dmi file %s does not exist\n", source);
-#endif
+                telem_debug("DEBUG: Dmi file %s does not exist\n", source);
 
                 old_value = *buf;
                 if (asprintf(buf, "no_%s_file", key) < 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                        telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                         ret = -ENOMEM;
                 }
                 free(old_value);
@@ -946,17 +924,13 @@ int tm_create_record(struct telem_ref **t_ref, uint32_t severity,
 
         *t_ref = (struct telem_ref *)malloc(sizeof(struct telem_ref));
         if (*t_ref == NULL) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 return -ENOMEM;
         }
 
         (*t_ref)->record = (struct telem_record *)malloc(sizeof(struct telem_record));
         if ((*t_ref)->record == NULL) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 free(*t_ref);
                 return -ENOMEM;
         }
@@ -1032,9 +1006,7 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
         t_ref->record->payload = (char *)malloc(sizeof(char) * payload_len + 1);
 
         if (!t_ref->record->payload) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 return -ENOMEM;
         }
 
@@ -1121,10 +1093,7 @@ static int tm_write_socket(int fd, char *buf, size_t nbytes)
 
                 if (b == -1 && errno != EAGAIN) {
                         ret = -errno;
-#ifdef DEBUG
-                        fprintf(stderr, "ERR: Write to daemon socket with"
-                                " system error: %s\n", strerror(errno));
-#endif
+                        telem_perror("Error writing to daemon socket");
                         return ret;
                 } else if (b == -1 &&
                            (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -1164,10 +1133,7 @@ static int tm_get_socket(void)
 
         if (sfd == -1) {
                 ret = -errno;
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Attempt to allocate socket fd failed:"
-                        " %s\n", strerror(errno));
-#endif
+                telem_perror("Attempt to allocate socket fd failed");
                 return ret;
         }
 
@@ -1178,10 +1144,7 @@ static int tm_get_socket(void)
         if (setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, &tv,
                        sizeof(tv)) < 0) {
                 ret = -errno;
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to set socket timeout:"
-                        " %s\n", strerror(errno));
-#endif
+                telem_perror("Failed to set socket timeout");
                 goto out1;
         }
 
@@ -1237,9 +1200,7 @@ static int tm_get_socket(void)
         // Set non-blocking after the connect() succeeded
         if ((sflags = fcntl(sfd, F_GETFL, NULL)) < 0) {
                 ret = -errno;
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to get socket flags\n");
-#endif
+                telem_log(LOG_ERR, "Failed to get socket flags\n");
                 goto out1;
         }
 
@@ -1247,9 +1208,7 @@ static int tm_get_socket(void)
 
         if (fcntl(sfd, F_SETFL, sflags) < 0) {
                 ret = -errno;
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to set socket flags\n");
-#endif
+                telem_log(LOG_ERR, "Failed to set socket flags\n");
                 goto out1;
         }
 
@@ -1283,10 +1242,8 @@ int tm_send_record(struct telem_ref *t_ref)
         sfd = tm_get_socket();
 
         if (sfd < 0) {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to get socket fd: %s\n",
-                        strerror(-sfd));
-#endif
+                telem_log(LOG_ERR, "Failed to get socket fd: %s\n",
+                          strerror(-sfd));
                 return sfd;
         }
 
@@ -1307,17 +1264,15 @@ int tm_send_record(struct telem_ref *t_ref)
                 total_size += (cfg_file_name_size + CFG_PREFIX_LENGTH);
         }
 
-#ifdef DEBUG
         if (cfg_file_name != NULL) {
-                fprintf(stderr, "DEBUG: CFG field size : %zu\n", cfg_file_name_size + CFG_PREFIX_LENGTH);
-                fprintf(stderr, "DEBUG: CFG file name : %s\n", cfg_file_name);
+                telem_debug("DEBUG: CFG field size : %zu\n", cfg_file_name_size + CFG_PREFIX_LENGTH);
+                telem_debug("DEBUG: CFG file name : %s\n", cfg_file_name);
         }
 
-        fprintf(stderr, "DEBUG: Header size : %zu\n", t_ref->record->header_size);
-        fprintf(stderr, "DEBUG: Payload size : %zu\n", t_ref->record->payload_size);
+        telem_debug("DEBUG: Header size : %zu\n", t_ref->record->header_size);
+        telem_debug("DEBUG: Payload size : %zu\n", t_ref->record->payload_size);
 
-        fprintf(stderr, "DEBUG: Total size : %zu\n", total_size);
-#endif
+        telem_debug("DEBUG: Total size : %zu\n", total_size);
 
         /*
          * Allocating buffer for what we intend to send.  Buffer layout is:
@@ -1332,9 +1287,7 @@ int tm_send_record(struct telem_ref *t_ref)
 
         data = malloc(record_size);
         if (!data) {
-#ifdef DEBUG
-                fprintf(stderr, "CRIT: Out of memory\n");
-#endif
+                telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 close(sfd);
                 return -ENOMEM;
         }
@@ -1363,17 +1316,11 @@ int tm_send_record(struct telem_ref *t_ref)
 
         memcpy(data + offset, t_ref->record->payload, t_ref->record->payload_size);
 
-#ifdef DEBUG
-        fprintf(stderr, "DEBUG: Data to be sent :\n\n%s\n", data + 2 * sizeof(uint32_t));
-#endif
+        telem_debug("DEBUG: Data to be sent :\n\n%s\n", data + 2 * sizeof(uint32_t));
         if ((ret = tm_write_socket(sfd, data, record_size)) == 0) {
-#ifdef DEBUG
-                fprintf(stderr, "INFO: Successfully sent record over the socket\n");
-#endif
+                telem_log(LOG_INFO, "INFO: Successfully sent record over the socket\n");
         } else {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Error while writing data to socket\n");
-#endif
+                telem_log(LOG_ERR, "Error while writing data to socket\n");
         }
 
         close(sfd);

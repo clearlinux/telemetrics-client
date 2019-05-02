@@ -244,9 +244,7 @@ void transmit_spooled_record(char *record_path, bool *post_succeeded, long size)
                         goto read_error;
                 }
                 strcpy (cfg_file, line);
-#ifdef DEBUG
-                fprintf(stderr, "DEBUG: [%s] cfg_file: %s\n", __func__, cfg_file);
-#endif
+                telem_debug("DEBUG: cfg_file: %s\n", cfg_file);
         } else {
                 cfg_file = NULL;
                 rewind(fp);

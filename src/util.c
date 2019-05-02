@@ -33,6 +33,7 @@
 
 #include "common.h"
 #include "util.h"
+#include "log.h"
 
 bool get_header(const char *haystack, const char *needle, char **line)
 {
@@ -100,10 +101,7 @@ long get_directory_size(const char *dir_path)
         dir = opendir(dir_path);
         if (!dir) {
                 ret = -errno;
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Error opening spool dir: %s\n",
-                        strerror(errno));
-#endif
+                telem_perror("Error opening spool dir");
                 return ret;
         }
 
@@ -113,19 +111,15 @@ long get_directory_size(const char *dir_path)
                 }
                 ret = asprintf(&file_path, "%s/%s", dir_path, de->d_name);
                 if (ret < 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "CRIT: Cannot allocate memory\n");
-#endif
+                        telem_log(LOG_CRIT, "CRIT: Cannot allocate memory\n");
                         closedir(dir);
                         return -ENOMEM;
                 }
 
                 ret = lstat(file_path, &buf);
                 if (ret < 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "ERR: Could not stat file %s: %s\n",
+                        telem_log(LOG_ERR, "Could not stat file %s: %s\n",
                                 file_path, strerror(errno));
-#endif
                 } else {
                         total_size += (buf.st_blocks * 512);
                 }
@@ -204,9 +198,7 @@ int validate_classification(char *classification)
         }
 
         if (slashes != 2) {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Classification string should have two /s.\n");
-#endif
+                telem_log(LOG_ERR, "Classification string should have two /s.\n");
                 return 1;
         }
 

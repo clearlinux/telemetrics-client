@@ -132,7 +132,7 @@ int main(int argc, char **argv)
         if (mkdir(MOUNT, 0755) < 0) {
                 //If there is an error other than an existing directory
                 if (errno != EEXIST) {
-                        telem_log(LOG_ERR, "Error creating directory /dev/pstore : %s\n", strerror(errno));
+                        telem_perror("Error creating directory /dev/pstore");
                         //bail out?
                         exit(EXIT_FAILURE);
                 }

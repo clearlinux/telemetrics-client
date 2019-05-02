@@ -65,14 +65,12 @@ void handle_complete_oops_message(struct oops_log_msg *msg)
 
 #ifdef DEBUG
         for (int i = 0; i < msg->length; i++) {
-                printf("%s\n", msg->lines[i]);
+                telem_debug("DEBUG: %s\n", msg->lines[i]);
         }
 #endif
         payload = parse_payload(msg);
 
-#ifdef DEBUG
-        printf("Payload Parsed :%s\n", payload->str);
-#endif
+        telem_debug("DEBUG: Payload Parsed :%s\n", payload->str);
         send_data(payload->str, (char *)msg->pattern->classification, (uint32_t)msg->pattern->severity);
         nc_string_free(payload);
 }
@@ -232,9 +230,7 @@ int main(int argc, char **argv)
                 // Look for only dmesg logs. Ignore other types of pstore dumps for now.
                 if (sscanf(entry->d_name, "dmesg-efi-%" PRIu64, &id) == 1) {
                         parse_id(id, &count, &part);
-                        #ifdef DEBUG
-                        printf("Extracted count :%d, part : %d\n", count, part);
-                        #endif
+                        telem_debug("DEBUG: Extracted count :%d, part : %d\n", count, part);
                 } else {
                         continue;
                 }
@@ -262,9 +258,7 @@ int main(int argc, char **argv)
 
         nc_hashmap_iter_init(hash, &iter);
         while (nc_hashmap_iter_next(&iter, (void **)&key, (void **)&value)) {
-                #ifdef DEBUG
-                printf("Count in the hash: %d\n", NC_UNHASH_KEY(key));
-                #endif
+                telem_debug("DEBUG: Count in the hash: %d\n", NC_UNHASH_KEY(key));
 
                 head = (struct chunk_list *)value;
                 elem = head;

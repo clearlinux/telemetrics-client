@@ -58,9 +58,7 @@ static int serialize_journal_entry(struct JournalEntry *entry, char **buff)
 
         if (asprintf(buff, "%s\036%lld\036%s\036%s\036%s", entry->record_id, (long long int)entry->timestamp,
                      entry->classification, entry->event_id, entry->boot_id) < 0) {
-#ifdef DEBUG
-                fprintf(stderr, "Error: unable to serialize data in buff\n");
-#endif
+                telem_log(LOG_ERR, "Error: Unable to serialize data in buff\n");
                 rc = -1;
         }
 
@@ -204,9 +202,7 @@ static int save_entry(FILE *fptr, struct JournalEntry *entry)
         }
 
         if ((rc = serialize_journal_entry(entry, &serialized_data)) == 0) {
-#ifdef DEBUG
-                printf("Saving: %s\n", serialized_data);
-#endif
+                telem_debug("DEBUG: Saving: %s\n", serialized_data);
                 fprintf(fptr, "%s\n", serialized_data);
                 fflush(fptr);
                 free(serialized_data);
@@ -229,9 +225,7 @@ static int read_boot_id(char buff[])
 
         fs = fopen(BOOTID_FILE, "r");
         if (!fs) {
-#ifdef DEBUG
-                fprintf(stderr, "Unable to open %s for reading: %d\n", BOOTID_FILE, errno);
-#endif
+                telem_log(LOG_ERR, "Error: Unable to open %s for reading: %d\n", BOOTID_FILE, errno);
                 return rc;
         }
 
@@ -264,9 +258,7 @@ static int skip_n_lines(int n, FILE *fptr, int (*found_record)(char *))
         struct JournalEntry *entry = NULL;
 
         if (fptr == NULL) {
-#ifdef DEBUG
-                fprintf(stderr, "fptr argument to skip_n_lines is invalid\n");
-#endif
+                telem_log(LOG_ERR, "fptr argument to skip_n_lines is invalid\n");
                 // File descriptor in bad state
                 return EBADFD;
         }
@@ -327,9 +319,7 @@ static int copy_to_tmp(FILE *fptr, char *tmp_path)
 
         if (fclose(fptr_tmp) != 0) {
                 rc = errno;
-#ifdef DEBUG
-                perror("Error: ");
-#endif
+                telem_perror("Error");
         }
         free(line);
 
@@ -350,22 +340,18 @@ TelemJournal *open_journal(const char *journal_file)
                 fptr = fopen(journal_file, "a+");
         }
         if (fptr == NULL) {
-#ifdef DEBUG
-                perror("Error while opening journal file: ");
-#endif
+                telem_perror("Error while opening journal file");
                 return NULL;
         }
 
         if (read_boot_id(boot_id) != 0) {
-#ifdef DEBUG
-                perror("Error while reading boot_id: ");
-#endif
+                telem_perror("Error while reading boot_id");
                 return NULL;
         }
 
         telem_journal = malloc(sizeof(struct TelemJournal));
         if (!telem_journal) {
-                fprintf(stderr, "Unable to allocate more memory\n");
+                telem_log(LOG_CRIT, "CRIT: Unable to allocate memory\n");
                 return NULL;
         }
 
@@ -379,9 +365,7 @@ TelemJournal *open_journal(const char *journal_file)
         telem_journal->latest_record_id = NULL;
         telem_journal->prune_entry_callback = NULL;
 
-#ifdef DEBUG
-        printf("Records in db: %d\n", telem_journal->record_count);
-#endif
+        telem_debug("Records in db: %d\n", telem_journal->record_count);
 
         return telem_journal;
 }
@@ -476,7 +460,7 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                 if (rc == -1) {
                         return rc;
                 } else if (rc != 0) {
-                        fprintf(stderr, "An error occurred while advancing journal file: %s\n", strerror(rc));
+                        telem_log(LOG_ERR, "An error occurred while advancing journal file: %s\n", strerror(rc));
                 }
         }
 
@@ -563,9 +547,7 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
         struct JournalEntry *entry = NULL;
 
         if (telem_journal == NULL) {
-#ifdef DEBUG
-                fprintf(stderr, "Error: telem_journal was not initialized\n");
-#endif
+                telem_log(LOG_ERR, "telem_journal was not initialized\n");
                 return rc;
         }
 
@@ -579,7 +561,7 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
 
         entry = malloc(sizeof(struct JournalEntry));
         if (!entry) {
-                fprintf(stderr, "Error: unable to allocate more memory\n");
+                telem_log(LOG_CRIT, "CRIT: unable to allocate memory\n");
                 return rc;
         }
         entry->classification = NULL;
@@ -588,16 +570,12 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
         entry->boot_id = NULL;
 
         if (get_random_id(&record_id) != 0) {
-#ifdef DEBUG
-                fprintf(stderr, "Error: unable to generate random id\n");
-#endif
+                telem_log(LOG_ERR, "Erorr: Unable to generate random id\n");
                 goto quit;
         }
 
         if (read_boot_id(boot_id) != 0) {
-#ifdef DEBUG
-                fprintf(stderr, "Error: unable to read boot_id\n");
-#endif
+                telem_log(LOG_ERR, "Error: Unable to read boot_id\n");
                 goto quit;
         }
 
@@ -615,9 +593,7 @@ int new_journal_entry(TelemJournal *telem_journal, char *classification,
 
         if ((rc = save_entry(telem_journal->fptr, entry)) == 0) {
                 telem_journal->record_count = telem_journal->record_count + 1;
-#ifdef DEBUG
-                fprintf(stdout, "%d records in journal\n", telem_journal->record_count);
-#endif
+                telem_debug("DEBUG: %d records in journal\n", telem_journal->record_count);
         }
 
         free(telem_journal->latest_record_id);
@@ -647,9 +623,7 @@ int prune_journal(struct TelemJournal *telem_journal, char *tmp_dir)
 
                 // jump to line# count
                 if ((rc = skip_n_lines(count, telem_journal->fptr, telem_journal->prune_entry_callback)) != 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "Error: skipping %d journal lines\n", count);
-#endif
+                        telem_log(LOG_ERR, "Error skipping %d journal lines\n", count);
                         // if rc == -1 (n > #lines in file, change to errno style)
                         return (rc == -1) ? EADDRNOTAVAIL : rc;
                 }
@@ -665,38 +639,28 @@ int prune_journal(struct TelemJournal *telem_journal, char *tmp_dir)
                 }
                 // create new file with rest of file
                 if ((rc = copy_to_tmp(telem_journal->fptr, tmp_file_path)) != 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "Error: copying partial journal to temp journal file\n");
-#endif
+                        telem_log(LOG_ERR, "Error copying partial journal to temp journal file\n");
                         goto quit;
                 }
                 // close file handler
                 if ((rc = fclose(telem_journal->fptr)) != 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "Error: closing journal file handler\n");
-#endif
+                        telem_log(LOG_ERR, "Error closing journal file handler\n");
                         goto quit;
                 }
                 // overwrite file
                 if ((rc = rename(tmp_file_path, telem_journal->journal_file)) != 0) {
-#ifdef DEBUG
-                        fprintf(stderr, "Error: while overwriting journal file\n");
-#endif
+                        telem_log(LOG_ERR, "Error while overwriting journal file\n");
                         goto quit;
                 }
                 // reopen file handler
                 telem_journal->fptr = fopen(telem_journal->journal_file, "a+");
                 if (!telem_journal->fptr) {
-#ifdef DEBUG
-                        fprintf(stderr, "Error: re-opening journal file\n");
-#endif
+                        telem_log(LOG_ERR, "Error re-opening journal file\n");
                         return rc;
                 }
                 // update record count
                 telem_journal->record_count = telem_journal->record_count - count;
-#ifdef DEBUG
-                fprintf(stdout, "record_count: %d\n", telem_journal->record_count);
-#endif
+                telem_debug("DEBUG: record_count: %d\n", telem_journal->record_count);
         }
         rc = 0;
 

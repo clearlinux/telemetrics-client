@@ -28,6 +28,7 @@
 #include "configuration.h"
 #include "util.h"
 #include "common.h"
+#include "log.h"
 
 #include "nica/inifile.h"
 
@@ -137,7 +138,8 @@ bool set_default_config_values(struct configuration *config)
         for (int i = 0; i < CONF_STR_MAX; i++) {
                 config->strValues[i] = strdup(config_str_default[i]);
                         if (config->strValues[i] == NULL) {
-                                fprintf(stderr, "ERR: could not set config item %s: %s\n", config_key_str[i], strerror(errno));
+                                telem_log(LOG_ERR, "Could not set config item %s: %s\n",
+                                          config_key_str[i], strerror(errno));
                                 return false;
                         }
         }
@@ -158,9 +160,7 @@ bool read_config_from_file(char *config_file, struct configuration *config)
 
         keyfile = nc_ini_file_parse(config_file);
         if (!keyfile) {
-#ifdef DEBUG
-                fprintf(stderr, "ERR: Failed to read config file\n");
-#endif
+                telem_log(LOG_ERR, "Failed to read config file\n");
                 return false;
         } else {
                 for (int i = 0; i < CONF_STR_MAX; i++) {
@@ -169,6 +169,8 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                         if (ptr) {
                                 config->strValues[i] = strdup(ptr);
                                 if (config->strValues[i] == NULL) {
+                                        telem_log(LOG_ERR, "Could not set config item %s: %s\n",
+                                                  config_key_str[i], strerror(errno));
                                         return false;
                                 }
                         } else {
@@ -184,6 +186,8 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                 errno = 0;
                                 config->intValues[i] = strtoll(ptr, NULL, 10);
                                 if (errno != 0) {
+                                        telem_log(LOG_ERR, "Error while parsing value of option %s: %s\n",
+                                                  config_key_int[i], strerror(errno));
                                         return false;
                                 }
                         } else {
@@ -200,6 +204,8 @@ bool read_config_from_file(char *config_file, struct configuration *config)
                                 } else if ((strcasecmp(ptr, "FALSE") == 0) || (strcmp(ptr, "0") == 0)) {
                                         config->boolValues[i] = false;
                                 } else {
+                                        telem_log(LOG_ERR, "Configuration item '%s' requires a boolean value\n",
+                                                  config_key_bool[i]);
                                         return false;
                                 }
                         } else {
@@ -231,9 +237,6 @@ static void initialize_config(void)
         if (config_file) {
                 if (!read_config_from_file(config_file, &config)) {
                         /* Error while parsing file  */
-#ifdef DEBUG
-                        fprintf(stderr, "ERR: Error while parsing configuration file\n");
-#endif
                         exit(EXIT_FAILURE);
                 }
         }
