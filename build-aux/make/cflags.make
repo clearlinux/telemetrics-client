@@ -12,7 +12,10 @@ AM_CFLAGS = \
 	-Wunreachable-code \
 	-funsigned-char \
 	-fPIE \
-	-fPIC
+	-fPIC \
+	-fno-strict-overflow \
+	-fno-delete-null-pointer-checks \
+	-fwrapv
 
 AM_CPPFLAGS = \
 	-D_FORTIFY_SOURCE=2 \
