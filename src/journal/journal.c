@@ -417,7 +417,7 @@ static void print_record(char *record_id)
 
         recordfp = fopen(filepath, "r");
         if (!recordfp) {
-                telem_perror("Error when opening a record to print");
+                telem_log(LOG_INFO, "Could not open record %s: %s\n", record_id, strerror(errno));
                 return;
         }
 
