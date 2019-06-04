@@ -126,7 +126,8 @@ void klog_process_oops_msgs(struct oops_log_msg *msg)
                 //Add the newline character to the end of each line
                 line = msg->lines[i];
                 linelength = strlen(line);
-                strncpy(bp, line, linelength);
+                // Copy the line (without the terminating NULL)
+                memcpy(bp, line, linelength);
                 bp[linelength] = '\n';
                 done += linelength + 1;
                 bp = contents + done;
