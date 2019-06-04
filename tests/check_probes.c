@@ -29,14 +29,17 @@
 #include "src/probes/klog_scanner.h"
 #include "src/probes/oops_parser.h"
 
-char reason[1024];
-nc_string *bt;
-nc_string *pl;
+static char reason[1024];
+static nc_string *pl;
 
 void callback_func(struct oops_log_msg *msg)
 {
-        strncpy(reason, msg->lines[0], strlen(msg->lines[0]) + 1);
-
+        size_t len = strlen(msg->lines[0]) + 1;
+        if (len > sizeof(reason)) {
+                len = sizeof(reason);
+        }
+        memcpy(reason, msg->lines[0], len);
+        reason[sizeof(reason) - 1] = 0;
         pl = parse_payload(msg);
 }
 
