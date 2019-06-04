@@ -272,7 +272,9 @@ static void get_payload_from_opt(char **payload)
         if (len >= MAX_PAYLOAD_LENGTH) {
                 len = MAX_PAYLOAD_LENGTH - 1;
         }
-        strncpy(*payload, opt_payload, len);
+
+        /* "payload" is pre-allocated zeroed buffer of MAX_PAYLOAD_LENGTH */
+        memcpy(*payload, opt_payload, len);
 }
 
 static void get_payload_from_stdin(char **payload)
