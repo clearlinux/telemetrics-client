@@ -1003,16 +1003,12 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
                 return -EINVAL;
         }
 
-        t_ref->record->payload = (char *)malloc(sizeof(char) * payload_len + 1);
+        t_ref->record->payload = strdup(payload);
 
         if (!t_ref->record->payload) {
                 telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 return -ENOMEM;
         }
-
-        memset(t_ref->record->payload, 0, sizeof(char) * payload_len + 1);
-
-        strncpy((char *)(t_ref->record->payload), (char *)payload, payload_len);
 
         t_ref->record->payload_size = payload_len;
 
