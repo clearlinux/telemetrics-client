@@ -24,14 +24,18 @@
 #include "common.h"
 #include "journal.h"
 
-void print_usage(void)
+static void print_usage(void)
 {
-        printf(" Usage\n");
+        printf("Usage:\n");
+        printf("  telem_journal [-Vi] [-r <record_id>] [-e <event_id>] [-c <classification>] [-b <boot_id>]\n\n");
+        printf("Where:\n");
         printf("  -r,  --record_id        Print record with specific record_id\n");
         printf("  -e,  --event_id         Print records with specific event_id\n");
         printf("  -c,  --classification   Print records with specific classification\n");
         printf("  -b,  --boot_id          Print records with specific boot_id\n");
-        printf("  -i,  --include_record   Include record content\n");
+        printf("  -i,  --include_record   Include record content if available.\n");
+        printf("                          Content only available when telemetry is configured\n");
+        printf("                          with \"record_retention_enabled=true\"\n");
         printf("  -V,  --verbose          Verbose output\n");
         printf("  -h,  --help             Display this help message\n");
 }
@@ -41,8 +45,8 @@ int main(int argc, char **argv)
 
         int rc = EXIT_SUCCESS;
         int count = 0;
-        int verbose_output = 0;
-        int record = 0;
+        bool verbose_output = false;
+        bool record = false;
         char *boot_id = NULL;
         char *record_id = NULL;
         char *event_id = NULL;
@@ -78,16 +82,15 @@ int main(int argc, char **argv)
                                 boot_id = optarg;
                                 break;
                         case 'V':
-                                verbose_output = 1;
+                                verbose_output = true;
                                 break;
                         case 'i':
-                                record = 1;
+                                record = true;
                                 break;
                         case 'h':
                                 print_usage();
                                 exit(EXIT_SUCCESS);
-                        case '?':
-                                /** default */
+                        default:
                                 print_usage();
                                 exit(EXIT_FAILURE);
                 }
