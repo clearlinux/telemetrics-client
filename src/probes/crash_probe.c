@@ -41,6 +41,8 @@
 #include "probe.h"
 #include "telemetry.h"
 
+#define FRAMES_MAX 64
+
 static Dwfl *d_core = NULL;
 
 /*
@@ -298,6 +300,12 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
                 }
         }
         nc_string_append_printf(*bt, "\n");
+
+        if (frame_counter >= FRAMES_MAX) {
+                errorstr = NULL;
+                return DWARF_CB_ABORT;
+        }
+
         return DWARF_CB_OK;
 }
 
@@ -390,6 +398,12 @@ static int process_corefile(nc_string **backtrace)
         *backtrace = nc_string_dup("");
 
         if (dwfl_getthreads(d_core, thread_cb, backtrace) != DWARF_CB_OK) {
+                /* We aborted unwinding, due to too many frames.
+                 * We don't consider this as an error.
+                 */
+                if (frame_counter >= FRAMES_MAX) {
+                        return 0;
+                }
                 /* When errors occur during the unwinding, we reach this point.
                  * If an error string is set for the particular error, send an
                  * "error" record to capture at least a partial backtrace if
@@ -654,6 +668,11 @@ int main(int argc, char **argv)
                 if (process_corefile(&backtrace) < 0) {
                         goto fail;
                 }
+        }
+
+        if (frame_counter >= FRAMES_MAX) {
+                telem_log(LOG_ERR, "Too many frames. Backtrace truncated.\n");
+                nc_string_append_printf(header, "Too many frames. Backtrace truncated.\n");
         }
 
         nc_string_prepend(backtrace, header->str);
