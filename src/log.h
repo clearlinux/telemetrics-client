@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2015 Intel Corporation
+ * Copyright 2019 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -17,6 +17,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -35,7 +36,6 @@
 #include <systemd/sd-journal.h>
 #endif
 #else
-#include <errno.h>
 #include <string.h>
 #include <syslog.h>
 #endif

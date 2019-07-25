@@ -9,23 +9,47 @@ bin_PROGRAMS += \
 	%D%/bertprobe
 
 %C%_pythonprobe_SOURCES = %D%/python-probe.c
+%C%_pythonprobe_CFLAGS = $(AM_CFLAGS)
 %C%_pythonprobe_LDADD = $(top_builddir)/src/libtelemetry.la
 %C%_pythonprobe_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
 
+if LOG_SYSTEMD
+if HAVE_SYSTEMD_JOURNAL
+%C%_pythonprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_pythonprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
+
 %C%_hprobe_SOURCES = %D%/hello.c
 %C%_hprobe_LDADD = $(top_builddir)/src/libtelemetry.la
+%C%_hprobe_CFLAGS = $(AM_CFLAGS)
 %C%_hprobe_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
 
+if LOG_SYSTEMD
+if HAVE_SYSTEMD_JOURNAL
+%C%_hprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_hprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
+
 %C%_bertprobe_SOURCES = %D%/bert_probe.c \
 	src/nica/b64enc.c
+%C%_bertprobe_CFLAGS = $(AM_CFLAGS)
 %C%_bertprobe_LDADD = $(top_builddir)/src/libtelemetry.la
 %C%_bertprobe_LDFLAGS = \
         $(AM_LDFLAGS) \
         -pie
+
+if LOG_SYSTEMD
+if HAVE_SYSTEMD_JOURNAL
+%C%_bertprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_bertprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
 
 %C%_telem_record_gen_SOURCES = %D%/telem_record_gen.c
 %C%_telem_record_gen_CFLAGS = \
@@ -34,6 +58,14 @@ bin_PROGRAMS += \
 %C%_telem_record_gen_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
+
+if LOG_SYSTEMD
+if HAVE_SYSTEMD_JOURNAL
+%C%_telem_record_gen_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_telem_record_gen_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
+
 
 %C%_pstoreclean_SOURCES = %D%/pstore_clean.c
 %C%_pstoreclean_CFLAGS = \
@@ -119,13 +151,6 @@ if HAVE_SYSTEMD_JOURNAL
 %C%_klogscanner_LDADD += \
         $(SYSTEMD_JOURNAL_LIBS)
 endif
-
-if HAVE_SYSTEMD_JOURNAL
-%C%_klogscanner_CFLAGS += \
-        $(SYSTEMD_JOURNAL_CFLAGS)
-%C%_klogscanner_LDADD += \
-        $(SYSTEMD_JOURNAL_LIBS)
-endif
 endif
 
 
@@ -149,6 +174,10 @@ bin_PROGRAMS += \
 %C%_journalprobe_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	-pie
+if LOG_SYSTEMD
+%C%_journalprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_journalprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
 endif
 endif
 

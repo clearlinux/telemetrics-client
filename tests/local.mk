@@ -33,6 +33,13 @@ dist_check_SCRIPTS = \
 	@CHECK_LIBS@ \
 	$(top_builddir)/src/libtelem-shared.la
 
+if HAVE_SYSTEMD_JOURNAL
+if LOG_SYSTEMD
+%C%_check_config_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_check_config_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
+
 %C%_check_probd_SOURCES = \
 	%D%/check_probd.c \
 	src/telemdaemon.c \
@@ -180,6 +187,13 @@ EXTRA_DIST += \
 %C%_check_journal_LDADD = \
 	@CHECK_LIBS@
 
+if HAVE_SYSTEMD_JOURNAL
+if LOG_SYSTEMD
+%C%_check_journal_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_check_journal_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
+
 %C%_check_libtelemetry_SOURCES = \
 	%D%/check_libtelemetry.c \
 	src/configuration.h \
@@ -194,5 +208,12 @@ EXTRA_DIST += \
 	@CHECK_LIBS@ \
 	$(top_builddir)/src/libtelemetry.la \
 	$(top_builddir)/src/libtelem-shared.la
+
+if HAVE_SYSTEMD_JOURNAL
+if LOG_SYSTEMD
+%C%_check_libtelemetry_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
+%C%_check_libtelemetry_LDADD += $(SYSTEMD_JOURNAL_LIBS)
+endif
+endif
 
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab
