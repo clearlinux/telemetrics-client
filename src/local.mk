@@ -1,6 +1,17 @@
 bin_PROGRAMS = \
 	%D%/telemprobd \
-	%D%/telempostd
+	%D%/telempostd \
+	%D%/telemctl
+
+%C%_telemctl_SOURCES = \
+	%D%/telemctl.c
+
+%C%_telemctl_CFLAGS = \
+	$(AM_CFLAGS)
+
+%C%_telemctl_LDFLAGS = \
+	$(AM_LDFLAGS) \
+	-pie
 
 %C%_telemprobd_SOURCES = \
 	%D%/probe.c \
