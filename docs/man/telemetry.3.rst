@@ -44,7 +44,7 @@ The function ``tm_set_payload()`` attaches the provided telemetry record
 data to the telemetry record. The current maximum payload size is 8192b.
 
 The function ``tm_send_record()`` delivers the record to the local
-``telemd``\(1) service.
+``telemprobd``\(1) service.
 
 The function ``tm_set_config_file()`` can be used to provide an alternate
 configuration path to the telemetry library.
