@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([telemetrics-client], [2.2.0], [https://clearlinux.org/])
+AC_INIT([telemetrics-client], [2.2.1], [https://clearlinux.org/])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.14 -Wall -Werror -Wno-extra-portability foreign subdir-objects])
 AM_SILENT_RULES([yes])
