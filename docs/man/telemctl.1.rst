@@ -52,6 +52,6 @@ RETURN VALUES
 SEE ALSO
 ========
 
-* ``telemd``\(1)
+* ``telemprobd``\(1)
 * https://github.com/clearlinux/telemetrics-client
 * https://clearlinux.org/documentation/
