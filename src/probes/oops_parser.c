@@ -150,6 +150,12 @@ struct oops_pattern oops_patterns_arr[] = {
                 TM_MEDIUM,
                 false,
         },
+        {
+                "ACPI Error:",
+                "org.clearlinux/kernel/warning",
+                TM_MEDIUM,
+                false,
+        },
 };
 
 static int oops_patterns_cnt = sizeof(oops_patterns_arr) / sizeof(struct oops_pattern);
