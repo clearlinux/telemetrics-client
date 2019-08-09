@@ -99,7 +99,7 @@ static int deserialize_journal_entry(char *line, struct JournalEntry **entry)
         size_t offset = 0;
         struct JournalEntry *e = NULL;
 
-        if (line == NULL) {
+        if (line == NULL || !strlen(line)) {
                 return -1;
         }
 
@@ -273,6 +273,8 @@ static int skip_n_lines(int n, FILE *fptr, int (*found_record)(char *))
                         break;
                 }
                 if (found_record != NULL) {
+                        if (!strlen(line))
+                            continue;
                         deserialize_journal_entry(line, &entry);
                         if (entry) {
                                 found_record(entry->record_id);
@@ -465,6 +467,8 @@ int print_journal(TelemJournal *telem_journal, char *classification,
         }
 
         while (getline(&line, &len, journal_fileptr) != -1) {
+                if (!strlen(line))
+                    continue;
                 deserialize_journal_entry(line, &entry);
                 if (entry) {
                         /* filter entry out if one is provided */
