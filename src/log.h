@@ -96,4 +96,12 @@
 #define telem_perror(msg) fprintf(stderr, "ERROR: " msg ": %s\n", strerror(errno))
 #endif
 
+#ifndef telem_log
+#define telem_log(priority, ...) do {} while (0);
+#endif
+
+#ifndef telem_perror
+#define telem_perror(msg) do {} while (0);
+#endif
+
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
