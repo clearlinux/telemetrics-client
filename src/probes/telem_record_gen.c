@@ -110,12 +110,21 @@ static bool parse_options(int argc, char **argv)
                                 severity = (uint32_t)tmp;
                                 break;
                         case 'c':
+                                if (opt_class != NULL) {
+                                    free(opt_class);
+                                }
                                 opt_class = strdup(optarg);
                                 break;
                         case 'p':
+                                if (opt_payload != NULL) {
+                                    free(opt_payload);
+                                }
                                 opt_payload = strdup(optarg);
                                 break;
                         case 'P':
+                                if (opt_payload_file != NULL) {
+                                    free(opt_payload_file);
+                                }
                                 opt_payload_file = strdup(optarg);
                                 break;
                         case 'R':
@@ -135,6 +144,9 @@ static bool parse_options(int argc, char **argv)
                                 payload_version = (uint32_t)tmp;
                                 break;
                         case 'e':
+                                if (opt_event_id != NULL) {
+                                    free(opt_event_id);
+                                }
                                 opt_event_id = strdup(optarg);
                                 if (opt_event_id == NULL) {
                                         goto fail;
