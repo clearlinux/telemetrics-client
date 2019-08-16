@@ -255,23 +255,19 @@ static void stage_record(char *filepath, char *headers[], char *body, char *cfg_
         telem_debug("DEBUG: filepath:%s\n", filepath);
         telem_debug("DEBUG: body:%s\n", body);
         telem_debug("DEBUG: cfg:%s\n", cfg_file);
-        // Use default path if not provided
+
         if (filepath == NULL) {
                 telem_log(LOG_ERR, "filepath value must be provided, aborting\n");
                 exit(EXIT_FAILURE);
         }
 
         tmpfd = mkstemp(filepath);
-        if (!tmpfd) {
+        if (tmpfd < 0) {
                 telem_perror("Error opening staging file");
-                close(tmpfd);
-                if (unlink(filepath)) {
-                        telem_perror("Error deleting staging file");
-                }
                 goto clean_exit;
         }
 
-        // open file
+        // access the opened file as a stream
         tmpfile = fdopen(tmpfd, "a");
         if (!tmpfile) {
                 telem_perror("Error opening temp stage file");
@@ -292,7 +288,7 @@ static void stage_record(char *filepath, char *headers[], char *body, char *cfg_
                 fprintf(tmpfile, "%s\n", headers[i]);
         }
 
-        //write body
+        // write body
         fprintf(tmpfile, "%s\n", body);
         fflush(tmpfile);
         fclose(tmpfile);
