@@ -83,7 +83,7 @@ bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
 
                 size_t pathlen = strlen(line);
                 *cfg_file = malloc(pathlen + 1);
-                if (cfg_file == NULL) {
+                if (*cfg_file == NULL) {
                         telem_log(LOG_ERR, "Could not allocate memory for config file path\n");
                         goto read_error;
                 }
