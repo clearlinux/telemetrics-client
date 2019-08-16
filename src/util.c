@@ -65,7 +65,7 @@ bool get_header_value(const char *header, char **value)
                 *value = strdup(sep);
         }
 
-        return (bool)(value != NULL);
+        return (bool)(*value != NULL);
 }
 
 void *reallocate(void **addr, size_t *allocated, size_t requested)
