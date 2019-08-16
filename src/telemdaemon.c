@@ -430,7 +430,7 @@ bool get_machine_id(char *machine_id)
                 return false;
         }
 
-        ret = fscanf(id_file, "%s", machine_id);
+        ret = fscanf(id_file, "%32s", machine_id);
         if (ret != 1) {
                 telem_perror("Could not read machine id from file");
                 fclose(id_file);
