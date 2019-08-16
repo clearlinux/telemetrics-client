@@ -335,8 +335,10 @@ static int instanciate_record(struct telem_ref **t_ref, char *payload)
                 goto out1;
         }
 
-        if ((ret = opt_event_id && tm_set_event_id(*t_ref, opt_event_id)) < 0) {
-                goto out1;
+        if (opt_event_id) {
+                if ((ret = tm_set_event_id(*t_ref, opt_event_id)) < 0) {
+                        goto out1;
+                }
         }
 
         if ((ret = tm_set_payload(*t_ref, payload)) < 0) {
