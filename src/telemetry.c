@@ -1053,7 +1053,7 @@ int tm_set_event_id(struct telem_ref *t_ref, char *event_id)
         int rc = -1;
 
         if (!validate_event_id(event_id)) {
-                if (t_ref && t_ref->record && t_ref->record->headers) {
+                if (t_ref && t_ref->record) {
                         // free default id before overriding
                         free(t_ref->record->headers[TM_EVENT_ID]);
                         // set new event_id
