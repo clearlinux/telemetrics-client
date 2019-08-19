@@ -389,27 +389,28 @@ telem_opt_out() {
 */
 static int telemctl_opt_out(void)
 {
-        if (access(TM_OPT_OUT, F_OK) == 0) {
-                fprintf(stderr, "Already opted out. Nothing to do.\n");
-                return 0;
-        } else {
-                /* Ensure TELEM_DIR exists */
-                if (mk_telem_dir() != 0) {
-                        fprintf(stderr, "Failed to create %s\n", TELEM_DIR);
-                        return 1;
-                }
-                /* create TM_OPT_OUT file in TELEM_DIR*/
-                int fd = creat(TM_OPT_OUT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-                if (fd < 0) {
+        /* Ensure TELEM_DIR exists */
+        if (mk_telem_dir() != 0) {
+                fprintf(stderr, "Failed to create %s\n", TELEM_DIR);
+                return 1;
+        }
+
+        /* Create a brand new file TM_OPT_OUT, we mai fail because the file exists already.
+         * In that case we are already opted out and we are done here. */
+        int fd = open(TM_OPT_OUT, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+        if (fd == -1) {
+                if (errno == EEXIST) {
+                        fprintf(stderr, "Already opted out. Nothing to do.\n");
+                        return 0;
+                } else {
                         fprintf(stderr, "Failed to create %s.\n", TM_OPT_OUT);
                         return 1;
                 }
-                close(fd);
+        } else {
                 telemctl_stop();
+                close(fd);
                 return telemctl_remove_work_dirs();
         }
-
-        return 1;
 }
 
 /*
@@ -423,16 +424,17 @@ telem_opt_in() {
 */
 static int telemctl_opt_in(void)
 {
-        if (access(TM_OPT_OUT, F_OK) != 0) {
-                fprintf(stderr, "Already opted in. Nothing to do.\n");
-                return 0;
-        } else {
-                if (unlink(TM_OPT_OUT) == -1) {
-                        fprintf(stderr, "Failed to remove %s.\n", TM_OPT_OUT);
-                        return 1;
+        /* Delete the TM_OPT_OUT file */
+        if (unlink(TM_OPT_OUT) == -1) {
+                if (errno == ENOENT) {
+                        fprintf(stderr, "Already opted in. Nothing to do.\n");
+                        return 0;
                 }
-                return telemctl_start();
+                fprintf(stderr, "Failed to remove %s.\n", TM_OPT_OUT);
+                return 1;
         }
+
+        return telemctl_start();
 }
 
 
