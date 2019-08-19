@@ -384,10 +384,12 @@ static int telemctl_opt_out(void)
                         return 1;
                 }
                 /* create TM_OPT_OUT file in TELEM_DIR*/
-                if ((creat(TM_OPT_OUT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) < 0) {
+                int fd = creat(TM_OPT_OUT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+                if (fd < 0) {
                         fprintf(stderr, "Failed to create %s.\n", TM_OPT_OUT);
                         return 1;
                 }
+                close(fd);
                 telemctl_stop();
                 return telemctl_remove_work_dirs();
         }
