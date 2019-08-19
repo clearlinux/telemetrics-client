@@ -363,8 +363,8 @@ save_err:
 
 static void save_entry_to_journal(TelemPostDaemon *daemon, time_t t_stamp, char *headers[])
 {
-        char *classification_value;
-        char *event_id_value;
+        char *classification_value = NULL;
+        char *event_id_value = NULL;
 
         if (get_header_value(headers[TM_CLASSIFICATION], &classification_value) &&
             get_header_value(headers[TM_EVENT_ID], &event_id_value)) {
