@@ -222,14 +222,14 @@ char *read_machine_id_override()
         return machine_override;
 }
 
-void machine_id_replace(char **machine_header, char *machine_id_override)
+static void machine_id_replace(char **machine_header, char *machine_id_override)
 {
         char machine_id[33] = { 0 };
         char *old_header;
         int ret;
 
         if (machine_id_override) {
-                strcpy(machine_id, machine_id_override);
+                strncpy(machine_id, machine_id_override, sizeof(machine_id)-1);
         } else {
                 if (!get_machine_id(machine_id)) {
                         // TODO: decide if error handling is needed here
