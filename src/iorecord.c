@@ -52,22 +52,19 @@ bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
 #else
         char line[PATH_MAX+1] = { 0 };
 #endif
-        struct stat buf;
         long size;
         uint32_t cfg_prefix = 0;
-
-        ret = stat(fullpath, &buf);
-        if (ret == -1) {
-                telem_log(LOG_ERR, "Unable to stat record %s in staging\n", fullpath);
-                return false;
-        }
-        size = buf.st_size;
 
         fp = fopen(fullpath, "r");
         if (fp == NULL) {
                 telem_log(LOG_ERR, "Unable to open file %s in staging\n", fullpath);
                 return false;
         }
+
+        // Get the file size
+        fseek(fp, 0 , SEEK_END);
+        size = ftell(fp);
+        fseek(fp, 0 , SEEK_SET);
 
         // First line may contain configuration file path
         if (fread(&cfg_prefix, CFG_PREFIX_LENGTH, 1, fp) != 1) {
