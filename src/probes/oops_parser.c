@@ -156,6 +156,12 @@ struct oops_pattern oops_patterns_arr[] = {
                 TM_MEDIUM,
                 false,
         },
+        {
+                "Kernel panic - not syncing:",
+                "org.clearlinux/kernel/panic",
+                TM_CRITICAL,
+                false,
+        },
 };
 
 static int oops_patterns_cnt = sizeof(oops_patterns_arr) / sizeof(struct oops_pattern);
