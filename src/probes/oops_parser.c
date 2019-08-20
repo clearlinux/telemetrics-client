@@ -516,7 +516,7 @@ static void stack_frame_append(struct stack_frame **head, struct stack_frame **t
                 while (*start && !isspace(*start)) {
                         start++;
                 }
-                if (start && *start == '\0') {
+                if (*start == '\0') {
                         return;
                 }
 
