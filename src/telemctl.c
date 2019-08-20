@@ -28,6 +28,7 @@
 #include <locale.h>
 #include <pwd.h>
 #include <grp.h>
+#include <errno.h>
 
 #define TELEM_DIR       "/etc/telemetrics"
 #define TM_OPT_OUT      TELEM_DIR"/opt-out"
@@ -237,22 +238,35 @@ static int telemctl_is_active(void)
         return 1;
 }
 
-/*
- * We run as root, so be extra careful when deleting folders/files.
- * We only delete those owned by telemetry:telemetry
- */
+
 static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
+        int rv = remove(fpath);
+#ifdef DEBUG
+        fprintf(stderr, "[debug] [%s] remove fpath:%s rv:%d\n", __func__, fpath, rv);
+#endif
+        return rv;
+
+}
+
+/* rm -rf path
+ *
+ * We run as root, so be extra careful when deleting folders.
+ * We only delete folders owned by telemetry:telemetry.
+ * As for the files, they can be owned by root.
+ */
+static int rm_rf(char *path)
+{
         struct stat info;
-        if (stat(fpath, &info) == 0) {
+        if (stat(path, &info) == 0) {
                 struct passwd *pw = getpwuid(info.st_uid);
                 if (pw == NULL) {
                         perror("getpwuid");
                         return -1;
                 }
                 if (strcmp(pw->pw_name, "telemetry") != 0) {
-                        fprintf(stderr, "Not removing \"%s\": Incorrect file owner \"%s\"\n",
-                                fpath, pw->pw_name);
+                        fprintf(stderr, "Not removing \"%s\": Incorrect folder owner \"%s\"\n",
+                                path, pw->pw_name);
                         return -1;
                 }
                 struct group  *gr = getgrgid(info.st_gid);
@@ -261,30 +275,22 @@ static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, str
                         return -1;
                 }
                 if (strcmp(gr->gr_name, "telemetry") != 0) {
-                        fprintf(stderr, "Not removing \"%s\": Incorrect file group \"%s\"\n",
-                        fpath, gr->gr_name);
+                        fprintf(stderr, "Not removing \"%s\": Incorrect folder group \"%s\"\n",
+                                path, gr->gr_name);
                         return -1;
                 }
 
-                int rv = remove(fpath);
-        #ifdef DEBUG
-                printf("[debug] [%s] remove fpath:%s rv:%d\n", __func__, fpath, rv);
-        #endif
-                if (rv) {
-                        perror(fpath);
-                }
-
-                return rv;
+                return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
         } else {
-                perror("stat");
-                return -1;
+                // Some folders are subfolders of folders already recursivley deleted.
+                // So they may not exist anymore.
+                if (errno != ENOENT) {
+                        fprintf(stderr, "file: %s :", path);
+                        perror("stat");
+                        return -1;
+                }
+                return 0;
         }
-}
-
-/* rm -rf path */
-static int rm_rf(char *path)
-{
-        return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
 
 /*
