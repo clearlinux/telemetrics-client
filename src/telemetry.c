@@ -913,14 +913,6 @@ int tm_create_record(struct telem_ref **t_ref, uint32_t severity,
                      char *classification, uint32_t payload_version)
 {
         int ret = 0;
-        int k = 0;
-        struct stat unused;
-
-        k = stat(TM_OPT_OUT_FILE, &unused);
-        if (k == 0) {
-                // Bail early if opt-out is enabled
-                return -ECONNREFUSED;
-        }
 
         *t_ref = (struct telem_ref *)malloc(sizeof(struct telem_ref));
         if (*t_ref == NULL) {
@@ -984,14 +976,6 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
 {
         size_t payload_len;
         int ret = 0;
-        int k = 0;
-        struct stat unused;
-
-        k = stat(TM_OPT_OUT_FILE, &unused);
-        if (k == 0) {
-                // Bail early if opt-out is enabled
-                return -ECONNREFUSED;
-        }
 
         payload_len = strlen((char *)payload);
 
