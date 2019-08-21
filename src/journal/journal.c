@@ -347,12 +347,14 @@ TelemJournal *open_journal(const char *journal_file)
 
         if (read_boot_id(boot_id) != 0) {
                 telem_perror("Error while reading boot_id");
+                fclose(fptr);
                 return NULL;
         }
 
         telem_journal = malloc(sizeof(struct TelemJournal));
         if (!telem_journal) {
                 telem_log(LOG_CRIT, "CRIT: Unable to allocate memory\n");
+                fclose(fptr);
                 return NULL;
         }
 
@@ -485,16 +487,16 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                                 // Check prefixes when classification ends in /*, otherwise use strcomp
                                 if (is_class_prefix(classification)) {
                                         if (strncmp(entry->classification, classification, strlen(classification) - 1) != 0) {
-                                                continue;
+                                                goto skip_print;
                                         }
                                 } else if (strcmp(entry->classification, classification) != 0) {
-                                        continue;
+                                        goto skip_print;
                                 }
                         }
                         /* end filters section */
                         ts = *localtime(&entry->timestamp);
                         if (strftime(str_time, sizeof(str_time), "%a %Y-%m-%d %H:%M:%S %Z", &ts) == 0) {
-                                continue;
+                                goto skip_print;
                         }
                         /* print record metadata */
                         fprintf(stdout, "%-30s %s %s %s %s\n", entry->classification, str_time, entry->record_id, entry->event_id, entry->boot_id);
@@ -503,9 +505,9 @@ int print_journal(TelemJournal *telem_journal, char *classification,
                                 print_record(entry->record_id);
                         }
                         count++;
-                }
 skip_print:
-                free_journal_entry(entry);
+                        free_journal_entry(entry);
+                }
         }
         free(line);
         fclose(journal_fileptr);
