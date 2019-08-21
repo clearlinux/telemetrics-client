@@ -99,11 +99,14 @@ static int deserialize_journal_entry(char *line, struct JournalEntry **entry)
         size_t offset = 0;
         struct JournalEntry *e = NULL;
 
+        /* Assume an error... */
+        *entry = NULL;
+
         if (line == NULL || !strlen(line)) {
                 return -1;
         }
 
-        e = malloc(sizeof(struct JournalEntry));
+        e = calloc(1, sizeof(struct JournalEntry));
         if (!e) {
                 return -1;
         }
@@ -138,10 +141,6 @@ static int deserialize_journal_entry(char *line, struct JournalEntry **entry)
                                         e->boot_id = out;
                                         rc = 0;
                                         break;
-                                default:
-                                        assert(i < 0 && i > 4);
-                                        free(out);
-                                        rc = 1;
                         }
                 } else {
                         rc = -1;
