@@ -382,17 +382,17 @@ out:
 static int print_record(char *payload)
 {
         struct telem_ref *t_ref = NULL;
-        int ret = 0;
-        int i = 0;
+        int ret;
 
         if ((ret = instanciate_record(&t_ref, payload)) == 0) {
+                int i;
                 for (i = 0; i < NUM_HEADERS; i++) {
                         fprintf(stdout, "%s", t_ref->record->headers[i]);
                 }
                 fprintf(stdout, "%s\n", t_ref->record->payload);
-                tm_free_record(t_ref);
         }
 
+        tm_free_record(t_ref);
         return ret;
 }
 
