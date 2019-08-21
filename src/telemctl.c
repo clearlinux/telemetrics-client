@@ -325,15 +325,24 @@ static int telemctl_remove_work_dirs(void)
 
         while (true) {
                 char folder[PATH_MAX+1];
-                int ret = fscanf(fp, "d %s %*s telemetry telemetry - \n", folder);
+                char line[PATH_MAX+30];
+
+                if (fgets(line, sizeof(line), fp) == NULL) {
+                        if (ferror(fp)) {
+                                fprintf(stderr, "Error reading file %s\n", TELEM_WRK_DIRS_CONF);
+                                fclose(fp);
+                                return 1;
+                        }
+                        // EOF
+                        break;
+                }
+
+                int ret = sscanf(line, "d %s %*s telemetry telemetry - \n", folder);
                 if (ret == 1) {
                         /* Delete the folder. We may get an error trying to delete
                          * folders already deleted. We ignore them, so don't bother
                          * checking rmrtf return value */
                         rm_rf(folder);
-                }
-                if (ret == EOF) {
-                        break;
                 }
         }
 
