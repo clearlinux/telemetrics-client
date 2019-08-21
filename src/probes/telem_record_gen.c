@@ -370,6 +370,9 @@ static int send_record(char *payload)
         }
 
         if ((ret = tm_send_record(t_ref)) < 0) {
+                if (ret == -ECONNREFUSED) {
+                        fprintf(stdout, "Unable to send record make sure to opt-in to telemetry first 'telemctl opt-in'\n");
+                }
                 goto out;
         }
 
