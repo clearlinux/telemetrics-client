@@ -18,7 +18,9 @@
 
 #include <stdio.h>
 #include <errno.h>
-
+#ifdef ANDROID
+#include <log/log.h>
+#endif
 #include "config.h"
 
 #ifdef TM_LOG_SYSTEMD
@@ -94,6 +96,36 @@
 #endif
 #ifdef TM_LOG_STDERR
 #define telem_perror(msg) fprintf(stderr, "ERROR: " msg ": %s\n", strerror(errno))
+#endif
+
+#ifdef ANDROID
+#ifdef telem_log
+#undef telem_log
+#endif
+#ifdef telem_perror
+#undef telem_perror
+#endif
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#ifdef LOG_PRI
+#undef LOG_PRI
+#endif
+#define LOG_TAG "telemetrics-client"
+#define LOG_PRI(priority, tag, ...) android_printLog(priority, tag, __VA_ARGS__)
+#define telem_log(priority, ...) \
+    switch (priority) \
+    { \
+        case LOG_EMERG: ALOGE(__VA_ARGS__); break; \
+        case LOG_ALERT: ALOGE(__VA_ARGS__); break; \
+        case LOG_CRIT: ALOGE(__VA_ARGS__); break; \
+        case LOG_ERR: ALOGE(__VA_ARGS__); break; \
+        case LOG_WARNING: ALOGW(__VA_ARGS__); break; \
+        case LOG_DEBUG: ALOGD(__VA_ARGS__); break; \
+        case LOG_NOTICE: ALOGD(__VA_ARGS__); break; \
+        case LOG_INFO: ALOGI(__VA_ARGS__); break; \
+    }
+#define telem_perror(msg) telem_log(LOG_ERR, msg)
 #endif
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */
