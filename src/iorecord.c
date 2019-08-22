@@ -43,7 +43,7 @@ bool _fgets(char *s, int n, FILE *stream)
 
 bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
 {
-        int i, ret = 0;
+        int i = 0;
         bool result = false;
         FILE *fp = NULL;
         long offset;
