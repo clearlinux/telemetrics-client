@@ -496,7 +496,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
         bool ret = false;
         char *headers[NUM_HEADERS];
         char *body = NULL;
-        struct stat buf;
+        struct stat buf = { 0 };
         time_t current_time = time(NULL);
         int64_t max_spool_size = 0;
         char *cfg_file = NULL;
@@ -520,7 +520,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
         }
 
         /** Update spool directory size **/
-        (daemon->current_spool_size) += (buf.st_blocks * 512);
+        daemon->current_spool_size += (buf.st_blocks * 512);
 
         /** Check that record is not expired **/
         if (!S_ISREG(buf.st_mode) ||
@@ -574,7 +574,7 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
 end_processing_file:
         /** Update spool size if record will be removed **/
         if (ret) {
-                (daemon->current_spool_size) -= (buf.st_blocks * 512);
+                daemon->current_spool_size -= (buf.st_blocks * 512);
         }
         telem_log(LOG_DEBUG, "spool_size: %ld\n", daemon->current_spool_size);
         free(body);
