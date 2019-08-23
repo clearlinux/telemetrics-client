@@ -353,9 +353,7 @@ static int instanciate_record(struct telem_ref **t_ref, char *payload)
                 }
         }
 
-        if ((ret = tm_set_payload(*t_ref, payload)) < 0) {
-                goto out1;
-        }
+        ret = tm_set_payload(*t_ref, payload);
 out1:
         return ret;
 }
