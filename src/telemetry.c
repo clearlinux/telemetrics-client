@@ -1256,8 +1256,8 @@ int tm_send_record(struct telem_ref *t_ref)
 
         /*
          * Allocating buffer for what we intend to send.  Buffer layout is:
-         * <uint32_t total_size>     : so recv knows how much to read
-         * <custom cfg file field>   : optional
+         * <uint32_t record_size>     : so recv knows how much to read
+         * <custom cfg file field>    : optional
          * <uint32_t header_size>
          * <headers + Payload>
          * <null-byte>
@@ -1265,16 +1265,14 @@ int tm_send_record(struct telem_ref *t_ref)
          */
         record_size = (2 * sizeof(uint32_t)) + total_size + 1;
 
-        data = malloc(record_size);
+        data = calloc(sizeof(char), record_size);
         if (!data) {
                 telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 close(sfd);
                 return -ENOMEM;
         }
 
-        memset(data, 0, record_size);
-
-        memcpy(data, &total_size, sizeof(uint32_t));
+        memcpy(data, &record_size, sizeof(uint32_t));
         offset += sizeof(uint32_t);
 
         if (cfg_file_name != NULL) {

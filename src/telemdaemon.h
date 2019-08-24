@@ -126,27 +126,6 @@ void remove_client(client_list_head *client_head, client *cl);
 bool is_client_list_empty(client_list_head *client_head);
 
 /**
- * Terminate a client connection
- *
- * @param daemon Pointer to the daemon
- * @param cl Pointer to the client in the client list
- * @param index The index of the client file descriptor in the poll fd
- *    array
- *
- */
-void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index);
-
-/**
- * Process record from a client
- *
- * @param daemon Pointer to the daemon
- * @param cl Pointer to the client in the client list
- *
- * @return true on success, false on failure
- */
-void process_record(TelemDaemon *daemon, client *cl);
-
-/**
  * Get random machine id stored in file
  *
  * @return machine id stored in file if successfully read, 0 otherwise
