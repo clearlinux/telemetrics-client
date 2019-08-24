@@ -36,6 +36,8 @@
 #include "log.h"
 #include "configuration.h"
 
+static void process_record(TelemDaemon *daemon, client *cl);
+
 void initialize_probe_daemon(TelemDaemon *daemon)
 {
         client_list_head head;
@@ -80,7 +82,8 @@ bool is_client_list_empty(client_list_head *client_head)
         return (client_head->lh_first == NULL);
 }
 
-void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index)
+
+static void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index)
 {
         /* Remove fd from the pollfds array */
         del_pollfd(daemon, index);
@@ -91,24 +94,34 @@ void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index)
         remove_client(&(daemon->client_head), cl);
 }
 
-bool handle_client(TelemDaemon *daemon, nfds_t ind, client *cl)
+/*
+ See "tm_send_record" for record retails.
+
+ recv buffer layout:
+         * <uint32_t record_size>    : so recv knows how much to read
+         * <custom cfg file field>   : optional, variable size (string)
+         * <uint32_t header_size>
+         * <headers + Payload>
+         * <null-byte>
+
+ The routine handle_client only cares about "record_size".
+*/
+
+bool handle_client(TelemDaemon *daemon, nfds_t index, client *cl)
 {
         /* For now  read data from fd */
         ssize_t len;
-        size_t record_size = 0;
+        size_t buf_size;
         bool processed = false;
+        uint32_t record_size;
 
-        if (!cl->buf) {
-                cl->buf = malloc(RECORD_SIZE_LEN);
-                cl->size = RECORD_SIZE_LEN;
-        }
-        if (!cl->buf) {
-                telem_log(LOG_ERR, "Unable to allocate memory, exiting\n");
-                exit(EXIT_FAILURE);
+        if (cl->buf != NULL) {
+                free(cl->buf);
+                cl->buf = NULL;
         }
 
         malloc_trim(0);
-        len = recv(cl->fd, cl->buf, RECORD_SIZE_LEN, MSG_PEEK | MSG_DONTWAIT);
+        len = recv(cl->fd, &record_size, RECORD_SIZE_LEN, MSG_PEEK | MSG_DONTWAIT);
         if (len < 0) {
                 telem_log(LOG_ERR, "Failed to talk to client %d: %s\n", cl->fd,
                           strerror(errno));
@@ -120,6 +133,32 @@ bool handle_client(TelemDaemon *daemon, nfds_t ind, client *cl)
                 goto end_client;
         }
 
+        /* Read the record size first */
+        len = recv(cl->fd, &record_size, RECORD_SIZE_LEN, 0);
+        if (len < 0) {
+                telem_log(LOG_ERR, "Failed to receive data from client"
+                                  " %d: %s\n", cl->fd, strerror(errno));
+                goto end_client;
+        } else if (len == 0) {
+                telem_log(LOG_DEBUG, "End of transmission for client"
+                          " %d\n", cl->fd);
+                goto end_client;
+        }
+
+        /* Now that we know the record size, allocate a new buffer
+         * for the record body. We don't need to record size itself in the body.
+         */
+
+        buf_size = record_size - RECORD_SIZE_LEN;
+        cl->buf = calloc(1, buf_size);
+        if (!cl->buf) {
+                telem_log(LOG_ERR, "Unable to allocate memory, exiting\n");
+                exit(EXIT_FAILURE);
+        }
+        cl->size = buf_size;
+        cl->offset = 0;
+
+        /* Read the actual record*/
         do {
                 malloc_trim(0);
                 len = recv(cl->fd, cl->buf + cl->offset, cl->size - cl->offset, 0);
@@ -134,36 +173,11 @@ bool handle_client(TelemDaemon *daemon, nfds_t ind, client *cl)
                 }
 
                 cl->offset += (size_t)len;
-                if (cl->offset < RECORD_SIZE_LEN) {
-                        continue;
-                }
-                if (cl->size == RECORD_SIZE_LEN) {
-                        record_size = *(uint32_t *)(cl->buf);
-                        telem_log(LOG_DEBUG, "Total size of record: %zu\n", record_size);
-                        if (record_size == 0) {     //record_size < RECORD_MIN_SIZE || record_size > RECORD_MAX_SIZE
-                                goto end_client;
-                        }
-                        // We just processed the record size field, so the remaining format
-                        // is (header size field + record body + terminating '\0' byte)
-                        cl->size = sizeof(uint32_t) + record_size + 1;
-                        cl->buf = realloc(cl->buf, cl->size);
-                        memset(cl->buf, 0, cl->size);
-                        cl->offset = 0;
-                        if (!cl->buf) {
-                                telem_log(LOG_ERR, "Unable to allocate memory, exiting\n");
-                                exit(EXIT_FAILURE);
-                        }
-                }
-                if (cl->offset != cl->size) {
-                        /* full record not received yet */
-                        continue;
-                }
-                if (cl->size != RECORD_SIZE_LEN) {
-                        /* entire record has been received */
+
+                if (cl->offset == cl->size) {
                         process_record(daemon, cl);
-                        /* TODO: cleanup or terminate? */
-                        cl->offset = 0;
-                        cl->size = RECORD_SIZE_LEN;
+                        free(cl->buf);
+                        cl->buf = NULL;
                         processed = true;
                         telem_debug("DEBUG: Record processed for client %d\n", cl->fd);
                         break;
@@ -172,7 +186,7 @@ bool handle_client(TelemDaemon *daemon, nfds_t ind, client *cl)
 
 end_client:
         telem_log(LOG_DEBUG, "Processed client %d: %s\n", cl->fd, processed ? "true" : "false");
-        terminate_client(daemon, cl, ind);
+        terminate_client(daemon, cl, index);
         return processed;
 }
 
@@ -298,7 +312,7 @@ clean_exit:
         return;
 }
 
-void process_record(TelemDaemon *daemon, client *cl)
+static void process_record(TelemDaemon *daemon, client *cl)
 {
         int i = 0;
         int ret = 0;
