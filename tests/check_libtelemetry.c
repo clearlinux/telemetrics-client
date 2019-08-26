@@ -41,7 +41,7 @@ void create_setup(void)
          * with the libcheck API...
          */
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run these tests");
+                      "First time opt-in required to run test");
 }
 
 START_TEST(record_create_non_null)
@@ -98,12 +98,22 @@ void create_teardown(void)
         }
 }
 
+START_TEST(is_opt_in)
+{
+        int ret;
+        ret = tm_is_opted_in();
+        /* Smoke testing function */
+        ck_assert_msg(ret == 0 || ret == 1,
+                      "Something wrong with opt-in check");
+}
+END_TEST
+
 START_TEST(record_create_invalid_class1)
 {
         int ret;
         ret = tm_create_record(&ref, 1, "t/t", 2000);
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
+                      "First time opt-in required to run test");
         ck_assert(ret == -EINVAL);
 }
 END_TEST
@@ -113,7 +123,7 @@ START_TEST(record_create_invalid_class2)
         int ret;
         ret = tm_create_record(&ref, 1, "t/t/t/t", 2000);
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
+                      "First time opt-in required to run test");
         ck_assert(ret == -EINVAL);
 }
 END_TEST
@@ -126,7 +136,7 @@ START_TEST(record_create_severity_underflow)
         // Severity of 0 is too low; raise it to 1, the minimum
         ret = tm_create_record(&ref, 0, "a/a/a", 2000);
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
+                      "First time opt-in required to run test");
 
         if (asprintf(&result, "%s: %u\n", TM_SEVERITY_STR, 1) < 0) {
                 return;
@@ -146,7 +156,7 @@ START_TEST(record_create_severity_overflow)
         // Severity of 5 is too high; lower it to 4, the maximum
         ret = tm_create_record(&ref, 5, "b/b/b", 2000);
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
+                      "First time opt-in required to run test");
 
         if (asprintf(&result, "%s: %u\n", TM_SEVERITY_STR, 4) < 0) {
                 return;
@@ -172,7 +182,7 @@ void event_id_setup(void)
                 return;
         }
         ck_assert_msg(ret != -ECONNREFUSED,
-                      "Opt-out enabled. Opt in to run this test");
+                      "First time opt-in required to run test");
 }
 
 START_TEST(record_set_event_id)
@@ -250,6 +260,10 @@ Suite *lib_suite(void)
         tcase_add_test(t, record_create_severity);
         tcase_add_test(t, record_create_classification);
         tcase_add_test(t, record_create_version);
+        suite_add_tcase(s, t);
+
+        t = tcase_create("Opt-in");
+        tcase_add_test(t, is_opt_in);
         suite_add_tcase(s, t);
 
         t = tcase_create("invalid classification");

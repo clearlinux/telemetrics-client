@@ -1199,6 +1199,17 @@ out1:
         return ret;
 }
 
+int tm_is_opted_in(void)
+{
+        struct stat unused;
+
+        if (stat(TM_OPT_IN_FILE, &unused) == -1) {
+                return 0;
+        }
+
+        return 1;
+}
+
 int tm_send_record(struct telem_ref *t_ref)
 {
         int i;
@@ -1208,14 +1219,11 @@ int tm_send_record(struct telem_ref *t_ref)
         char *data = NULL;
         size_t offset = 0;
         int ret = 0;
-        int k = 0;
-        struct stat unused;
         size_t cfg_file_name_size = 0;
         const char *cfg_file_name = NULL;
 
-        k = stat(TM_OPT_OUT_FILE, &unused);
-        if (k == 0) {
-                // Bail early if opt-out is enabled
+        if (tm_is_opted_in() == 0) {
+                // Bail early if opt-in is not existent
                 return -ECONNREFUSED;
         }
 

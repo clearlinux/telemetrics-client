@@ -21,3 +21,8 @@ TM_4_0_0 {
   global:
     tm_set_event_id;
 } TM_3_0_0;
+
+TM_4_1_0 {
+  global:
+    tm_is_opted_in;
+} TM_4_0_0;

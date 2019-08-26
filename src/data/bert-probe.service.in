@@ -2,7 +2,7 @@
 Description=Telemetrics BERT Probe
 Requires=telemprobd.socket
 After=telemprobd.socket
-ConditionPathExists=!/etc/telemetrics/opt-out
+ConditionPathExists=/etc/telemetrics/opt-in
 ConditionPathExists=/sys/firmware/acpi/tables/data/BERT
 
 [Service]

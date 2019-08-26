@@ -45,6 +45,8 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBvoid tm_free_record(struct telem_ref *t_ref)\fP
 .sp
 \fBint tm_set_config_file(const char *c_file)\fP
+.sp
+\fBint tm_is_opted_in(void)\fP
 .SH DESCRIPTION
 .sp
 The functions in the telemetry library facilitate the delivery of
@@ -64,11 +66,15 @@ The function \fBtm_send_record()\fP delivers the record to the local
 .sp
 The function \fBtm_set_config_file()\fP can be used to provide an alternate
 configuration path to the telemetry library.
+.sp
+\fBtm_is_opted_in\fP is a utility provided to check if the one time opt\-in
+has been performed.
 .SH RETURN VALUES
 .sp
 All these functions return \fB0\fP on success, or a non\-zero return value
 if an error occurred. The function \fBtm_free_record()\fP does not return
-any value.
+any value. \fBtm_is_opted_in\fP returns \fB1\fP when telemetry is opted\-in
+otherwise \fB0\fP\&.
 .SH SEE ALSO
 .INDENT 0.0
 .IP \(bu 2

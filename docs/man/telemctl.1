@@ -34,7 +34,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 \fBtelemctl\fP
 .sp
-\fB/etc/telemetrics/opt\-out\fP
+\fB/etc/telemetrics/opt\-in\fP
 .SH DESCRIPTION
 .sp
 Control actions for telemetry services. The command can be used to start,
@@ -48,12 +48,13 @@ restart, or stop \fBtelemprobd\fP(1) and \fBtelempostd\fP(1), or to opt\-in or o
 Starts, stops or restarts all running telemetry services.
 .IP \(bu 2
 \fBopt\-in\fP:
-Opts in to telemetry, and starts telemetry services. The opt\-out file
-\fB/etc/telemetrics/opt\-out\fP is removed.
+Opts in to telemetry and the opt\-in file \fB/etc/telemetrics/opt\-in\fP
+is created. Note: this is a one time required operation before
+telemetry can be used the first time.
 .IP \(bu 2
 \fBopt\-out\fP:
-Opts out of telemetry, and stops telemetry services. The opt\-out file
-\fB/etc/telemetrics/opt\-out\fP is created.
+Opts out of telemetry, and stops telemetry services. The opt\-in file
+\fB/etc/telemetrics/opt\-in\fP is deleted.
 .IP \(bu 2
 \fBis\-active\fP:
 Checks if telemetry client daemons are active (telemprobd and telempostd).

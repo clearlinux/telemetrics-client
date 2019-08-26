@@ -67,37 +67,46 @@ Descriptions of config options are listed below in the Usage section.
 
 Starting the client
 ---------------------
+To use the telemetrics client a one time explicit ```opt-in``` is required (this is
+also true when the contents of the directory ```/etc/telemetrics/``` are removed).
+To opt-in to telemetrics-client use the command:
+
+```{r, engine='bash', count_lines}
+ telemctl opt-in
+```
+
+**Note** this is a change from previous versions, before 2.3.0 installation of
+telemetrics client was enough to enable the client and if needed the client could
+be disabled with ```telemctl opt-out```. This command in previous versions created
+```/etc/telemetrics/opt-out``` file (after telemetrics-client version 2.3.0 this
+file can be safely removed).
 
 If the client was compiled with systemd support the respective activation units
 should be already in place (after a ```make install``` invocation). In this case
 the client wil start automatically when data is made available to it. i.e. when
-executing an ```/usr/bin/hprobe``` command.
-
-Method 1 (recommended):
+executing an ```/usr/bin/hprobe``` command. Otherwise use the following command:
 
 ```{r, engine='bash', count_lines}
  telemctl start
 ```
-
 Note: the above invocation technically readies the service for both socket and
-path activation, so you may not see an "active" status.
-
-Method 2:
-
-```{r, engine='bash', count_lines}
-systemctl start telemprobd.service
-systemctl start telempostd.service
-```
-
-Method 3:
+path activation, so you may not see an "active" status. To check the status of
+telemetrics-client use:
 
 ```{r, engine='bash', count_lines}
-telemprobd &
-telempostd &
+ telemctl is-active
+   telemprobd : active
+   telempostd : active
 ```
+
+Starting individual service units ```telempostd.service``` or ```telemeprobd.service```
+is discouraged.
 
 Configure the client to autostart at boot
 ---------------------
+
+As longs as the first time ```opt-in``` was performed, the following methods are valid:
+
 
 Method 1 (recommended):
 

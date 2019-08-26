@@ -2,6 +2,7 @@
 Description=Telemetrics Pstore Probe
 Requires=telemprobd.socket
 After=telemprobd.socket
+ConditionPathExists=/etc/telemetrics/opt-in
 
 [Service]
 ExecStart=@bindir@/pstoreprobe
