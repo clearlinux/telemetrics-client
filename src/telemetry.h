@@ -121,6 +121,13 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload);
 int tm_send_record(struct telem_ref *t_ref);
 
 /**
+ * Checks if telemetry was opted in
+ *
+ * @return 1 when opt-in, or 0 when opt-out
+ */
+int tm_is_opted_in(void);
+
+/**
  * Release the memory allocated to a telemetrics record.
  *
  * @param t_ref A handle created by a call to

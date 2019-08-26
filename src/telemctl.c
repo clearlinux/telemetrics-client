@@ -31,7 +31,7 @@
 #include <errno.h>
 
 #define TELEM_DIR       "/etc/telemetrics"
-#define TM_OPT_OUT      TELEM_DIR"/opt-out"
+#define TM_OPT_IN       TELEM_DIR"/opt-in"
 
 #define TELEM_WRK_DIRS_CONF "/usr/lib/tmpfiles.d/telemetrics-dirs.conf"
 
@@ -151,14 +151,16 @@ telem_start() {
   create_work_dirs
   for_each_service "start" ${SPECIAL_UNITS[@]}
 }
+
+Modified to add explicit opt-in
 */
 static int telemctl_start(void)
 {
         char buff[512];
         int status, ret;
 
-        if (access(TM_OPT_OUT, F_OK) == 0) {
-                fprintf(stderr, "Opt out is enabled. Cannot start services.\n");
+        if (access(TM_OPT_IN, F_OK) != 0) {
+                fprintf(stderr, "Opt in to telemetry first.\n");
                 return 1;
         }
 
@@ -386,28 +388,21 @@ telem_opt_out() {
 */
 static int telemctl_opt_out(void)
 {
-        /* Ensure TELEM_DIR exists */
-        if (mk_telem_dir() != 0) {
-                fprintf(stderr, "Failed to create %s\n", TELEM_DIR);
-                return 1;
-        }
+        int ret;
 
-        /* Create a brand new file TM_OPT_OUT, we mai fail because the file exists already.
-         * In that case we are already opted out and we are done here. */
-        int fd = open(TM_OPT_OUT, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-        if (fd == -1) {
-                if (errno == EEXIST) {
+        /* Remove TM_OPT_IN file */
+        if (unlink(TM_OPT_IN) != 0) {
+                if (errno == ENOENT) {
                         fprintf(stderr, "Already opted out. Nothing to do.\n");
                         return 0;
-                } else {
-                        fprintf(stderr, "Failed to create %s.\n", TM_OPT_OUT);
-                        return 1;
                 }
-        } else {
-                telemctl_stop();
-                close(fd);
-                return telemctl_remove_work_dirs();
-        }
+		fprintf(stderr, "Failed to remove %s.\n", TM_OPT_IN);
+                return 1;
+	}
+
+        ret = telemctl_stop();
+        ret |= telemctl_remove_work_dirs();
+        return ret;
 }
 
 /*
@@ -418,20 +413,33 @@ telem_opt_in() {
   rm -f $OPT_OUT_FILE || exit_err "Failed to remove ${OPT_OUT_FILE}."
   telem_start
 }
+
+Modified to add explicit opt-in
 */
 static int telemctl_opt_in(void)
 {
-        /* Delete the TM_OPT_OUT file */
-        if (unlink(TM_OPT_OUT) == -1) {
-                if (errno == ENOENT) {
-                        fprintf(stderr, "Already opted in. Nothing to do.\n");
-                        return 0;
-                }
-                fprintf(stderr, "Failed to remove %s.\n", TM_OPT_OUT);
+
+        /* Ensure TELEM_DIR exists */
+        if (mk_telem_dir() != 0) {
+                fprintf(stderr, "Failed to create %s\n", TELEM_DIR);
                 return 1;
         }
 
-        return telemctl_start();
+	/* Create a brand new file TM_OPT_IN, we maight fail because the file exists already.
+         * In that case we are already opted in and we are done here. */
+        int fd = open(TM_OPT_IN, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+        if (fd == -1) {
+                if (errno == EEXIST) {
+                        fprintf(stderr, "Already opted in. Nothing to do.\n");
+                        return 0;
+                } else {
+                        fprintf(stderr, "Failed to create %s.\n", TM_OPT_IN);
+                        return 1;
+                }
+        }
+        close(fd);
+
+        return 0;
 }
 
 

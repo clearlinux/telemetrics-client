@@ -27,6 +27,8 @@ SYNOPSIS
 
 ``int tm_set_config_file(const char *c_file)``
 
+``int tm_is_opted_in(void)``
+
 
 DESCRIPTION
 ===========
@@ -49,13 +51,16 @@ The function ``tm_send_record()`` delivers the record to the local
 The function ``tm_set_config_file()`` can be used to provide an alternate
 configuration path to the telemetry library.
 
+``tm_is_opted_in`` is a utility provided to check if the one time opt-in
+has been performed.
 
 RETURN VALUES
 =============
 
 All these functions return ``0`` on success, or a non-zero return value
 if an error occurred. The function ``tm_free_record()`` does not return
-any value.
+any value. ``tm_is_opted_in`` returns ``1`` when telemetry is opted-in
+otherwise ``0``.
 
 
 SEE ALSO

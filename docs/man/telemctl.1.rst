@@ -15,7 +15,7 @@ SYNOPSIS
 
 ``telemctl``
 
-``/etc/telemetrics/opt-out``
+``/etc/telemetrics/opt-in``
 
 
 DESCRIPTION
@@ -32,12 +32,13 @@ OPTIONS
    Starts, stops or restarts all running telemetry services.
 
  * ``opt-in``:
-   Opts in to telemetry, and starts telemetry services. The opt-out file
-   ``/etc/telemetrics/opt-out`` is removed.
+   Opts in to telemetry and the opt-in file ``/etc/telemetrics/opt-in``
+   is created. Note: this is a one time required operation before
+   telemetry can be used the first time.
 
  * ``opt-out``:
-   Opts out of telemetry, and stops telemetry services. The opt-out file
-   ``/etc/telemetrics/opt-out`` is created.
+   Opts out of telemetry, and stops telemetry services. The opt-in file
+   ``/etc/telemetrics/opt-in`` is deleted.
 
  * ``is-active``:
    Checks if telemetry client daemons are active (telemprobd and telempostd).

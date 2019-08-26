@@ -90,8 +90,8 @@ endif
 
 # set library version info
 SHAREDLIB_CURRENT=4
-SHAREDLIB_REVISION=0
-SHAREDLIB_AGE=1
+SHAREDLIB_REVISION=1
+SHAREDLIB_AGE=0
 
 noinst_LTLIBRARIES = %D%/libtelem-shared.la
 

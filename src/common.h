@@ -75,7 +75,7 @@ static const uint32_t RECORD_FORMAT_VERSION = 4;
 #define TM_SITE_VERSION_FILE "/etc/os-release"
 #define TM_DIST_VERSION_FILE "/usr/lib/os-release"
 
-#define TM_OPT_OUT_FILE "/etc/telemetrics/opt-out"
+#define TM_OPT_IN_FILE "/etc/telemetrics/opt-in"
 
 /* Currently max supported payload size is 8kb */
 #define MAX_PAYLOAD_LENGTH 8192

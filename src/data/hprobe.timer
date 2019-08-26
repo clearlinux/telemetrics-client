@@ -1,6 +1,6 @@
 [Unit]
 Description=Daily Heartbeat for Telemetrics
-ConditionPathExists=!/etc/telemetrics/opt-out
+ConditionPathExists=/etc/telemetrics/opt-in
 
 [Timer]
 OnCalendar=daily

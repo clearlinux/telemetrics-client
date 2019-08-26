@@ -1,6 +1,6 @@
 [Unit]
 Description=Telemetrics Daemon
-ConditionPathExists=!/etc/telemetrics/opt-out
+ConditionPathExists=/etc/telemetrics/opt-in
 
 [Socket]
 ListenStream=@SOCKETDIR@/telem-0

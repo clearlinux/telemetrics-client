@@ -1,6 +1,6 @@
 [Unit]
 Description=Telemetry Post Daemon staging
-ConditionPathExists=!/etc/telemetrics/opt-out
+ConditionPathExists=/etc/telemetrics/opt-in
 
 [Path]
 DirectoryNotEmpty=@localstatedir@/spool/telemetry

@@ -2,7 +2,7 @@
 Description=Telemetrics Systemd Journal Probe
 Requires=telemprobd.socket
 After=telemprobd.socket
-ConditionPathExists=!/etc/telemetrics/opt-out
+ConditionPathExists=/etc/telemetrics/opt-in
 
 [Service]
 ExecStart=@bindir@/journalprobe
