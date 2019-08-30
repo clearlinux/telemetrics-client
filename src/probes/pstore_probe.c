@@ -15,6 +15,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
@@ -195,6 +196,13 @@ struct chunk_list {
         struct chunk_list *next;
 };
 
+static void print_usage(char *prog)
+{
+        printf("%s: Usage\n", prog);
+        printf("  -f,  --config_file    This overides the other parameters\n");
+        printf("  -h,  --help           Display this help message\n");
+}
+
 int main(int argc, char **argv)
 {
         DIR *pstore_dir;
@@ -205,6 +213,32 @@ int main(int argc, char **argv)
         int max_part;
         size_t totalsize = 0;
         char *crash_dump = NULL;
+        int c;
+        int opt_index = 0;
+
+        struct option opts[] = {
+                { "config_file", 1, NULL, 'f' },
+                { "help", 0, NULL, 'h' },
+                { NULL, 0, NULL, 0 }
+        };
+
+        while ((c = getopt_long(argc, argv, "f:h", opts, &opt_index)) != -1) {
+                switch (c) {
+                        case 'f':
+                                if (tm_set_config_file(optarg) != 0) {
+                                        telem_log(LOG_ERR, "Configuration file"
+                                                  " path not valid\n");
+                                        exit(EXIT_FAILURE);
+                                }
+                                break;
+                        case 'h':
+                                print_usage(argv[0]);
+                                exit(EXIT_SUCCESS);
+                        case '?':
+                                print_usage(argv[0]);
+                                exit(EXIT_FAILURE);
+                }
+        }
 
         /*
          * Hash table used to store chunks belonging to a oops counter
@@ -230,7 +264,13 @@ int main(int argc, char **argv)
                 // Look for only dmesg logs. Ignore other types of pstore dumps for now.
                 if (sscanf(entry->d_name, "dmesg-efi-%" PRIu64, &id) == 1) {
                         parse_id(id, &count, &part);
-                        telem_debug("DEBUG: Extracted count :%d, part : %d\n", count, part);
+                        telem_debug("dmesg-efi Extracted count :%d, part : %d\n",
+                                    count, part);
+                } else if (sscanf(entry->d_name, "dmesg-ramoops-%" PRIu64, &id) == 1) {
+                        count = (int)(id + 1);
+                        part = 1;
+                        telem_debug("dmesg-ramoops Extracted count :%d, part : %d\n",
+                                    count, part);
                 } else {
                         continue;
                 }
