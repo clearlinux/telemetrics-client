@@ -105,8 +105,14 @@ static void terminate_client(TelemDaemon *daemon, client *cl, nfds_t index)
          * <null-byte>
 
  The routine handle_client only cares about "record_size".
+ However, we need to validate if the record_size is reasonable. We assume the
+ worst case scenario would be a record with max cfg file field. There is no
+ exact way to determine header_size, so we assume each line at most 80 chars.
+ 
 */
 
+#define MAX_RECORD_SIZE (2*sizeof(uint32_t) + CFG_PREFIX_LENGTH + PATH_MAX + \
+        MAX_PAYLOAD_LENGTH + NUM_HEADERS*80)
 bool handle_client(TelemDaemon *daemon, nfds_t index, client *cl)
 {
         /* For now  read data from fd */
@@ -148,6 +154,13 @@ bool handle_client(TelemDaemon *daemon, nfds_t index, client *cl)
         /* Now that we know the record size, allocate a new buffer
          * for the record body. We don't need to record size itself in the body.
          */
+
+        if (record_size <= RECORD_SIZE_LEN || record_size > MAX_RECORD_SIZE) {
+                telem_log(LOG_ERR, "Record size %u greater tham maximum allowed %lu."
+                                    "Recored ignored\n", record_size,
+                                    MAX_RECORD_SIZE);
+                goto end_client;      
+        }
 
         buf_size = record_size - RECORD_SIZE_LEN;
         cl->buf = calloc(1, buf_size);
