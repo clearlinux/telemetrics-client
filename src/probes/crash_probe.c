@@ -250,7 +250,7 @@ static int frame_cb(Dwfl_Frame *frame, void *userdata)
                                " current frame: %s\n",
                                dwfl_errmsg(-1));
                 if (ret < 0) {
-                        return DWARF_CB_ABORT;
+                        errorstr = NULL;
                 }
                 return DWARF_CB_ABORT;
         }
