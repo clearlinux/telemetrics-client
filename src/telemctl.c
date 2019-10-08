@@ -46,7 +46,6 @@ static char *SPECIAL_UNITS[] = {
         "telempostd.path",
         "klogscanner.service",
         "journal-probe-tail.service",
-        "python-probe.path",
 };
 
 #define NUM_SPECIAL_UNITS ARRAY_SIZE(SPECIAL_UNITS)
@@ -312,8 +311,6 @@ Notes:
    d /usr/local/var/log/telemetry/records 0750 telemetry telemetry -
    d /usr/local/var/cache/telemetry 0750 telemetry telemetry -
    d /usr/local/var/cache/telemetry/pstore 0750 telemetry telemetry -
-   d /var/lib/telemetry/python 01777 telemetry telemetry -
-   d /var/tmp/telemetry 01777 telemetry telemetry -
 */
 static int telemctl_remove_work_dirs(void)
 {

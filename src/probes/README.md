@@ -19,8 +19,6 @@ The default probes provided along the telemetry client code are:
 
 * pstoreprobe: probe to collect messages left on pstore filesystem.
 
-* pythonprobe: a probe that monitors Python generated traceback files.
-
 * telem-record-gen: this is a "general-purpose probe" for sending custom
   records on-the-fly. This tool can be used stand alone or as a part of a
   script to implement a probe.
