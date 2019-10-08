@@ -4,23 +4,8 @@ bin_PROGRAMS += \
 	%D%/telem-record-gen \
 	%D%/klogscanner \
 	%D%/pstoreprobe \
-	%D%/pythonprobe \
 	%D%/pstoreclean \
 	%D%/bertprobe
-
-%C%_pythonprobe_SOURCES = %D%/python-probe.c
-%C%_pythonprobe_CFLAGS = $(AM_CFLAGS)
-%C%_pythonprobe_LDADD = $(top_builddir)/src/libtelemetry.la
-%C%_pythonprobe_LDFLAGS = \
-	$(AM_LDFLAGS) \
-	-pie
-
-if LOG_SYSTEMD
-if HAVE_SYSTEMD_JOURNAL
-%C%_pythonprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
-%C%_pythonprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
-endif
-endif
 
 %C%_hprobe_SOURCES = %D%/hello.c
 %C%_hprobe_LDADD = $(top_builddir)/src/libtelemetry.la

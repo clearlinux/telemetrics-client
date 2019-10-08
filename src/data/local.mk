@@ -19,8 +19,6 @@ EXTRA_DIST += \
 	%D%/bert-probe.service.in \
 	%D%/journal-probe.service.in \
 	%D%/journal-probe-tail.service.in \
-	%D%/python-probe.service.in \
-	%D%/python-probe.path.in \
 	%D%/pstore-probe.service.in \
 	%D%/klogscanner.service.in \
 	%D%/pstore-clean.service.in \
@@ -58,8 +56,6 @@ systemdunit_DATA = \
 	%D%/bert-probe.service \
 	%D%/journal-probe.service \
 	%D%/journal-probe-tail.service \
-	%D%/python-probe.service \
-	%D%/python-probe.path \
 	%D%/pstore-probe.service \
 	%D%/klogscanner.service \
 	%D%/pstore-clean.service \
@@ -96,12 +92,6 @@ systemdunit_DATA = \
 %D%/telempostd.service: %D%/telempostd.service.in
 	$(pathfix) < $< > $@
 
-%D%/python-probe.service: %D%/python-probe.service.in
-	$(pathfix) < $< > $@
-
-%D%/python-probe.path: %D%/python-probe.path.in
-	$(pathfix) < $< > $@
-
 %D%/telemprobd.service: %D%/telemprobd.service.in
 	$(pathfix) < $< > $@
 
@@ -125,8 +115,6 @@ clean-local:
 		%D%/telemprobd.socket \
 		%D%/telempostd.service \
 		%D%/telempostd.path \
-		%D%/python-probe.service \
-		%D%/python-probe.path \
 		%D%/telemprobd-update-trigger.service \
 		%D%/telemetrics.conf \
 		%D%/telemetrics-dirs.conf \

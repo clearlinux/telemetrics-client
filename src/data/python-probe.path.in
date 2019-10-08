@@ -1,9 +1,0 @@
-[Unit]
-Description=Python Probe Daemon Staging
-ConditionPathExists=!/etc/telemetrics/opt-out
-
-[Path]
-DirectoryNotEmpty=/var/lib/telemetry/python
-
-[Install]
-WantedBy=multi-user.target
