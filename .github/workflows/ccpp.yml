@@ -1,0 +1,29 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: install dependencies
+      run: sudo apt-get install libcurl4-gnutls-dev valgrind libelf-dev libdw-dev
+    - name: install check
+      run: wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz &&
+           tar xf check-0.12.0.tar.gz &&
+           pushd check-0.12.0 &&
+           ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu &&
+           make -j8 && sudo make install && popd
+    - name: autogen
+      run: sh autogen.sh
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make -j8
+    - name: check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
