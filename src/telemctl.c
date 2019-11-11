@@ -69,6 +69,7 @@ static int telemctl_opt_in(void);
 static int telemctl_journal(char *);
 
 struct telemcmd {
+        bool root;
         char *cmd;
         union {
         int  (*f1)(void);
@@ -78,13 +79,13 @@ struct telemcmd {
 };
 
 static struct telemcmd commands[] = {
-        {"stop",      {.f1=telemctl_stop},     "Stops all running telemetry services" },
-        {"start",     {.f1=telemctl_start},    "Starts all telemetry services" },
-        {"restart",   {.f1=telemctl_restart},  "Restarts all telemetry services" },
-        {"is-active", {.f1=telemctl_is_active},"Checks if telemprobd and telempostd are active" },
-        {"opt-in",    {.f1=telemctl_opt_in},   "Opts in to telemetry, and starts telemetry services" },
-        {"opt-out",   {.f1=telemctl_opt_out},  "Opts out of telemetry, and stops telemetry services" },
-        {"journal",   {.f2=telemctl_journal},  "Prints telemetry journal contents. Use -h argument with\n            command for more options"}
+        {true,  "stop",      {.f1=telemctl_stop},     "Stops all running telemetry services" },
+        {true,  "start",     {.f1=telemctl_start},    "Starts all telemetry services" },
+        {true,  "restart",   {.f1=telemctl_restart},  "Restarts all telemetry services" },
+        {false, "is-active", {.f1=telemctl_is_active},"Checks if telemprobd and telempostd are active" },
+        {true,  "opt-in",    {.f1=telemctl_opt_in},   "Opts in to telemetry, and starts telemetry services" },
+        {true,  "opt-out",   {.f1=telemctl_opt_out},  "Opts out of telemetry, and stops telemetry services" },
+        {true,  "journal",   {.f2=telemctl_journal},  "Prints telemetry journal contents. Use -h argument with\n            command for more options"}
 };
 
 static int syscmd(char *cmd, char *buff, int bufflen)
@@ -396,9 +397,9 @@ static int telemctl_opt_out(void)
                         fprintf(stderr, "Already opted out. Nothing to do.\n");
                         return 0;
                 }
-		fprintf(stderr, "Failed to remove %s.\n", TM_OPT_IN);
+                fprintf(stderr, "Failed to remove %s.\n", TM_OPT_IN);
                 return 1;
-	}
+        }
 
         ret = telemctl_stop();
         ret |= telemctl_remove_work_dirs();
@@ -425,7 +426,7 @@ static int telemctl_opt_in(void)
                 return 1;
         }
 
-	/* Create a brand new file TM_OPT_IN, we maight fail because the file exists already.
+        /* Create a brand new file TM_OPT_IN, we may fail because the file exists already.
          * In that case we are already opted in and we are done here. */
         int fd = open(TM_OPT_IN, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
         if (fd == -1) {
@@ -521,7 +522,7 @@ int main(int argc, char **argv)
 
         for (i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
                 if (strcmp(commands[i].cmd, argv[1]) == 0) {
-                        if (!is_root) {
+                        if (commands[i].root == true && is_root == false) {
                                 fprintf(stderr, "Must be root to run this command. Exiting...\n");
                                 exit(1);
                         }
