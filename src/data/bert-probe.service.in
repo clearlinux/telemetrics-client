@@ -7,7 +7,7 @@ ConditionPathExists=/sys/firmware/acpi/tables/data/BERT
 
 [Service]
 ExecStart=@bindir@/bertprobe
-User=telemetry
+User=root
 
 [Install]
 WantedBy=multi-user.target
