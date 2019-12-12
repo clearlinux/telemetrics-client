@@ -2,9 +2,6 @@
 
 The default probes provided along the telemetry client code are:
 
-* bertprobe: this probe reports on the Boot Error Region Table if such
-  entry is found in ```/sys/firmware/acpi/tables/BERT```.
-
 * crashprobe: This probe processes core dump files. It can be registered as
   the kernel core file handler in /proc/sys/kernel/core_pattern.
 
@@ -15,7 +12,7 @@ The default probes provided along the telemetry client code are:
   from failed services.
 
 * klogscanner: a probe to collect 'oops messages' when the kernel detects a
-  problem.
+  problem. Also reports errors in the Boot Error Region Table if detected.
 
 * pstoreprobe: probe to collect messages left on pstore filesystem.
 

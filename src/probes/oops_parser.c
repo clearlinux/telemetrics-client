@@ -162,6 +162,12 @@ struct oops_pattern oops_patterns_arr[] = {
                 TM_CRITICAL,
                 false,
         },
+        {
+                "BERT: Error records from previous boot:",
+                "org.clearlinux/bert/debug",
+                TM_MEDIUM,
+                false,
+        },
 };
 
 static int oops_patterns_cnt = sizeof(oops_patterns_arr) / sizeof(struct oops_pattern);
@@ -334,6 +340,7 @@ void oops_msg_cleanup(struct oops_log_msg *msg)
 static struct oops_log_msg oops_msg;
 
 static bool in_stack_dump = false;
+static bool in_bert_dump = false;
 
 static oops_handler_t oops_handler;
 
@@ -357,6 +364,19 @@ void oops_parser_cleanup()
         free_pattern_regex();
 }
 
+/*
+ *
+[    1.609112] BERT: Error records from previous boot:
+[    1.609113] [Hardware Error]: event severity: fatal
+[    1.609115] [Hardware Error]:  Error 0, type: fatal
+[    1.609116] [Hardware Error]:   section type: unknown, 81212a96-09ed-4996-9471-8d729c8e69ed
+[    1.609117] [Hardware Error]:   section length: 0xc10
+[    1.609119] [Hardware Error]:   00000000: 00000001 00000000 00000000 01001002  ................
+[    1.609120] [Hardware Error]:   00000010: 01001002 00000001 c71f0d2f 00000003  ......../.......
+[    1.609122] [Hardware Error]:   00000020: 00000001 0000004f 0c070048 800001ff  ....O...H.......
+[    1.609123] [Hardware Error]:   00000030: 02002080 7e15fe03 00000001 00000000  . .....~......
+ ...
+ */
 void parse_single_line(char *line, size_t size)
 {
         char *start;
@@ -376,28 +396,30 @@ void parse_single_line(char *line, size_t size)
                                 continue;
                         }
                         telem_log(LOG_DEBUG, "Oops start has been  detected\n");
-
                         oops_msg.pattern = pattern;
                         oops_msg.lines[oops_msg.length] = strndup(start, (size_t)(line_end - start));
                         if (oops_msg.lines[oops_msg.length] == NULL) {
                                 //telem_perror("Failed to copy string");
                                 exit(EXIT_FAILURE);
                                 return;
-                        } else {
-                                oops_msg.length++;
                         }
+
+                        oops_msg.length++;
                         in_stack_dump = false;
-                        break;
+                        in_bert_dump = false;
+                        if (strstr(oops_msg.pattern->begin_line, "BERT:")) {
+                                in_bert_dump = true;
+                        }
+                        return;
                 }
         } else {
                 // If in the middle of oops
                 if (oops_msg.length >= MAX_LINES) {
+                        fprintf(stderr,"*** MAX_LINES!!\n");
                         end_found = true;
-                        // } else if (oops_msg.end_line && strstr(start, oops_msg.end_line)) {
-                        //        end_found = false;
                 } else if (strstr(start, "[ end trace")) {
                         end_found = true;
-                } else if (!in_stack_dump) {
+                } else if (!in_stack_dump && !in_bert_dump) {
                         // This line indicates the beginning of a stack trace;
                         // the next line is most likely the topmost frame.
                         if (starts_with(start, line_end, "Call Trace:")) {
@@ -412,6 +434,10 @@ void parse_single_line(char *line, size_t size)
                             (strstr(start, "Code:") != NULL) ||
                             (strstr(start, "Instruction Dump::") != NULL)) {
                                 in_stack_dump = false;
+                                end_found = true;
+                        }
+                } else if (in_bert_dump) {
+                        if (!strstr(start, "[Hardware Error]:")) {
                                 end_found = true;
                         }
                 }
@@ -847,15 +873,28 @@ static nc_string *parse_backtrace(struct oops_log_msg *msg)
         return backtrace;
 }
 
+static void append_payload(nc_string *payload, struct oops_log_msg *msg)
+{
+        for (int i = 1; i < msg->length; i++) {
+                nc_string_cat(payload,msg->lines[i]);
+                nc_string_cat(payload,"\n");
+        }
+}
+
 nc_string *parse_payload(struct oops_log_msg *msg)
 {
         nc_string *payload, *backtrace;
 
         payload = nc_string_dup("Crash Report:\n");
         nc_string_append_printf(payload, "Reason: %s\n", msg->lines[0]);
-        backtrace = parse_backtrace(msg);
-        nc_string_cat(payload, backtrace->str);
-        nc_string_free(backtrace);
+        if (strstr(msg->lines[0], "BERT:")) {
+                append_payload(payload, msg);
+        } else {
+                backtrace = parse_backtrace(msg);
+                nc_string_cat(payload, backtrace->str);
+                nc_string_free(backtrace);
+        }
+
         return payload;
 
 }
