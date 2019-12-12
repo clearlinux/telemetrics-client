@@ -15,7 +15,6 @@ check_PROGRAMS = \
 	%D%/check_probd \
 	%D%/check_postd \
 	%D%/check_probes \
-	%D%/check_ncb64  \
 	%D%/check_journal \
 	%D%/check_libtelemetry
 
@@ -154,25 +153,6 @@ if HAVE_SYSTEMD_JOURNAL
         $(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
-
-%C%_check_ncb64_SOURCES = \
-	%D%/check_ncb64.c \
-	src/nica/b64enc.h \
-	src/nica/b64enc.c
-
-%C%_check_ncb64_CFLAGS = \
-	$(AM_CFLAGS) \
-	@CHECK_CFLAGS@
-
-%C%_check_ncb64_LDADD = \
-	@CHECK_LIBS@
-
-EXTRA_DIST += \
-	%D%/nc_b64enc_test_files/empty \
-	%D%/nc_b64enc_test_files/fo \
-	%D%/nc_b64enc_test_files/foob \
-	%D%/nc_b64enc_test_files/foobar \
-	%D%/nc_b64enc_test_files/long_text
 
 %C%_check_journal_SOURCES = \
 	%D%/check_journal.c \

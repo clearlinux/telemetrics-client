@@ -39,7 +39,6 @@ autoscan.log
 configure.scan
 tprobe
 hprobe
-bertprobe
 crashprobe
 journalprobe
 telem-record-gen
@@ -57,7 +56,6 @@ tests/check_config
 tests/check_daemon
 tests/check_journal
 tests/check_libtelemetry
-tests/check_ncb64
 tests/check_postd
 tests/check_probd
 tests/check_probes

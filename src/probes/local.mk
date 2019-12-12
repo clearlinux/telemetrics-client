@@ -4,8 +4,7 @@ bin_PROGRAMS += \
 	%D%/telem-record-gen \
 	%D%/klogscanner \
 	%D%/pstoreprobe \
-	%D%/pstoreclean \
-	%D%/bertprobe
+	%D%/pstoreclean
 
 %C%_hprobe_SOURCES = %D%/hello.c
 %C%_hprobe_LDADD = $(top_builddir)/src/libtelemetry.la
@@ -18,21 +17,6 @@ if LOG_SYSTEMD
 if HAVE_SYSTEMD_JOURNAL
 %C%_hprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
 %C%_hprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
-endif
-endif
-
-%C%_bertprobe_SOURCES = %D%/bert_probe.c \
-	src/nica/b64enc.c
-%C%_bertprobe_CFLAGS = $(AM_CFLAGS)
-%C%_bertprobe_LDADD = $(top_builddir)/src/libtelemetry.la
-%C%_bertprobe_LDFLAGS = \
-        $(AM_LDFLAGS) \
-        -pie
-
-if LOG_SYSTEMD
-if HAVE_SYSTEMD_JOURNAL
-%C%_bertprobe_CFLAGS += $(SYSTEMD_JOURNAL_CFLAGS)
-%C%_bertprobe_LDADD += $(SYSTEMD_JOURNAL_LIBS)
 endif
 endif
 
