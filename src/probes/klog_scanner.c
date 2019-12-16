@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "common.h"
 #include "log.h"
 #include "oops_parser.h"
 #include "klog_scanner.h"
@@ -42,6 +43,11 @@ static bool send_data(char *backtrace, char *class, uint32_t severity)
                 telem_log(LOG_ERR, "Failed to create record: %s",
                           strerror(-ret));
                 return false;
+        }
+
+        /* Truncate payload if necessary, otherwise nothing will be sent */
+        if (strlen(backtrace) > MAX_PAYLOAD_LENGTH) {
+                backtrace[MAX_PAYLOAD_LENGTH-1] = 0;
         }
 
         if ((ret = tm_set_payload(handle, backtrace)) < 0) {
