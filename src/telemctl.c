@@ -471,7 +471,7 @@ static int journal_cmd(char *cmd)
 
 static char* concatargs(int argc, char** argv)
 {
-        size_t len = strlen("telem_journal") + 1;
+        size_t len = 1 + strlen("telem_journal ");
         for (int i = 2; i < argc; i++) {
                 len += strlen(argv[i]) + 1;
         }
