@@ -35,6 +35,7 @@ build-aux/m4/ltversion.m4
 /tags
 telemprobd
 telempostd
+telemctl
 autoscan.log
 configure.scan
 tprobe

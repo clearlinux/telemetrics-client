@@ -20,6 +20,14 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+# Valgrind check
+AX_VALGRIND_DFLT(memcheck, on)
+AX_VALGRIND_DFLT(helgrind, off)
+AX_VALGRIND_DFLT(drd, off)
+AX_VALGRIND_DFLT(sgcheck, off)
+
+AX_VALGRIND_CHECK
+
 # Checks for libraries.
 
 # check >= 0.9.12 is required for TAP output
@@ -171,4 +179,6 @@ systemconfdir:          $confpath
 socketdir:              $socketpath
 loglevel:               $loglevel
 logtype:                $logtype
+
+valgrind:               $enable_valgrind
 ])
