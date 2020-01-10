@@ -196,4 +196,13 @@ if LOG_SYSTEMD
 endif
 endif
 
+@VALGRIND_CHECK_RULES@
+VALGRIND_FLAGS = \
+	--error-exitcode=1 \
+	--leak-resolution=low \
+	--quiet \
+	--leak-check=full \
+	--show-possibly-lost=no \
+	--suppressions=$(top_builddir)/tests/tests.supp
+
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab
