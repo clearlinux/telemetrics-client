@@ -243,9 +243,8 @@ END_TEST
 
 void event_id_teardown(void)
 {
-        if (ref) {
-                free(ref);
-        }
+        // Free record
+        create_teardown();
         free(original_event_id);
 }
 
@@ -292,6 +291,7 @@ int main(void)
 {
         Suite *s;
         SRunner *sr;
+        int failed;
 
         s = lib_suite();
         sr = srunner_create(s);
@@ -299,11 +299,13 @@ int main(void)
         srunner_set_log(sr, NULL);
         srunner_set_tap(sr, "-");
 
+        // set CK_NOFORK to attach gdb
+        // srunner_set_fork_status(sr, CK_NOFORK);
         srunner_run_all(sr, CK_SILENT);
-
+        failed = srunner_ntests_failed(sr);
         srunner_free(sr);
 
-        return 0;
+        return (failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

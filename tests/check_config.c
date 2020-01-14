@@ -14,8 +14,10 @@
  * details.
  */
 
+#include <stdlib.h>
 #include <check.h>
 #include "configuration.h"
+#include "configuration_check.h"
 
 START_TEST(check_read_config_for_invalid_file)
 {
@@ -52,6 +54,7 @@ START_TEST(check_read_valid_config)
                          "X-Telemetry-TID: 6907c830-eed9-4ce9-81ae-76daf8d88f0f");
         ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == true);
 
+        free_config_struct(&config);
 }
 END_TEST
 
@@ -80,6 +83,8 @@ START_TEST(check_default_config)
         ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == DEFAULT_DAEMON_RECYCLING_ENABLED);
         ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == DEFAULT_RECORD_RETENTION_ENABLED);
         ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == DEFAULT_RECORD_SERVER_DELIVERY_ENABLED);
+
+        free_config_struct(&config);
 }
 END_TEST
 
@@ -110,6 +115,8 @@ START_TEST(check_layered_config)
         ck_assert(config.boolValues[CONF_DAEMON_RECYCLING_ENABLED] == DEFAULT_DAEMON_RECYCLING_ENABLED);
         ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == DEFAULT_RECORD_RETENTION_ENABLED);
         ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == DEFAULT_RECORD_SERVER_DELIVERY_ENABLED);
+
+        free_config_struct(&config);
 }
 END_TEST
 
@@ -123,6 +130,8 @@ START_TEST(check_read_valid_config_record_retention_delivery)
 
         ck_assert(config.boolValues[CONF_RECORD_RETENTION_ENABLED] == true);
         ck_assert(config.boolValues[CONF_RECORD_SERVER_DELIVERY_ENABLED] == false);
+
+        free_config_struct(&config);
 }
 END_TEST
 
@@ -176,6 +185,7 @@ int main(void)
 {
         Suite *s;
         SRunner *sr;
+        int failed;
 
         s = config_suite();
         sr = srunner_create(s);
@@ -186,13 +196,13 @@ int main(void)
         srunner_set_tap(sr, "-");
 
         srunner_run_all(sr, CK_SILENT);
-        // failed = srunner_ntests_failed(sr);
+        failed = srunner_ntests_failed(sr);
         srunner_free(sr);
 
         // if you want the TAP driver to report a hard error based
         // on certain conditions (e.g. number of failed tests, etc.),
         // return non-zero here instead.
-        return 0;
+        return (failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

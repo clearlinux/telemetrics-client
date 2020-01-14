@@ -152,6 +152,18 @@ bool set_default_config_values(struct configuration *config)
         return true;
 }
 
+/* Needed for unit testing */
+void free_config_struct(struct configuration *config)
+{
+        if (keyfile != NULL) {
+                nc_hashmap_free(keyfile);
+        }
+
+        for (int i = 0; i < CONF_STR_MAX; i++) {
+                free(config->strValues[i]);
+        }
+}
+
 bool read_config_from_file(char *config_file, struct configuration *config)
 {
         if (keyfile != NULL) {
@@ -271,6 +283,14 @@ void free_configuration(void)
         }
 
         if (cmd_line_cfg) {
+                free(config_file);
+        }
+}
+
+/* Needed for unit testing */
+void free_config_file(void)
+{
+        if (config_file) {
                 free(config_file);
         }
 }

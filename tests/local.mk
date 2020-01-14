@@ -22,6 +22,7 @@ dist_check_SCRIPTS = \
 	%D%/create-core.sh
 
 %C%_check_config_SOURCES = \
+	%D%/configuration_check.h \
 	%D%/check_config.c
 
 %C%_check_config_CFLAGS = \
@@ -40,6 +41,7 @@ endif
 endif
 
 %C%_check_probd_SOURCES = \
+	%D%/configuration_check.h \
 	%D%/check_probd.c \
 	src/telemdaemon.c \
 	src/telemdaemon.h \
@@ -199,8 +201,9 @@ endif
 @VALGRIND_CHECK_RULES@
 VALGRIND_FLAGS = \
 	--error-exitcode=1 \
+	--track-origins=yes \
 	--leak-resolution=low \
-	--quiet \
+	--verbose \
 	--leak-check=full \
 	--show-possibly-lost=no \
 	--suppressions=$(top_builddir)/tests/tests.supp
