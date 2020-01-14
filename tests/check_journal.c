@@ -17,6 +17,7 @@
 #include <check.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "common.h"
 #include "journal/journal.h"
 
@@ -239,6 +240,7 @@ int main(void)
 {
         Suite *s;
         SRunner *sr;
+        int failed;
 
         s = config_suite();
         sr = srunner_create(s);
@@ -249,13 +251,13 @@ int main(void)
         srunner_set_tap(sr, "-");
 
         srunner_run_all(sr, CK_SILENT);
-        // failed = srunner_ntests_failed(sr);
+        failed = srunner_ntests_failed(sr);
         srunner_free(sr);
 
         // if you want the TAP driver to report a hard error based
         // on certain conditions (e.g. number of failed tests, etc.),
         // return non-zero here instead.
-        return 0;
+        return (failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

@@ -57,6 +57,10 @@ void setup_payload(char *oopsfile)
                 oops_parser_init(callback_func);
                 split_buf_by_line(buf, buflen);
         }
+
+        if (buf) {
+                free(buf);
+        }
 }
 
 // Tests for checking backtrace
@@ -249,6 +253,8 @@ START_TEST(sysctl1_payload)
         ck_assert(strstr(pl->str, "#24 sys_ioctl"));
         ck_assert(strstr(pl->str, "#25 sysenter_past_esp"));
         ck_assert(strstr(pl->str, "#26 quirk_ali7101_acpi"));
+
+        nc_string_free(pl);
 }
 END_TEST
 
@@ -679,27 +685,6 @@ Suite *config_suite(void)
         tcase_add_test(t, bug_kernel_handle_payload);
         tcase_add_test(t, bug_kernel_handle_payload_new_format);
 
-        //TODO fix
-        //tcase_add_test(t, badness_payload);
-
-/*
-        tcase_add_test(t, watchdog_oops);
-        tcase_add_test(t, warning_oops);
-        tcase_add_test(t, warn_on_oops);
-        tcase_add_test(t, two_warnings_oops);
-        tcase_add_test(t, sysctl1_oops);
-        tcase_add_test(t, sysctl2_oops);
-        tcase_add_test(t, softlockup_oops);
-        tcase_add_test(t, rtnl_oops);
-        tcase_add_test(t, kernel_null_pointer_oops);
-        tcase_add_test(t, kernel_bug_oops);
-        tcase_add_test(t, irq_oops);
-        tcase_add_test(t, general_protection_fault_oops);
-        tcase_add_test(t, double_fault_oops);
-        tcase_add_test(t, bad_page_map_oops);
-        tcase_add_test(t, bug_kernel_handle_oops);
-        tcase_add_test(t, badness_oops);
- */
         suite_add_tcase(s, t);
 
         return s;
@@ -709,6 +694,7 @@ int main(void)
 {
         Suite *s;
         SRunner *sr;
+        int failed;
 
         s = config_suite();
         sr = srunner_create(s);
@@ -720,14 +706,16 @@ int main(void)
         srunner_set_log(sr, NULL);
         srunner_set_tap(sr, "-");
 
+        // set CK_NOFORK to attach gdb
+        // srunner_set_fork_status(sr, CK_NOFORK);
         srunner_run_all(sr, CK_SILENT);
-        // failed = srunner_ntests_failed(sr);
+        failed = srunner_ntests_failed(sr);
         srunner_free(sr);
 
         // if you want the TAP driver to report a hard error based
         // on certain conditions (e.g. number of failed tests, etc.),
         // return non-zero here instead.
-        return 0;
+        return (failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

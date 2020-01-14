@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "configuration.h"
+#include "configuration_check.h"
 #include "telemdaemon.h"
 #include "common.h"
 
@@ -61,12 +62,19 @@ void setup(void)
         initialize_probe_daemon(&tdaemon);
 }
 
+void teardown(void)
+{
+        free_config_file();
+}
+
 START_TEST(check_daemon_is_initialized)
 {
         setup();
 
         ck_assert(tdaemon.nfds == 0);
         ck_assert(tdaemon.pollfds == NULL);
+
+        teardown();
 }
 END_TEST
 
@@ -84,9 +92,9 @@ START_TEST(check_add_del_poll_fd)
 
         int fd = 1;
         int short events = 1;
-        add_pollfd(&tdaemon, fd, events);
-        add_pollfd(&tdaemon, ++fd, events);
-        add_pollfd(&tdaemon, ++fd, events);
+        add_pollfd(&tdaemon, 1, events);
+        add_pollfd(&tdaemon, 2, events);
+        add_pollfd(&tdaemon, 3, events);
         ck_assert_msg(tdaemon.nfds == 3, "Failed to add pollfd");
 
         fd = get_poll_fd(&tdaemon, 0);
@@ -110,6 +118,10 @@ START_TEST(check_add_del_poll_fd)
         ck_assert_msg(tdaemon.nfds == 0, "Failed to delete pollfd");
         fd = get_poll_fd(&tdaemon, 0);
         ck_assert(fd == -1);
+
+        /* Cleaning alloctions */
+        free(tdaemon.pollfds);
+        teardown();
 }
 END_TEST
 
@@ -133,6 +145,8 @@ START_TEST(check_add_remove_client)
         remove_client(&(tdaemon.client_head), cl3);
         //ck_assert(tdaemon.client_head.lh_first == NULL);
         ck_assert_msg(is_client_list_empty(&(tdaemon.client_head)), "Failed to remove clients\n");
+
+        teardown();
 }
 END_TEST
 
@@ -171,6 +185,8 @@ START_TEST(check_handle_client_with_no_data)
         ck_assert_msg(is_client_list_empty(&(tdaemon.client_head)), "Failed to remove client with no data\n");
         ck_assert_msg(tdaemon.nfds == 0, "Failed to remove poll fd for client with n data\n");
         close(server_fd);
+
+        teardown();
 }
 END_TEST
 
@@ -197,6 +213,8 @@ START_TEST(check_handle_client_with_incorrect_data)
         ck_assert_msg(is_client_list_empty(&(tdaemon.client_head)), "Failed to remove client with no data\n");
         ck_assert_msg(tdaemon.nfds == 0, "Failed to remove poll fd for client with n data\n");
         close(server_fd);
+
+        teardown();
 }
 END_TEST
 
@@ -228,6 +246,8 @@ START_TEST(check_handle_client_with_incorrect_size)
         ck_assert_msg(is_client_list_empty(&(tdaemon.client_head)), "Failed to remove client with no data\n");
         ck_assert_msg(tdaemon.nfds == 0, "Failed to remove poll fd for client with n data\n");
         close(server_fd);
+
+        teardown();
 }
 END_TEST
 
@@ -332,6 +352,8 @@ START_TEST(check_process_record_with_incorrect_headers)
         ck_assert_msg(tdaemon.nfds == 0, "Failed to remove poll fd for client with incorrect headers\n");
         close(server_fd);
         free(record);
+
+        teardown();
 }
 END_TEST
 
@@ -361,6 +383,7 @@ int main(void)
 {
         Suite *s;
         SRunner *sr;
+        int failed;
 
         s = config_suite();
         sr = srunner_create(s);
@@ -370,14 +393,16 @@ int main(void)
         srunner_set_log(sr, NULL);
         srunner_set_tap(sr, "-");
 
+        // set CK_NOFORK to attach gdb
+        // srunner_set_fork_status(sr, CK_NOFORK);
         srunner_run_all(sr, CK_SILENT);
-        // failed = srunner_ntests_failed(sr);
+        failed = srunner_ntests_failed(sr);
         srunner_free(sr);
 
         // if you want the TAP driver to report a hard error based
         // on certain conditions (e.g. number of failed tests, etc.),
         // return non-zero here instead.
-        return 0;
+        return (failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* vi: set ts=8 sw=8 sts=4 et tw=80 cino=(0: */

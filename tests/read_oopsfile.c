@@ -1,3 +1,19 @@
+/*
+ * This program is part of the Clear Linux Project
+ *
+ * Copyright 2015 Intel Corporation
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms and conditions of the GNU Lesser General Public License, as
+ * published by the Free Software Foundation; either version 2.1 of the License,
+ * or (at your option) any later version.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -36,26 +52,18 @@ char *readfile(char *filepath)
                         if (fread(bufp, sizeof(char), buflen, fp) != buflen) {
                                 telem_log(LOG_ERR, "Error reading file\n");
                         } else {
-                                bufp[++buflen] = '\0';
+                                bufp[buflen] = '\0';
                         }
                 }
                 if (fclose(fp) != 0) {
                         printf("Error closing file: %s\n", strerror(errno));
                 }
-                //free(bufp);
         } else {
                 telem_log(LOG_ERR, "Wrong file pathname: %s", filepath);
         }
 
         return bufp;
 }
-/*
-   char *getbuf()
-   {
-
-   return bufp;
-   }
- */
 
 unsigned long getbuflen()
 {
