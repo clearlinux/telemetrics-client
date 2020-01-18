@@ -354,12 +354,21 @@ static void process_record(TelemDaemon *daemon, client *cl)
 
         buf += cfg_info_size;
         header_size = *(uint32_t *)buf;
+        /* Header size can not be bigger than buffer size bail out early */
+        if ((uint32_t)header_size >= (uint32_t)cl->size) {
+                return;
+        }
         message_size = cl->size - (cfg_info_size + header_size);
-        telem_debug("DEBUG: cl->size: %zu\n", cl->size);
-        telem_debug("DEBUG: header_size: %zu\n", header_size);
-        telem_debug("DEBUG: message_size: %zu\n", message_size);
-        telem_debug("DEBUG: cfg_info_size: %zu\n", cfg_info_size);
-        assert(message_size > 0);      //TODO:Check for min and max limits
+        telem_debug("DEBUG: cl->size: %ld\n", cl->size);
+        telem_debug("DEBUG: header_size: %ld\n", header_size);
+        telem_debug("DEBUG: message_size: %ld\n", message_size);
+        telem_debug("DEBUG: cfg_info_size: %ld\n", cfg_info_size);
+        telem_debug("Total: %zu\n", header_size + cfg_info_size + message_size);
+        /* Check message size bounds */
+        if (message_size <= 0 || message_size > MAX_PAYLOAD_LENGTH) {
+                telem_log(LOG_INFO, "Record message size out of bounds\n");
+                return;
+        }
         msg = (char *)buf + sizeof(uint32_t);
 
         /* Copying the headers as strtok modifies the orginal buffer */

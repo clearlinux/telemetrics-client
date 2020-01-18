@@ -577,6 +577,10 @@ static void stack_frame_free(struct stack_frame **head)
 
         while (*head != NULL) {
                 frame = (*head)->next;
+                // First free memory allocation for function name
+                if ((*head)->function) {
+                        free((*head)->function);
+                }
                 free(*head);
                 *head = frame;
         }
@@ -584,8 +588,8 @@ static void stack_frame_free(struct stack_frame **head)
 
 /*
  * Function parses lines of the format :
- * CPU: 2 PID: 6429 Comm: insmod Tainted: P           OE  3.19.0-18-generic #18-Ubuntu$
- * CPU: 2 PID: 0 Comm: swapper/2 Not tainted  3.10.4-100.fc18.x86_64 #1
+ * CPU: 2 PID: 6429 Comm: insmod Tainted: POE 3.19.0-18-generic #18-Ubuntu$
+ * CPU: 2 PID: 0 Comm: swapper/2 Not tainted 3.10.4-100.fc18.x86_64 #1
  * CPU: 3 PID: 0 Comm: swapper/3 Not tainted 4.0.5-300.fc22.x86_64 #1
  */
 static void parse_kernel_cpu_line(char *line, char **kernel_version, char **tainted)
@@ -834,6 +838,15 @@ static nc_string *parse_backtrace(struct oops_log_msg *msg)
 
                 if (str_starts_with_casei(line, "CPU: ") ||
                     str_starts_with_casei(line, "PID: ")) {
+                        /* Can't assume that these variables (tainted,
+                         * an kernel_version) are not already allocated
+                         * otherwise it will leak memory */
+                        if (tainted) {
+                             free(tainted);
+                        }
+                        if (kernel_version) {
+                             free(kernel_version);
+                        }
                         parse_kernel_cpu_line(line, &kernel_version, &tainted);
                         continue;
                 }
