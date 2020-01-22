@@ -1,4 +1,6 @@
-EXTRA_DIST += %D%/taplib.sh
+EXTRA_DIST += \
+	%D%/taplib.sh \
+	%D%/telemetrics-client.supp
 
 TEST_EXTENSIONS = .sh
 
@@ -199,13 +201,13 @@ endif
 endif
 
 @VALGRIND_CHECK_RULES@
+VALGRIND_SUPPRESSIONS_FILES = %D%/telemetrics-client.supp
 VALGRIND_FLAGS = \
 	--error-exitcode=1 \
 	--track-origins=yes \
 	--leak-resolution=low \
 	--verbose \
 	--leak-check=full \
-	--show-possibly-lost=no \
-	--suppressions=$(top_builddir)/tests/tests.supp
+	--show-possibly-lost=no
 
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab
