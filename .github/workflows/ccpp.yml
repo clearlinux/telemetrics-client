@@ -25,7 +25,7 @@ jobs:
       run: make -j8
     - name: check
       run: make check
-    - name: check-valgrind-memcheck
-      run: make check-valgrind-memcheck-am
+    - name: valgrind memcheck
+      run: make check-valgrind
     - name: make distcheck
       run: make distcheck
