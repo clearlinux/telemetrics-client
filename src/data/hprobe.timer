@@ -5,6 +5,7 @@ ConditionPathExists=/etc/telemetrics/opt-in
 [Timer]
 OnCalendar=daily
 AccuracySec=12h
+RandomizedDelaySec=21600
 Persistent=true
 
 [Install]
