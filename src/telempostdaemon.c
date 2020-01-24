@@ -490,7 +490,7 @@ static bool deliver_record(TelemPostDaemon *daemon, char *headers[], char *body,
         return ret;
 }
 
-bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemon)
+bool process_staged_record(char *filename, TelemPostDaemon *daemon)
 {
         int k;
         bool ret = false;
@@ -530,20 +530,12 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
                 goto end_processing_file;
         }
 
-        /* Retries should not be recorded */
-        if (is_retry == false) {
-                /** Journal entry **/
-                save_entry_to_journal(daemon, current_time, headers);
-                /** Record retention **/
-                apply_retention_policies(daemon, body);
-        }
-
         /** Record delivery **/
         if (!daemon->record_server_delivery_enabled) {
                 telem_log(LOG_INFO, "record server delivery disabled\n");
                 // Not an error condition
                 ret = true;
-                goto end_processing_file;
+                goto end_record_delivery;
         }
 
         /** Spool policies **/
@@ -570,6 +562,17 @@ bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemo
 
         /** Deliver or spool **/
         ret = deliver_record(daemon, headers, body, cfg_file);
+
+end_record_delivery:
+        /** Save record once it is properly delivered, if record
+         *  is spooled the record is not saved to journal until
+         *  delievered on a re-try **/
+        if (ret) {
+                /** Save to journal **/
+                save_entry_to_journal(daemon, current_time, headers);
+                /** Record retention **/
+                apply_retention_policies(daemon, body);
+        }
 
 end_processing_file:
         /** Update spool size if record will be removed **/
@@ -625,7 +628,7 @@ int staging_records_loop(TelemPostDaemon *daemon)
                         telem_log(LOG_ERR, "Failed to allocate memory for staging record full path\n");
                         exit(EXIT_FAILURE);
                 }
-                if (process_staged_record(record_path, true, daemon)) {
+                if (process_staged_record(record_path, daemon)) {
                         unlink(record_path);
                         processed++;
                 }
@@ -721,7 +724,7 @@ void run_daemon(TelemPostDaemon *daemon)
                                                                 exit(EXIT_FAILURE);
                                                         }
                                                         /* Process inotify event */
-                                                        if (process_staged_record(record_name, false, daemon)) {
+                                                        if (process_staged_record(record_name, daemon)) {
                                                                 unlink(record_name);
                                                         }
                                                         free(record_name);

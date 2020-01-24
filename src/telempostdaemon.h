@@ -85,11 +85,9 @@ void close_daemon(TelemPostDaemon *daemon);
  * Processed record written on disk
  *
  * @param filename a pointor to record on disk
- * @param is_retry a boolean value that indicates if
- *        the record has been previously processed.
  * @param daemon post to telemetry post daemon
  */
-bool process_staged_record(char *filename, bool is_retry, TelemPostDaemon *daemon);
+bool process_staged_record(char *filename, TelemPostDaemon *daemon);
 
 /**
  * Scans staging directory to process files that were
@@ -107,6 +105,7 @@ int staging_records_loop(TelemPostDaemon *daemon);
  * @param body a pointer to the payload
  * @param cfg_file a pointer to a non-default configuration
  *        file to be used.
+ * @return true if successful, false otherwise
  */
 bool post_record_http(char *headers[], char *body, char *cfg_file);
 
