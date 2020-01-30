@@ -396,6 +396,7 @@ static int process_corefile(nc_string **backtrace)
                 nc_string_free(*backtrace);
         }
         *backtrace = nc_string_dup("");
+        frame_counter = 0;
 
         if (dwfl_getthreads(d_core, thread_cb, backtrace) != DWARF_CB_OK) {
                 /* We aborted unwinding, due to too many frames.
