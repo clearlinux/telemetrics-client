@@ -1,5 +1,6 @@
 [Unit]
 Description=Telemetrics Kernel Log Scanner
+ConditionVirtualization=!container
 Requires=telemprobd.socket
 After=telemprobd.socket
 
