@@ -33,6 +33,7 @@ AX_VALGRIND_CHECK
 # check >= 0.9.12 is required for TAP output
 PKG_CHECK_MODULES([CHECK], [check >= 0.12])
 PKG_CHECK_MODULES([CURL], [libcurl])
+PKG_CHECK_MODULES([JSON_C], [json-c])
 AC_CHECK_LIB([elf], [elf_begin], [have_elflib=yes], [AC_MSG_ERROR([Unable to find libelf from elfutils])])
 AC_CHECK_LIB([dw], [dwfl_begin], [have_dwlib=yes], [AC_MSG_ERROR([Unable to find libdw from elfutils])])
 AS_IF([test "x$have_elflib" = "xyes" -a "x$have_dwlib" = "xyes"],
@@ -49,6 +50,7 @@ AC_CHECK_HEADERS([elfutils/libdwfl.h])
 AC_CHECK_HEADERS([fcntl.h])
 AC_CHECK_HEADERS([getopt.h])
 AC_CHECK_HEADERS([inttypes.h])
+AC_CHECK_HEADERS([json-c/json.h])
 AC_CHECK_HEADERS([libelf.h])
 AC_CHECK_HEADERS([limits.h])
 AC_CHECK_HEADERS([stdarg.h])
