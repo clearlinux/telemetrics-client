@@ -61,7 +61,7 @@ endif
 	%D%/iorecord.c \
 	%D%/iorecord.h
 
-%C%_telempostd_LDADD = $(CURL_LIBS) \
+%C%_telempostd_LDADD = $(CURL_LIBS) $(JSON_C_LIBS) \
 	%D%/libtelem-shared.la \
 	%D%/libtelemetry.la
 

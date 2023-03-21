@@ -93,6 +93,7 @@ EXTRA_DIST += \
 %C%_check_postd_LDADD = \
         @CHECK_LIBS@ \
         @CURL_LIBS@ \
+        @JSON_C_LIBS@ \
         $(top_builddir)/src/libtelem-shared.la
 
 if LOG_SYSTEMD
