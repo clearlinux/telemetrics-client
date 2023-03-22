@@ -1,7 +1,7 @@
 /*
  * This program is part of the Clear Linux Project
  *
- * Copyright 2018 Intel Corporation
+ * Copyright 2018-2023 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms and conditions of the GNU Lesser General Public License, as
@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
+#include <json-c/json.h>
 #include <sys/signalfd.h>
 
 #include "log.h"
@@ -210,13 +211,47 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
         return size * nmemb;
 }
 
+char *create_json_message(char *tm_headers[], char *tm_payload)
+{
+        /*
+         * Embed the telemetry record headers and the telemetry payload into a
+         * JSON object string.
+         */
+        char *json_string = NULL;
+        json_object *root = json_object_new_object();
+
+        /* Add the telemetry record headers */
+
+        for (int i = 0; i < NUM_HEADERS; i++) {
+                /* ex: arch: x86_64 */
+
+                /* Split the header field into name/value */
+                strtok(tm_headers[i], ":");
+                json_object *value = json_object_new_string(strtok(NULL, " "));
+                json_object_object_add(root, tm_headers[i], value);
+        }
+        json_object *payload = json_object_new_string(tm_payload);
+        json_object_object_add(root, "payload", payload);
+
+        /* Keep our own copy of the json string */
+        json_string = strdup(json_object_to_json_string_ext(root,
+                                                            JSON_C_TO_STRING_PLAIN |
+                                                            JSON_C_TO_STRING_NOSLASHESCAPE));
+
+        /* Free the memory associated with the JSON objects */
+        json_object_put(root);
+
+        return json_string;
+}
+
 bool post_record_http(char *headers[], char *body, char *cfg)
 {
         CURL *curl;
         int res = 0;
-        char *content = "Content-Type: application/text";
+        char *content = "Content-Type: application/json";
         struct curl_slist *custom_headers = NULL;
         char errorbuf[CURL_ERROR_SIZE];
+        char *json_body = NULL;
         long http_response = 0;
         const char *cert_file = get_cainfo_config();
         const char *tid_header = get_tidheader_config();
@@ -236,6 +271,9 @@ bool post_record_http(char *headers[], char *body, char *cfg)
                 reload_config();
                 telem_debug("DEBUG: override server_addr:%s\n", server_addr_config());
         }
+
+        // Generate the JSON message body
+        json_body = create_json_message(headers, body);
 
         // Initialize the libcurl global environment once per POST. This lets us
         // clean up the environment after each POST so that when the daemon is
@@ -264,16 +302,13 @@ bool post_record_http(char *headers[], char *body, char *cfg)
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
-        for (int i = 0; i < NUM_HEADERS; i++) {
-                custom_headers = curl_slist_append(custom_headers, headers[i]);
-        }
         custom_headers = curl_slist_append(custom_headers, tid_header);
         // This should be set by probes/libtelemetry in the future
         custom_headers = curl_slist_append(custom_headers, content);
 
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, custom_headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(body));
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_body);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json_body));
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 
         if (strlen(cert_file) > 0) {
@@ -315,6 +350,11 @@ bool post_record_http(char *headers[], char *body, char *cfg)
         curl_global_cleanup();
 
 Done:
+        if (json_body) {
+                free(json_body);
+                json_body = NULL;
+        }
+
         if (saved_config_file != NULL) {
                 if (set_config_file(saved_config_file) != 0) {
                         telem_log(LOG_ERR, "set-config_file(): Failed to set %s",
