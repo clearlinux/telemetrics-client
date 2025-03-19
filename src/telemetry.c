@@ -977,17 +977,18 @@ int tm_set_payload(struct telem_ref *t_ref, char *payload)
         size_t payload_len;
         int ret = 0;
 
-        payload_len = strlen((char *)payload);
-
-        if (payload_len > MAX_PAYLOAD_LENGTH) {
+        if (payload == NULL) {
+                telem_log(LOG_WARNING, "payload pointer is NULL\n");
                 return -EINVAL;
         }
+
+        payload_len = strnlen(payload, MAX_PAYLOAD_LENGTH);
 
         if (payload_is_ascii(payload, payload_len) != 0) {
                 return -EINVAL;
         }
 
-        t_ref->record->payload = strdup(payload);
+        t_ref->record->payload = strndup(payload, payload_len);
 
         if (!t_ref->record->payload) {
                 telem_log(LOG_CRIT, "CRIT: Out of memory\n");
@@ -1273,7 +1274,7 @@ int tm_send_record(struct telem_ref *t_ref)
          */
         record_size = (2 * sizeof(uint32_t)) + total_size + 1;
 
-        data = calloc(sizeof(char), record_size);
+        data = (char *)calloc(sizeof(char), record_size);
         if (!data) {
                 telem_log(LOG_CRIT, "CRIT: Out of memory\n");
                 close(sfd);
