@@ -21,6 +21,7 @@ include $(top_srcdir)/src/nica/local.mk
 include $(top_srcdir)/src/probes/local.mk
 include $(top_srcdir)/src/journal/local.mk
 include $(top_srcdir)/tests/local.mk
+include $(top_srcdir)/fuzz/local.mk
 
 release:
 	@git rev-parse v$(PACKAGE_VERSION) &> /dev/null; \
