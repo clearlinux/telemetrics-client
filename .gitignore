@@ -67,5 +67,3 @@ src/data/telemetrics.conf
 src/data/telemetrics-dirs.conf
 src/data/libtelemetry.pc
 src/data/40-crash-probe.conf
-fuzz/libtelem_fuzzer
-fuzz/config_fuzzer

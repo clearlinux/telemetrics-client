@@ -19,3 +19,12 @@ fuzz: build_fuzz_kibtelem
 	$(BIN) fuzz/corpus $(FUZZ_FLAGS)
 
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab
+
+create a makefile that builds {3 binaries}
+
+{4 binaries}: fuzz_libtelem fuzz_config fuzz_iorec
+
+each one has different compiling flags and SOURCES
+
+
+

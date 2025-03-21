@@ -2,23 +2,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int save_config_file(char *config_template, const char *data) {
-    FILE *tempFile = NULL;
+int save_data(char *filename, const char *data) {
+    FILE *temp_file = NULL;
     int fd;
 
-    fd = mkstemp(config_template);
+    fd = mkstemp(filename);
     if (fd == -1) {
         return 1;
     }
 
-    tempFile = fdopen(fd, "w");
-    if (tempFile == NULL) {
+    temp_file = fdopen(fd, "w");
+    if (temp_file == NULL) {
         close(fd);
         return 1;
     }
 
-    fprintf(tempFile, "%s", data);
-    fclose(tempFile);
+    fprintf(temp_file, "%s", data);
+    fclose(temp_file);
 
     return 0;
 }

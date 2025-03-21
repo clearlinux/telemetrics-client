@@ -1,1 +1,1 @@
-int save_config_file(char *config_template, const char *data);
+int save_data(char *filename, const char *data);
