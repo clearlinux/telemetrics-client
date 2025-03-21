@@ -21,7 +21,6 @@ fuzz_config_SOURCES = \
 	fuzz_config.c
 
 fuzz_iorec_SOURCES = \
-<<<<<<< HEAD
 	utils.c \
 	fuzz_iorec.c
 
@@ -29,10 +28,6 @@ fuzz_iorec_CFLAGS = \
 	$(CFLAGS) \
 	-fsanitize=address,fuzzer
 
-=======
-	fuzz_iorec.c
-
->>>>>>> 8a64168 (Use local Makefile)
 fuzz_libtelem_CFLAGS = \
 	$(CFLAGS) \
 	-fsanitize=address,fuzzer \
@@ -51,11 +46,7 @@ fuzz_config: $(fuzz_config_SOURCES)
 	$(CC) $(fuzz_config_CFLAGS) -o $@ $^
 
 fuzz_iorec: $(fuzz_iorec_SOURCES)
-<<<<<<< HEAD
 	$(CC) $(fuzz_iorec_CFLAGS) -o $@ $^
-=======
-	$(CC) $(CFLAGS) -o $@ $^
->>>>>>> 8a64168 (Use local Makefile)
 
 clean:
 	rm -f $(bin_PROGRAMS) *.o
