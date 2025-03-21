@@ -1,4 +1,3 @@
-
 COMPILER = clang
 CLANG_FLAGS = \
 	-g \
@@ -13,10 +12,10 @@ FUZZ_FLAGS = \
 	-runs=1000000 \
 	-max_total_time=$(HALF_DAY_SEC)
 
-build_fuzz:
+build_fuzz_libtelem:
 	LD_LIBRARY_PATH=src/.libs $(COMPILER) $(CLANG_FLAGS) -ltelemetry  $(SOURCES) -o $(BIN)
 
-fuzz: build_fuzz
+fuzz: build_fuzz_kibtelem
 	$(BIN) fuzz/corpus $(FUZZ_FLAGS)
 
 # vim: filetype=automake tabstop=8 shiftwidth=8 noexpandtab

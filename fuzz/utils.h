@@ -1,0 +1,1 @@
+int save_config_file(char *config_template, const char *data);
