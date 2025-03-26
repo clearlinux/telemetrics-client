@@ -8,15 +8,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
     - name: install dependencies
-      run: sudo apt-get install libcurl4-gnutls-dev valgrind libelf-dev libdw-dev
-    - name: install check
-      run: wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz &&
-           tar xf check-0.12.0.tar.gz &&
-           pushd check-0.12.0 &&
-           ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu &&
-           make -j8 && sudo make install && popd
+      run: |
+        sudo apt-get update
+        sudo apt-get --fix-missing install libcurl4-gnutls-dev valgrind libelf-dev libdw-dev libjson-c-dev check
     - name: autogen
       run: sh autogen.sh
     - name: configure
