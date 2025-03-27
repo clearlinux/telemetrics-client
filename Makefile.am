@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I build-aux/m4
 
 EXTRA_DIST = \
 	AUTHORS \
-	LICENSE.LGPL-2.1
+	LICENSE
 
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdunitdir) \
