@@ -661,7 +661,8 @@ int prune_journal(struct TelemJournal *telem_journal, char *tmp_dir)
                 telem_journal->fptr = fopen(telem_journal->journal_file, "a+");
                 if (!telem_journal->fptr) {
                         telem_log(LOG_ERR, "Error re-opening journal file\n");
-                        return rc;
+                        rc = 1;
+                        goto quit;
                 }
                 // update record count
                 telem_journal->record_count = telem_journal->record_count - count;
