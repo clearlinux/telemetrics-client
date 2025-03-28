@@ -159,7 +159,7 @@ int main(int argc, char **argv)
                                 break;
                         case 'H':
                                 str = "org.clearlinux/heartbeat/ping";
-                                memcpy(classification, str, strlen(str));
+                                memcpy(classification, str, strlen(str) + 1);
                                 break;
                         case 'l':
                                 payload_options |= PAYLOAD_LOCALE;
