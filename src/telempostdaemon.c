@@ -266,7 +266,7 @@ bool post_record_http(char *headers[], char *body, char *cfg)
                        // settings than explicitly requested.
                        // However, report success so the record gets deleted.
                        res = 0;
-                       goto Done;
+                       goto done;
                 }
                 reload_config();
                 telem_debug("DEBUG: override server_addr:%s\n", server_addr_config());
@@ -288,32 +288,35 @@ bool post_record_http(char *headers[], char *body, char *cfg)
                 /* TODO: check if memory needs to be released */
         }
 
-        // Errors for any curl_easy_* functions will store nice error messages
-        // in errorbuf, so send log messages with errorbuf contents
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuf);
-
-        curl_easy_setopt(curl, CURLOPT_URL, server_addr_config());
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-        curl_easy_setopt(curl, CURLOPT_POST, 1);
-#ifdef DEBUG
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-#endif
-
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
         custom_headers = curl_slist_append(custom_headers, tid_header);
         // This should be set by probes/libtelemetry in the future
         custom_headers = curl_slist_append(custom_headers, content);
 
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, custom_headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_body);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json_body));
-        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+        // Errors for any curl_easy_* functions will store nice error messages
+        // in errorbuf, so send log messages with errorbuf contents
+        if (curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuf) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_URL, server_addr_config()) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_POST, 1) != CURLE_OK ||
+#ifdef DEBUG
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1) != CURLE_OK ||
+#endif
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, custom_headers) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_body) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(json_body)) != CURLE_OK ||
+            curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY) != CURLE_OK) {
+                telem_log(LOG_ERR, "curl_easy_setopt(): Failed to set one or more options\n");
+                goto exit;
+        }
 
         if (strlen(cert_file) > 0) {
                 if (access(cert_file, F_OK) != -1) {
-                        curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file);
+                        if (curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file) != CURLE_OK) {
+                                telem_log(LOG_ERR, "curl_easy_setopt(): Failed to set CAINFO\n");
+                                goto exit;
+                        }
                         telem_log(LOG_INFO, "cafile was set to %s\n", cert_file);
                 }
         }
@@ -344,12 +347,12 @@ bool post_record_http(char *headers[], char *body, char *cfg)
                 telem_log(LOG_INFO, "Record sent successfully\n");
         }
 
+exit:
         curl_slist_free_all(custom_headers);
         curl_easy_cleanup(curl);
-
         curl_global_cleanup();
 
-Done:
+done:
         if (json_body) {
                 free(json_body);
                 json_body = NULL;
