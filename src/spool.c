@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "spool.h"
 #include "telempostdaemon.h"
@@ -149,27 +150,37 @@ void process_spooled_record(const char *spool_dir, char *name,
         }
 
         (*records_processed)++;
-        ret = stat(record_name, &buf);
-        if (ret == -1) {
-                telem_perror("Unable to stat record in spool");
-                free(record_name);
-                return;
+        // Use file descriptor to mitigate TOCTOU
+        int fd = open(record_name, O_RDONLY | O_NOFOLLOW);
+        if (fd == -1) {
+                telem_perror("Unable to open record in spool");
+                goto exit;
+        }
+
+        if (fstat(fd, &buf) == -1) {
+                telem_perror("Unable to fstat record in spool");
+                close(fd);
+                goto exit;
         }
 
         /*
-         * If file is a regular file , if uid is diff than process uid
-         * or if mtime is greater than record expiry delete the file
+         * If file is a regular file, if uid is different than process uid,
+         * or if mtime is greater than record expiry, delete the file.
          */
 
         if (record_expiry_config() == -1) {
                 telem_log(LOG_ERR, "Invalid record expiry value\n");
+                close(fd);
                 exit(EXIT_FAILURE);
         }
+
         if (!S_ISREG(buf.st_mode) ||
             (current_time - buf.st_mtime > (record_expiry_config() * 60)) ||
-            (buf.st_uid  != getuid())) {
+            (buf.st_uid != getuid())) {
                 unlink(record_name);
+                close(fd);
         } else if (post_succeeded && *records_sent <= TM_SPOOL_MAX_SEND_RECORDS) {
+                close(fd);
                 transmit_spooled_record(record_name, &post_succeeded, buf.st_size);
 
                 if (!post_succeeded) {
@@ -194,6 +205,7 @@ void process_spooled_record(const char *spool_dir, char *name,
                         }
                 }
         }
+exit:
         free(record_name);
 }
 
