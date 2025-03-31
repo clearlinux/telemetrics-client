@@ -124,8 +124,8 @@ bool read_record(char *fullpath, char *headers[], char **body, char **cfg_file)
         }
         memset(*body, 0, (size_t)size);
 
-        //read rest of file
-        size_t newlen = fread(*body, sizeof(char), (size_t)size, fp);
+        //read rest of file. '-1' ensures it's null terminated
+        size_t newlen = fread(*body, sizeof(char), (size_t)size - 1, fp);
         if (newlen == 0) {
                 telem_perror("Error reading staged file");
                 result = false;
