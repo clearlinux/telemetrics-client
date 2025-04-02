@@ -333,6 +333,10 @@ $ org.clearlinux/hello/world     Mon 2018-04-02 17:48:01 UTC a19a0d41ba16788881e
 $ hello
 ```
 
+## Using tarball
+
+When building the telemetrics-client using the tarball, a signature is provided for validation. Please follow the steps outlined in the release's README.txt for guidance.
+
 ## Security Disclosures
 
 To report a security issue or receive security advisories please follow procedures
