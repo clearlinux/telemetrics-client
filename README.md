@@ -335,9 +335,10 @@ $ hello
 
 ## Using tarball
 
-When building the telemetrics-client using the tarball, a signature is provided for validation. Please follow the steps outlined in the release's README.txt for guidance.
+When building the telemetrics-client using the tarball, a signature is provided for
+validation. Please follow the steps outlined in the release's README.txt for guidance.
 
 ## Security Disclosures
 
 To report a security issue or receive security advisories please follow procedures
-in this [link](https://01.org/security).
+in [link](security.md).
