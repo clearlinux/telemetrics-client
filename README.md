@@ -337,7 +337,8 @@ $ hello
 
 When building the telemetrics-client using the tarball, a signature is provided for validation. Please follow the steps outlined in the release's README.txt for guidance.
 
-## Security Disclosures
+## Security Policy
+Intel is committed to rapidly addressing security vulnerabilities affecting our customers and providing clear guidance on the solution, impact, severity and mitigation. 
 
-To report a security issue or receive security advisories please follow procedures
-in this [link](https://01.org/security).
+### Reporting a Vulnerability
+Please report any security vulnerabilities in this project [utilizing the guidelines here](https://www.intel.com/content/www/us/en/security-center/vulnerability-handling-guidelines.html).
