@@ -154,12 +154,11 @@ void process_spooled_record(const char *spool_dir, char *name,
         int fd = open(record_name, O_RDONLY | O_NOFOLLOW);
         if (fd == -1) {
                 telem_perror("Unable to open record in spool");
-                goto exit;
+                goto clean;
         }
 
         if (fstat(fd, &buf) == -1) {
                 telem_perror("Unable to fstat record in spool");
-                close(fd);
                 goto exit;
         }
 
@@ -178,9 +177,7 @@ void process_spooled_record(const char *spool_dir, char *name,
             (current_time - buf.st_mtime > (record_expiry_config() * 60)) ||
             (buf.st_uid != getuid())) {
                 unlink(record_name);
-                close(fd);
         } else if (post_succeeded && *records_sent <= TM_SPOOL_MAX_SEND_RECORDS) {
-                close(fd);
                 transmit_spooled_record(record_name, &post_succeeded, buf.st_size);
 
                 if (!post_succeeded) {
@@ -206,6 +203,8 @@ void process_spooled_record(const char *spool_dir, char *name,
                 }
         }
 exit:
+        close(fd);
+clean:
         free(record_name);
 }
 
