@@ -355,6 +355,7 @@ int spool_record_compare(const void *entrya, const void *entryb, void *path)
         ret = stat(pathb, &statentryb);
         if (ret == -1) {
                 telem_log(LOG_ERR, "Unable to stat %s: %s\n", patha, strerror(errno));
+                free(patha);
                 free(pathb);
                 return 0;
         }
