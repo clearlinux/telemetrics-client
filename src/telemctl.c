@@ -428,7 +428,7 @@ static int telemctl_opt_in(void)
 
         /* Create a brand new file TM_OPT_IN, we may fail because the file exists already.
          * In that case we are already opted in and we are done here. */
-        int fd = open(TM_OPT_IN, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+        int fd = open(TM_OPT_IN, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|O_NOFOLLOW);
         if (fd == -1) {
                 if (errno == EEXIST) {
                         fprintf(stderr, "Already opted in. Nothing to do.\n");

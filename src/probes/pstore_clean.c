@@ -44,14 +44,14 @@ int copy_file(char *src_file, char *dest_file)
         ssize_t bytes_read, bytes_written;
         int ret = -1;
 
-        src_fd = open(src_file, O_RDONLY);
+        src_fd = open(src_file, O_RDONLY|O_NOFOLLOW);
         if (src_fd == -1) {
                 telem_log(LOG_ERR, "Failed to open file %s:%s\n", src_file,
                           strerror(errno));
                 goto end;
         }
 
-        dest_fd = open(dest_file, O_WRONLY | O_CREAT, 0644);
+        dest_fd = open(dest_file, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
         if (dest_fd == -1) {
                 telem_log(LOG_ERR, "Failed to create file %s:%s\n", dest_file,
                           strerror(errno));

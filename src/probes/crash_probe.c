@@ -587,7 +587,7 @@ int main(int argc, char **argv)
         }
 
         if (core_file) {
-                core_fd = open(core_file, O_RDONLY);
+                core_fd = open(core_file, O_RDONLY|O_NOFOLLOW);
                 if (core_fd == -1) {
                         telem_perror("Failed to open input core file");
                         goto fail;

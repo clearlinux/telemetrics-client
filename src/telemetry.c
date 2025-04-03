@@ -49,9 +49,9 @@ static int version_file(void)
 {
         int fd;
 
-        fd = open(TM_SITE_VERSION_FILE, O_RDONLY);
+        fd = open(TM_SITE_VERSION_FILE, O_RDONLY|O_NOFOLLOW);
         if (fd < 0) {
-                fd = open(TM_DIST_VERSION_FILE, O_RDONLY);
+                fd = open(TM_DIST_VERSION_FILE, O_RDONLY|O_NOFOLLOW);
         }
 
         return fd;

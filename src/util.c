@@ -143,7 +143,7 @@ int get_random_id(char **buff)
         int frandom = -1;
         uint64_t random_id[2] = { '\0' };
 
-        frandom = open("/dev/urandom", O_RDONLY);
+        frandom = open("/dev/urandom", O_RDONLY|O_NOFOLLOW);
         if (frandom < 0) {
                 return -1;
         }
