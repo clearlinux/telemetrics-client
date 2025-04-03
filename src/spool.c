@@ -151,7 +151,7 @@ void process_spooled_record(const char *spool_dir, char *name,
 
         (*records_processed)++;
         // Use file descriptor to mitigate TOCTOU
-        int fd = open(record_name, O_RDONLY | O_NOFOLLOW);
+        int fd = open(record_name, O_RDONLY|O_NOFOLLOW);
         if (fd == -1) {
                 telem_perror("Unable to open record in spool");
                 goto clean;
